@@ -90,166 +90,88 @@ A position is a contiguous triplet of 32-bit floating point values representing 
 
 To represent this tree (D is the data of the node and 0-7 are its children):
 
-D:0.1 0.2 0.3
-
-0:
-
-	D:0.4 0.5 0.6
-
+	D:0.1 0.2 0.3
 	0:
-
+		D:0.4 0.5 0.6
+		0:
+		1:
+		2:
+			D:0.7 0.8 0.9
+		3:
+		4:
+		5:
+		6:
+		7:
 	1:
-
+		D:1.0 1.1 1.2
+		  1.3 1.4 1.5
 	2:
-
-		D:0.7 0.8 0.9
-
 	3:
-
 	4:
-
 	5:
-
 	6:
-
 	7:
-
-1:
-
-	D:1.0 1.1 1.2
-
-	  1.3 1.4 1.5
-
-2:
-
-3:
-
-4:
-
-5:
-
-6:
-
-7:
 
 The corresponding file would contain the following values :
 
-10
-
-0
-
-CHUNK0-ADDR
-
-0
-
-CHUNK1-ADDR
-
--1
-
--1
-
-CHUNK2-ADDR
-
-1
-
-CHUNK3-ADDR
-
-1
-
-//CHUNK0
-
-0.1
-
-0.1
-
-0.2
-
-0.2
-
-0.3
-
-0.3
-
-3
-
-0.1
-
-0.2
-
-0.3
-
-//CHUNK1
-
-0.4
-
-0.4
-
-0.5
-
-0.5
-
-0.6
-
-0.6
-
-3
-
-0.4
-
-0.5
-
-0.6
-
-//CHUNK2
-
-0.7
-
-0.7
-
-0.8
-
-0.8
-
-0.9
-
-0.9
-
-3
-
-0.7
-
-0.8
-
-0.9
-
-//CHUNK3
-
-1.0
-
-1.3
-
-1.1
-
-1.4
-
-1.2
-
-1.5
-
-6
-
-1.0
-
-1.1
-
-1.2
-
-1.3
-
-1.4
-
-1.5
-
+	10
+	0
+	CHUNK0-ADDR
+	0
+	CHUNK1-ADDR
+	-1
+	-1
+	CHUNK2-ADDR
+	1
+	CHUNK3-ADDR
+	1
+	//CHUNK0
+	0.1
+	0.1
+	0.2
+	0.2
+	0.3
+	0.3
+	3
+	0.1
+	0.2
+	0.3
+	//CHUNK1
+	0.4
+	0.4
+	0.5
+	0.5
+	0.6
+	0.6
+	3
+	0.4
+	0.5
+	0.6
+	//CHUNK2
+	0.7
+	0.7
+	0.8
+	0.8
+	0.9
+	0.9
+	3
+	0.7
+	0.8
+	0.9
+	//CHUNK3
+	1.0
+	1.3
+	1.1
+	1.4
+	1.2
+	1.5
+	6
+	1.0
+	1.1
+	1.2
+	1.3
+	1.4
+	1.5
 
 All values starting with "//" are not in the file but are comments for this documentation.
 Also, CHUNKi-ADDR values should hold the true address of CHUNK i in bytes (e.g. CHUNK0-ADDR = 4 + 10x8 = 84 because it's the 12th value written in the file after one 4-bytes value and ten 8-bytes values), but for readability purposes, it was replaced by these "constant names".
