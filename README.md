@@ -20,11 +20,17 @@ If you wish to write your own octree file format reader/writer or edit this proj
 ### Terminal terms (vocabulary)
 
 FLOAT   : a 32-bit floating point value
+
 SIZE    : a 32-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit value would be of SIZE 4)
+
 (       : a 64-bit constant 0x0000000000000000 (0)
+
 )       : a 64-bit constant 0x0000000000000001 (1)
+
 null    : a 64-bit constant 0xFFFFFFFFFFFFFFFF (-1)
+
 ADDRESS : a 64-bit integer that is not equal to either (, ) or null; usually a pointer to a CHUNK (e.g. if ADDRESS is 0x0000000000000002, this means the chunk starts from the third byte of the file)
+
 empty   : void, defined for grammar syntax, represented by absolutly no bits in the file
 
 
@@ -83,87 +89,165 @@ A position is a contiguous triplet of 32-bit floating point values representing 
 ### Example
 
 To represent this tree (D is the data of the node and 0-7 are its children):
+
 D:0.1 0.2 0.3
+
 0:
+
 	D:0.4 0.5 0.6
+
 	0:
+
 	1:
+
 	2:
+
 		D:0.7 0.8 0.9
+
 	3:
+
 	4:
+
 	5:
+
 	6:
+
 	7:
+
 1:
+
 	D:1.0 1.1 1.2
+
 	  1.3 1.4 1.5
+
 2:
+
 3:
+
 4:
+
 5:
+
 6:
+
 7:
 
 The corresponding file would contain the following values :
 
 10
+
 0
+
 CHUNK0-ADDR
+
 0
+
 CHUNK1-ADDR
+
 -1
+
 -1
+
 CHUNK2-ADDR
+
 1
+
 CHUNK3-ADDR
+
 1
+
 //CHUNK0
+
 0.1
+
 0.1
+
 0.2
+
 0.2
+
 0.3
+
 0.3
+
 3
+
 0.1
+
 0.2
+
 0.3
+
 //CHUNK1
+
 0.4
+
 0.4
+
 0.5
+
 0.5
+
 0.6
+
 0.6
+
 3
+
 0.4
+
 0.5
+
 0.6
+
 //CHUNK2
+
 0.7
+
 0.7
+
 0.8
+
 0.8
+
 0.9
+
 0.9
+
 3
+
 0.7
+
 0.8
+
 0.9
+
 //CHUNK3
+
 1.0
+
 1.3
+
 1.1
+
 1.4
+
 1.2
+
 1.5
+
 6
+
 1.0
+
 1.1
+
 1.2
+
 1.3
+
 1.4
+
 1.5
 
 
