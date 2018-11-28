@@ -62,8 +62,8 @@ add_executable(${PROJECT_TEST_NAME} ${TEST_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 
 #EXECUTABLE 2 : octree-file-format
-add_executable(${PROJECT_NAME} ${MAIN_SRC_FILES})
-target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
+#add_executable(${PROJECT_NAME} ${MAIN_SRC_FILES})
+#target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
 
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
