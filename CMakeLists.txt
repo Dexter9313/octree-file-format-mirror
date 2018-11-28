@@ -42,9 +42,9 @@ list(REMOVE_ITEM MAIN_SRC_FILES ${PROJECT_SOURCE_DIR}/src/binaryrw.cpp)
 
 file(GLOB SRC_FILES ${MAIN_SRC_FILES})
 list(REMOVE_ITEM SRC_FILES ${PROJECT_SOURCE_DIR}/src/main.cpp)
+file(GLOB MAIN_FILE ${PROJECT_SOURCE_DIR}/src/main.cpp)
 
 file(GLOB_RECURSE TEST_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
-list(APPEND TEST_FILES ${SRC_FILES})
 
 set(EXT_PROJECT_DIR ${PROJECT_SOURCE_DIR}/ext)
 
@@ -57,12 +57,15 @@ include_directories(${COMMON_INCLUDES} SYSTEM ${SYSTEM_INCLUDES})
 #LINKING SETUP
 set(LD_LIBS ${HDF5_LIBRARIES})
 
+#COMMON OBJECTS
+add_library(objects OBJECT ${SRC_FILES})
+
 #EXECUTABLE 1 : tests
-add_executable(${PROJECT_TEST_NAME} ${TEST_FILES})
+add_executable(${PROJECT_TEST_NAME} $<TARGET_OBJECTS:objects> ${TEST_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 
 #EXECUTABLE 2 : octree-file-format
-add_executable(${PROJECT_NAME} ${MAIN_SRC_FILES})
+add_executable(${PROJECT_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
 target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
 
 enable_testing ()
