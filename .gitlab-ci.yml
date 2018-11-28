@@ -1,7 +1,7 @@
 image: gcc
 
 before_script:
-    - apt update && apt install -y cmake
+    - apt update && apt install -y cmake libhdf5-serial-dev
 
 tests:
     only:
