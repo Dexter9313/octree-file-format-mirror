@@ -49,6 +49,7 @@ void TEST_EQUAL(T result, T shouldbe, const char* testname,
 		          << *reinterpret_cast<uint64_t*>(&shouldbe) << "\")"
 		          << (additional != "" ? " Additional Information : " : "")
 		          << additional << std::endl;
+		exit(EXIT_FAILURE);
 	}
 }
 

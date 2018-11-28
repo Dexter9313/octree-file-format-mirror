@@ -68,8 +68,8 @@ target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 add_executable(${PROJECT_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
 target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
 
-#enable_testing ()
-#add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
+enable_testing ()
+add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
 
 
 # Including extra cmake rules
