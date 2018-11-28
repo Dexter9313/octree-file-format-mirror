@@ -1,5 +1,8 @@
 image: gcc
 
+before_script:
+    - apt update && apt install -y cmake
+
 tests:
     only:
         - pushes
