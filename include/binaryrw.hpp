@@ -23,7 +23,7 @@ inline void read(std::istream& stream, std::vector<T>& vec);
 
 inline void debugread(std::istream& stream, std::ostream& dbgstream);
 
-#include "binaryrw.cpp"
+#include "../src/binaryrw.cpp"
 } // ns brw
 
 #endif // BINARYRW_H
