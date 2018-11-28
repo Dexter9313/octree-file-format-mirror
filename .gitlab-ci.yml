@@ -1,3 +1,5 @@
+image: gcc
+
 tests:
     only:
         - pushes
