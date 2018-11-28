@@ -147,7 +147,6 @@ int main(int, char* [])
 		octree2.readData(f);
 		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree" << std::endl;
-		TEST_EQUAL(0, 1, "Should fail");
 	}
 
 	return EXIT_SUCCESS;
