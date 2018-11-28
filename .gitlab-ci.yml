@@ -11,4 +11,5 @@ tests:
         - cd build
         - cmake ..
         - make -j4
-        - make test ; cat Testing/Temporary/LastTest.log
+        - make test 
+        - cat Testing/Temporary/LastTest.log
