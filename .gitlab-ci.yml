@@ -12,3 +12,4 @@ tests:
         - cmake ..
         - make -j4
         - make test
+        - cat Testing/Temporary/LastTest.log
