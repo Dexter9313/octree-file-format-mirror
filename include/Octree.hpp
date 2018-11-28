@@ -7,11 +7,11 @@ class Octree : public Leaf
 {
   public:
 	Octree(std::vector<float> data);
-	Octree(std::ifstream& in);
+	Octree(std::istream& in);
 	virtual std::vector<long> getCompactData() const;
-	virtual void writeData(std::ofstream& out);
-	virtual void readData(std::ifstream& in);
-	virtual void debug(std::string const& tabs = "") const;
+	virtual void writeData(std::ostream& out);
+	virtual void readData(std::istream& in);
+	virtual std::string toString(std::string const& tabs = "") const;
 	virtual ~Octree();
 
   private:
@@ -19,6 +19,6 @@ class Octree : public Leaf
 	                     nullptr, nullptr, nullptr, nullptr};
 };
 
-void write(std::ofstream& stream, Octree& octree);
+void write(std::ostream& stream, Octree& octree);
 
 #endif // OCTREE_H

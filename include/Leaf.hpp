@@ -4,7 +4,8 @@
 #include <cfloat>
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "binaryrw.hpp"
@@ -15,14 +16,14 @@ class Leaf
 {
   public:
 	Leaf(std::vector<float> const& data);
-	Leaf(std::ifstream& in);
+	Leaf(std::istream& in);
 	virtual std::vector<long> getCompactData() const
 	{
 		return std::vector<long>({file_addr});
 	};
-	virtual void writeData(std::ofstream& out);
-	virtual void readData(std::ifstream& in);
-	virtual void debug(std::string const& tabs) const;
+	virtual void writeData(std::ostream& out);
+	virtual void readData(std::istream& in);
+	virtual std::string toString(std::string const& tabs) const;
 	virtual ~Leaf(){};
 
   protected:

@@ -36,7 +36,7 @@ Octree::Octree(std::vector<float> data)
 	}
 }
 
-Octree::Octree(std::ifstream& in)
+Octree::Octree(std::istream& in)
     : Leaf(in)
 {
 	long readVal;
@@ -88,7 +88,7 @@ std::vector<long> Octree::getCompactData() const
 	return res;
 }
 
-void Octree::writeData(std::ofstream& out)
+void Octree::writeData(std::ostream& out)
 {
 	Leaf::writeData(out);
 	for(unsigned int i(0); i < 8; ++i)
@@ -96,7 +96,7 @@ void Octree::writeData(std::ofstream& out)
 			children[i]->writeData(out);
 }
 
-void Octree::readData(std::ifstream& in)
+void Octree::readData(std::istream& in)
 {
 	Leaf::readData(in);
 	for(unsigned int i(0); i < 8; ++i)
@@ -106,16 +106,18 @@ void Octree::readData(std::ifstream& in)
 	}
 }
 
-void Octree::debug(std::string const& tabs) const
+std::string Octree::toString(std::string const& tabs) const
 {
-	std::cout << tabs << "D:" << std::endl;
-	Leaf::debug(tabs);
+	std::ostringstream oss;
+	oss << tabs << "D:" << std::endl;
+	oss << Leaf::toString(tabs);
 	for(unsigned int i(0); i < 8; ++i)
 	{
-		std::cout << tabs << i << ":" << std::endl;
+		oss << tabs << i << ":" << std::endl;
 		if(children[i] != nullptr)
-			children[i]->debug(tabs + "\t");
+			oss << children[i]->toString(tabs + "\t");
 	}
+	return oss.str();
 }
 
 Octree::~Octree()
@@ -127,7 +129,7 @@ Octree::~Octree()
 	}
 }
 
-void write(std::ofstream& stream, Octree& octree)
+void write(std::ostream& stream, Octree& octree)
 {
 	uint32_t headerSize(octree.getCompactData().size());
 	long start(stream.tellp());

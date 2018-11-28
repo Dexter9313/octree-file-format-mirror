@@ -1,4 +1,6 @@
+#include "Octree.hpp"
 #include "binaryrw.hpp"
+#include "utils.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -69,7 +71,8 @@ T randomVal()
 
 int main(int, char* [])
 {
-	srand(0);
+	const unsigned int seed = 0;
+	srand(seed);
 	std::string success(term::green + "[SUCCESS] " + term::reset);
 	std::string failure(term::red + "[FAILURE] " + term::reset);
 	// TEST BINARY RW double
@@ -127,6 +130,22 @@ int main(int, char* [])
 			TEST_EQUAL(vec2[i], vec[i], "R/W vector of doubles");
 		}
 		std::cout << success << "R/W vector of doubles" << std::endl;
+	}
+	// TEST BINARY RW random octree
+	{
+		Octree octree1(generateVertices(100000, seed));
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		uint32_t foo;
+		long bar;
+		brw::read(f, foo);
+		brw::read(f, bar);
+		Octree octree2(f);
+		octree2.readData(f);
+		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
+		std::cout << success << "R/W random octree" << std::endl;
 	}
 
 	return EXIT_SUCCESS;

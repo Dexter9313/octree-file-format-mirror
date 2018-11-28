@@ -28,12 +28,12 @@ Leaf::Leaf(std::vector<float> const& data)
 	}
 }
 
-Leaf::Leaf(std::ifstream& in)
+Leaf::Leaf(std::istream& in)
 {
 	brw::read(in, file_addr);
 }
 
-void Leaf::writeData(std::ofstream& out)
+void Leaf::writeData(std::ostream& out)
 {
 	file_addr = out.tellp();
 	brw::write(out, minX);
@@ -45,7 +45,7 @@ void Leaf::writeData(std::ofstream& out)
 	brw::write(out, data);
 }
 
-void Leaf::readData(std::ifstream& in)
+void Leaf::readData(std::istream& in)
 {
 	in.seekg(file_addr);
 	brw::read(in, minX);
@@ -57,9 +57,11 @@ void Leaf::readData(std::ifstream& in)
 	brw::read(in, data);
 }
 
-void Leaf::debug(std::string const& tabs) const
+std::string Leaf::toString(std::string const& tabs) const
 {
+	std::ostringstream oss;
 	for(unsigned int i(0); i < data.size(); i += 3)
-		std::cout << tabs << data[i] << "; " << data[i + 1] << "; "
+		oss << tabs << data[i] << "; " << data[i + 1] << "; "
 		          << data[i + 2] << std::endl;
+	return oss.str();
 }
