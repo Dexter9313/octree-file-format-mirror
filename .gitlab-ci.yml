@@ -12,3 +12,13 @@ tests:
         - cmake ..
         - make -j4
         - ./tests
+
+build:
+    only:
+        - tags
+    script:
+        - mkdir build
+        - cd build
+        - cmake .. -DTAG=CI_COMMIT_TAG
+        - make package
+        - ls

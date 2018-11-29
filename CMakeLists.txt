@@ -2,8 +2,12 @@
 cmake_minimum_required(VERSION 3.0.0)
 
 set(PROJECT_NAME octree-file-format)
+set(PROJECT_GENERATOR_NAME octreegen)
 set(PROJECT_TEST_NAME tests)
 project(${PROJECT_NAME} C CXX)
+
+execute_process(COMMAND uname -i OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
+string(REGEX REPLACE "\n$" "" CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
 
 #C++11
 include(CheckCXXCompilerFlag)
@@ -65,11 +69,31 @@ add_executable(${PROJECT_TEST_NAME} $<TARGET_OBJECTS:objects> ${TEST_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 
 #EXECUTABLE 2 : octree-file-format
-add_executable(${PROJECT_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
-target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
+add_executable(${PROJECT_GENERATOR_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
+target_link_libraries(${PROJECT_GENERATOR_NAME} ${LD_LIBS})
 
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
+
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_GENERATOR_NAME} DESTINATION bin)
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_PACKAGE_NAME ${PROJECT_GENERATOR_NAME})
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An .octree file generator designed for VIRUP.")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
+if(TAG)
+	SET(CPACK_PACKAGE_VERSION ${TAG})
+endif()
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-100")
+
+INCLUDE(CPack)
+
+add_custom_target(uninstall
+		COMMAND xargs rm < install_manifest.txt && rm install_manifest.txt
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+		COMMENT "Uninstalling executable..."
+		VERBATIM)
+
 
 
 # Including extra cmake rules
