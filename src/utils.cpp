@@ -1,5 +1,28 @@
 #include "utils.hpp"
 
+std::vector<std::string> split(std::string const& str, char c)
+{
+	// look from the end to use push_back (there is no "push_front")
+	size_t p(str.rfind(c));
+	if(p == std::string::npos)
+		return {str};
+
+	std::string left(str.substr(0, p)),
+	    right(str.substr(p + 1, str.size() - p - 1));
+	std::vector<std::string> res(split(left, c));
+	res.push_back(right);
+	return res;
+}
+
+std::string join(std::vector<std::string> const& strs, char c)
+{
+	std::string res("");
+	for(std::string str : strs)
+		res += str + c;
+	res.pop_back();
+	return res;
+}
+
 std::vector<float> generateVertices(unsigned int number, unsigned int seed)
 {
 	std::vector<float> vertices;
@@ -17,8 +40,11 @@ std::vector<float> generateVertices(unsigned int number, unsigned int seed)
 	return vertices;
 }
 
-std::vector<float> readHDF5(std::string const& path, const char* parttype)
+std::vector<float> readHDF5(std::string const& path,
+                            const char* pathToCoordinates)
 {
+	std::vector<std::string> pathToCoordsSplitted(
+	    split(pathToCoordinates, '/'));
 	hid_t hdf5_file, hdf5_grp[6];
 	hid_t hdf5_dataset;
 	hsize_t dims[2];
@@ -27,10 +53,17 @@ std::vector<float> readHDF5(std::string const& path, const char* parttype)
 	float** rdata;
 	// int status;
 
-	hdf5_file    = H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-	hdf5_grp[0]  = H5Gopen(hdf5_file, parttype, H5P_DEFAULT);
-	hdf5_dataset = H5Dopen(hdf5_grp[0], "Coordinates", H5P_DEFAULT);
-	space        = H5Dget_space(hdf5_dataset);
+	hdf5_file = H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+	hdf5_grp[0]
+	    = H5Gopen(hdf5_file, ("/" + pathToCoordsSplitted[0]).c_str(), H5P_DEFAULT);
+	for(unsigned int i(1); i < pathToCoordsSplitted.size() - 1; ++i)
+		hdf5_grp[0] = H5Gopen(hdf5_grp[0], pathToCoordsSplitted[i].c_str(),
+		                      H5P_DEFAULT);
+	hdf5_dataset
+	    = H5Dopen(hdf5_grp[0],
+	              pathToCoordsSplitted[pathToCoordsSplitted.size() - 1].c_str(),
+	              H5P_DEFAULT);
+	space = H5Dget_space(hdf5_dataset);
 	H5Sget_simple_extent_dims(space, dims, NULL);
 
 	std::vector<float> result(dims[0] * dims[1]);

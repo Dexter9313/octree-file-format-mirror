@@ -148,6 +148,23 @@ int main(int, char* [])
 		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree" << std::endl;
 	}
+	// TEST String splitting
+	{
+		std::string str("This is a sentence.");
+		std::vector<std::string> result(split(str, ' '));
+		TEST_EQUAL(result[0], std::string("This"), "String splitting");
+		TEST_EQUAL(result[1], std::string("is"), "String splitting");
+		TEST_EQUAL(result[2], std::string("a"), "String splitting");
+		TEST_EQUAL(result[3], std::string("sentence."), "String splitting");
+		std::cout << success << "String splitting" << std::endl;
+	}
+	// TEST String joining
+	{
+		std::string str("This is a sentence.");
+		std::string result(join(split(str, ' '), ' '));
+		TEST_EQUAL(result, str, "String joining");
+		std::cout << success << "String joining" << std::endl;
+	}
 
 	return EXIT_SUCCESS;
 }
