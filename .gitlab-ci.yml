@@ -21,4 +21,6 @@ build:
         - cd build
         - cmake .. -DTAG=$CI_COMMIT_TAG
         - make package
-        - ls
+    artifacts:
+        paths:
+            - *.deb
