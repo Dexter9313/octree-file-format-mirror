@@ -6,8 +6,12 @@ set(PROJECT_GENERATOR_NAME octreegen)
 set(PROJECT_TEST_NAME tests)
 project(${PROJECT_NAME} C CXX)
 
-execute_process(COMMAND uname -i OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
-string(REGEX REPLACE "\n$" "" CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
+if(ARCH)
+	set(CMAKE_SYSTEM_NAME ${ARCH})
+else()
+	execute_process(COMMAND uname -i OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
+	string(REGEX REPLACE "\n$" "" CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
+endif()
 
 #C++11
 include(CheckCXXCompilerFlag)
