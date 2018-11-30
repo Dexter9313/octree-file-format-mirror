@@ -13,6 +13,7 @@ What makes separating structure from data worth is that VIRUP octrees aren't ful
 Please read each tool's README inside its own directory !
 
 * [octreegen](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen/) : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
+* [octreegen-gui](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen-gui/) : A user-friendly GUI interface for octreegen.
 
 ## Complete Grammar Syntax and hints on semantics
 

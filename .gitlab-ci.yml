@@ -23,6 +23,21 @@ build:octreegen:
         untracked: true
         expire_in: 1h
 
+build:octreegen-gui:
+    stage: build
+    only:
+        - pushes
+    script:
+        - cd octreegen-gui
+        - mkdir build
+        - cd build
+        - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
+        - cmake .. -DTAG=$CI_COMMIT_TAG -DARCH=$ARCH
+        - make -j4
+    artifacts:
+        untracked: true
+        expire_in: 1h
+
 test:octreegen:
     stage: test
     dependencies:
@@ -46,6 +61,22 @@ pack:octreegen:
         - mv *.deb ../..
         - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
         - echo "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/octreegen-$CI_COMMIT_TAG-$ARCH.deb?job=$CI_JOB_NAME"
+    artifacts:
+        paths:
+            - "*.deb"
+
+pack:octreegen-gui:
+    stage: pack
+    dependencies:
+        - build:octreegen-gui
+    only:
+        - tags
+    script:
+        - cd octreegen-gui/build
+        - make package
+        - mv *.deb ../..
+        - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
+        - echo "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/octreegen-gui-$CI_COMMIT_TAG-$ARCH.deb?job=$CI_JOB_NAME"
     artifacts:
         paths:
             - "*.deb"
