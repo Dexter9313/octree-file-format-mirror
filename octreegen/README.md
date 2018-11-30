@@ -52,3 +52,21 @@ Optionally, you can generate a deb package to make installation managing easier 
 	sudo dpkg -i ./*.deb
 
 
+## Usage
+
+	octreegen FILE_IN:DATASET_PATH FILE_OUT
+
+	octreegen PARTICLES_NUMBER FILE_OUT
+
+### Examples
+
+To read gaz data coordinates within snapshot.hdf5 in 
+group /PartType0 and write the corresponding octree in 
+the gaz.octree file :
+
+	octreegen snapshot.hdf5:/PartType0/Coordinates gaz.octree
+
+To generate 1 million uniformly random particles and 
+write the corresponding octree in the random.octree file :
+
+	octreegen 1000000 random.octree
