@@ -34,7 +34,7 @@ First install the required libraries :
 
 Then simply install the following deb package :
 
-Download (.deb) : [https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/0.0.2/raw/octreegen-0.0.2-linux_amd64.deb?job=build](octree-file-format 0.0.2)
+Download (.deb) : [octree-file-format 0.0.2](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/0.0.2/raw/octreegen-0.0.2-linux_amd64.deb?job=build)
 
 ### Build from source
 
