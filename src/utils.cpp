@@ -43,9 +43,7 @@ std::vector<float> generateVertices(unsigned int number, unsigned int seed)
 std::vector<float> readHDF5(std::string const& path,
                             const char* pathToCoordinates)
 {
-	std::vector<std::string> pathToCoordsSplitted(
-	    split(pathToCoordinates, '/'));
-	hid_t hdf5_file, hdf5_grp[6];
+	hid_t hdf5_file;
 	hid_t hdf5_dataset;
 	hsize_t dims[2];
 
@@ -53,17 +51,9 @@ std::vector<float> readHDF5(std::string const& path,
 	float** rdata;
 	// int status;
 
-	hdf5_file = H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-	hdf5_grp[0]
-	    = H5Gopen(hdf5_file, ("/" + pathToCoordsSplitted[0]).c_str(), H5P_DEFAULT);
-	for(unsigned int i(1); i < pathToCoordsSplitted.size() - 1; ++i)
-		hdf5_grp[0] = H5Gopen(hdf5_grp[0], pathToCoordsSplitted[i].c_str(),
-		                      H5P_DEFAULT);
-	hdf5_dataset
-	    = H5Dopen(hdf5_grp[0],
-	              pathToCoordsSplitted[pathToCoordsSplitted.size() - 1].c_str(),
-	              H5P_DEFAULT);
-	space = H5Dget_space(hdf5_dataset);
+	hdf5_file    = H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+	hdf5_dataset = H5Dopen(hdf5_file, pathToCoordinates, H5P_DEFAULT);
+	space        = H5Dget_space(hdf5_dataset);
 	H5Sget_simple_extent_dims(space, dims, NULL);
 
 	std::vector<float> result(dims[0] * dims[1]);
