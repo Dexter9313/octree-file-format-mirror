@@ -21,7 +21,7 @@ A user-friendly GUI interface for octreegen.
 
 First install the required libraries :
 
-	sudo apt-get install libhdf5-100
+	sudo apt-get install libhdf5-100 libqt5widgets5
 
 Then simply install the following deb package :
 
@@ -32,7 +32,7 @@ Download (.deb) : [octreegen-gui 1.0.0](https://gitlab.com/Dexter9313/octree-fil
 First install the required libraries :
 
 	sudo apt-get update
-	sudo apt-get install build-essential cmake libhdf5-serial-dev
+	sudo apt-get install build-essential cmake libhdf5-serial-dev qtbase5-dev
 
 Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
 
