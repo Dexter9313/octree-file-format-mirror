@@ -1,8 +1,7 @@
 #INIT
 cmake_minimum_required(VERSION 3.0.0)
 
-set(PROJECT_NAME octree-file-format)
-set(PROJECT_GENERATOR_NAME octreegen)
+set(PROJECT_NAME octreegen)
 set(PROJECT_TEST_NAME tests)
 project(${PROJECT_NAME} C CXX)
 
@@ -72,17 +71,17 @@ add_library(objects OBJECT ${SRC_FILES})
 add_executable(${PROJECT_TEST_NAME} $<TARGET_OBJECTS:objects> ${TEST_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 
-#EXECUTABLE 2 : octree-file-format
-add_executable(${PROJECT_GENERATOR_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
-target_link_libraries(${PROJECT_GENERATOR_NAME} ${LD_LIBS})
+#EXECUTABLE 2 : octreegen
+add_executable(${PROJECTNAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
+target_link_libraries(${PROJECTNAME} ${LD_LIBS})
 
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
 
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_GENERATOR_NAME} DESTINATION bin)
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECTNAME} DESTINATION bin)
 
 SET(CPACK_GENERATOR "DEB")
-SET(CPACK_PACKAGE_NAME ${PROJECT_GENERATOR_NAME})
+SET(CPACK_PACKAGE_NAME ${PROJECTNAME})
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An .octree file generator designed for VIRUP.")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
 if(TAG)
