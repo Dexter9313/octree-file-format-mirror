@@ -1,0 +1,6 @@
+if(ARCH)
+	set(CMAKE_SYSTEM_NAME ${ARCH})
+else()
+	execute_process(COMMAND uname -i OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
+	string(REGEX REPLACE "\n$" "" CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
+endif()

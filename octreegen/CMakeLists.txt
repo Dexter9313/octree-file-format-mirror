@@ -5,33 +5,12 @@ set(PROJECT_NAME octreegen)
 set(PROJECT_TEST_NAME tests)
 project(${PROJECT_NAME} C CXX)
 
-if(ARCH)
-	set(CMAKE_SYSTEM_NAME ${ARCH})
-else()
-	execute_process(COMMAND uname -i OUTPUT_VARIABLE CMAKE_SYSTEM_NAME)
-	string(REGEX REPLACE "\n$" "" CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}")
-endif()
+#GET CMAKE_SYSTEM_NAME VARIABLE
+include(../cmake/common/SystemName.cmake)
+message(STATUS "Architecture : ${CMAKE_SYSTEM_NAME}")
 
-#C++11
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=gnu++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-	message(ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif()
-
-if(MSVC)
-	set(MSVC_COMPILER_DEFS "-D_VARIADIC_MAX=10")
-endif()
-
-#WARNINGS
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
-endif()
+#SET UP COMPILER
+include(../cmake/common/SetupCompiler.cmake)
 
 #DEPENDENCIES
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/modules)
@@ -72,16 +51,16 @@ add_executable(${PROJECT_TEST_NAME} $<TARGET_OBJECTS:objects> ${TEST_FILES})
 target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
 
 #EXECUTABLE 2 : octreegen
-add_executable(${PROJECTNAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
-target_link_libraries(${PROJECTNAME} ${LD_LIBS})
+add_executable(${PROJECT_NAME} $<TARGET_OBJECTS:objects> ${MAIN_FILE})
+target_link_libraries(${PROJECT_NAME} ${LD_LIBS})
 
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
 
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECTNAME} DESTINATION bin)
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME} DESTINATION bin)
 
 SET(CPACK_GENERATOR "DEB")
-SET(CPACK_PACKAGE_NAME ${PROJECTNAME})
+SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An .octree file generator designed for VIRUP.")
 SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
 if(TAG)
@@ -91,13 +70,8 @@ SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-100")
 
 INCLUDE(CPack)
 
-add_custom_target(uninstall
-		COMMAND xargs rm < install_manifest.txt && rm install_manifest.txt
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		COMMENT "Uninstalling executable..."
-		VERBATIM)
-
-
+#Create uninstall target
+include(../cmake/common/Uninstall.cmake)
 
 # Including extra cmake rules
 #include(cmake/clang-dev-tools.cmake)
