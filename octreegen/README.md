@@ -51,7 +51,6 @@ Optionally, you can generate a deb package to make installation managing easier 
 	make package
 	sudo dpkg -i ./*.deb
 
-
 ## Usage
 
 	octreegen FILE_IN:DATASET_PATH FILE_OUT
@@ -70,3 +69,15 @@ To generate 1 million uniformly random particles and
 write the corresponding octree in the random.octree file :
 
 	octreegen 1000000 random.octree
+
+## Uninstall
+
+If the deb method for installation was used :
+
+	sudo apt-get autoremove octreegen
+
+If the make install method for installation was used, uninstallation can only be done if the build directory has been left untouched since installation :
+
+	cd $OCTREE_ROOT_DIR
+	cd octreegen/build
+	sudo make uninstall
