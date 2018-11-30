@@ -34,7 +34,7 @@ First install the required libraries :
 
 Then simply install the following deb package :
 
-Download (.deb) : [octree-file-format 0.0.2](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/0.0.2/raw/octreegen-0.0.2-linux_amd64.deb?job=build)
+Download (.deb) : [octreegen 0.0.2](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/0.0.2/raw/octreegen-0.0.2-linux_amd64.deb?job=build)
 
 ### Build from source
 
@@ -47,7 +47,7 @@ Clone this repository. The root directory of the repository would be stored in t
 	make
 	sudo make install
 
-Optionally, you can generate a deb package to make installation managing easier if you are on a debian-based system. The package name will be "octree-file-format".
+Optionally, you can generate a deb package to make installation managing easier if you are on a debian-based system. The package name will be "octreegen".
 
 	cd $OCTREE_ROOT_DIR
 	mkdir build && cd build
