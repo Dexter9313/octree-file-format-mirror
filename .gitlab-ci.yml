@@ -8,7 +8,7 @@ stages:
   - test
   - pack
 
-octreegen:
+build:octreegen:
     stage: build
     only:
         - pushes
@@ -20,10 +20,10 @@ octreegen:
     artifacts:
         untracked: true
 
-test:
+test:octreegen:
     stage: test
     dependencies:
-        - build
+        - build:octreegen
     only:
         - pushes
     script:
@@ -32,10 +32,10 @@ test:
         - ./tests
 
 
-pack:
+pack:octreegen:
     stage: pack
     dependencies:
-        - build
+        - build:octreegen
     only:
         - tags
     script:
