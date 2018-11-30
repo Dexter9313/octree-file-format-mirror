@@ -40,8 +40,6 @@ pack:octreegen:
         - build:octreegen
     only:
         - tags
-    before_script:
-        - apt update && apt install -y cmake
     script:
         - cd octreegen/build
         - make package
