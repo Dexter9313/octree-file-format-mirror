@@ -1,0 +1,54 @@
+# octreegen
+
+Generates an octree file either from an HDF5 file or from a number to random particles to generate.
+
+## Requirements
+
+### Running the tool
+
+* LibHDF5
+
+### Building from source
+
+* A C++ compiler (g++ for example)
+* CMake
+* LibHDF5
+
+## Installation
+
+### Ubuntu/Debian
+
+First install the required libraries :
+
+	sudo apt-get install libhdf5-100
+
+Then simply install the following deb package :
+
+Download (.deb) : [octreegen 1.0.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/octreegen-1.0.0-linux_amd64.deb?job=build)
+
+### Build from source
+
+First install the required libraries :
+
+	sudo apt-get update
+	sudo apt-get install build-essential cmake libhdf5-serial-dev
+
+Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
+
+	cd $OCTREE_ROOT_DIR
+	cd octreegen
+	mkdir build && cd build
+	cmake ..
+	make
+	sudo make install
+
+Optionally, you can generate a deb package to make installation managing easier if you are on a debian-based system. The package name will be "octreegen".
+
+	cd $OCTREE_ROOT_DIR
+	cd octreegen
+	mkdir build && cd build
+	cmake ..
+	make package
+	sudo dpkg -i ./*.deb
+
+

@@ -10,51 +10,9 @@ What makes separating structure from data worth is that VIRUP octrees aren't ful
 
 ## Tools
 
-* octreegen : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
+Please read each tool's README inside its own directory !
 
-## Requirements
-
-### Running the tools
-
-* LibHDF5
-
-### Building from source
-
-* CMake
-* A C++ compiler (g++ for example)
-* LibHDF5
-
-## Installation
-
-### Ubuntu/Debian
-
-First install the required libraries :
-
-	sudo apt-get install libhdf5-100
-
-Then simply install the following deb package :
-
-Download (.deb) : [octreegen 1.0.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/octreegen-1.0.0-linux_amd64.deb?job=build)
-
-### Build from source
-
-First, make sure you installed the required libraries (see above : Building from source).
-Clone this repository. The root directory of the repository would be stored in the $OCTREE_ROOT_DIR variable.
-
-	cd $OCTREE_ROOT_DIR
-	mkdir build && cd build
-	cmake ..
-	make
-	sudo make install
-
-Optionally, you can generate a deb package to make installation managing easier if you are on a debian-based system. The package name will be "octreegen".
-
-	cd $OCTREE_ROOT_DIR
-	mkdir build && cd build
-	cmake ..
-	make package
-	sudo dpkg -i ./*.deb
-
+* [octreegen](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen/) : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
 
 ## Complete Grammar Syntax and hints on semantics
 
@@ -76,7 +34,6 @@ null    : a 64-bit constant 0xFFFFFFFFFFFFFFFF (-1)
 ADDRESS : a 64-bit integer that is not equal to either (, ) or null; usually a pointer to a CHUNK (e.g. if ADDRESS is 0x0000000000000002, this means the chunk starts from the third byte of the file)
 
 empty   : void, defined for grammar syntax, represented by absolutly no bits in the file
-
 
 ### Non-terminal terms (rules)
 
