@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 		try
 		{
 			numberOfVertices= std::stoi(argv[1]);
-		} catch(std::invalid_argument e)
+		} catch(const std::invalid_argument& e)
 		{
 			std::cerr << "Invalid argument : " << argv[1] << std::endl;
 			man(argv[0]);
