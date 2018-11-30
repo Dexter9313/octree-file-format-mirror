@@ -8,9 +8,53 @@ The principle is the following : the structure of the tree is stored in the file
 
 What makes separating structure from data worth is that VIRUP octrees aren't full depth octrees. Each leaf stores around 16000 tri-dimensional points, and each node stores a subsample (also of size 16000) of its descendants points for Level of Detail. Storing the structure of the tree can be for example a megabyte worth and the data stored in this tree will be worth a few dozen gigabytes. This way, initial loading of the tree structure is done almost instantly without having to parse the whole file.
 
+## Tools
+
+* octreegen : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
+
 ## Requirements
 
-* LibHDF5 Serial
+### Running the tools
+
+* LibHDF5
+
+### Building from source
+
+* CMake
+* A C++ compiler (g++ for example)
+* LibHDF5
+
+## Installation
+
+### Ubuntu/Debian
+
+First install the required libraries :
+
+	sudo apt-get install libhdf5-100
+
+Then simply install the following deb package :
+
+Download (.deb) : [https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/0.0.2/raw/octreegen-0.0.2-linux_amd64.deb?job=build](octree-file-format 0.0.2)
+
+### Build from source
+
+First, make sure you installed the required libraries (see above : Building from source).
+Clone this repository. The root directory of the repository would be stored in the $OCTREE_ROOT_DIR variable.
+
+	cd $OCTREE_ROOT_DIR
+	mkdir build && cd build
+	cmake ..
+	make
+	sudo make install
+
+Optionally, you can generate a deb package to make installation managing easier if you are on a debian-based system. The package name will be "octree-file-format".
+
+	cd $OCTREE_ROOT_DIR
+	mkdir build && cd build
+	cmake ..
+	make package
+	sudo dpkg -i ./*.deb
+
 
 ## Complete Grammar Syntax and hints on semantics
 
