@@ -3,7 +3,13 @@ image: gcc
 before_script:
     - apt update && apt install -y cmake libhdf5-serial-dev
 
-tests:
+stages:
+  - build
+  - test
+  - pack
+
+octreegen:
+    stage: build
     only:
         - pushes
     script:
@@ -11,15 +17,20 @@ tests:
         - cd build
         - cmake ..
         - make -j4
+
+test:
+    stage: test
+    only:
+        - pushes
+    script:
         - ./tests
 
 
-build:
+pack:
+    stage: pack
     only:
         - tags
     script:
-        - mkdir build
-        - cd build
         - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
         - cmake .. -DTAG=$CI_COMMIT_TAG -DARCH=$ARCH
         - make package
