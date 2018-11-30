@@ -43,7 +43,7 @@ pack:octreegen:
     script:
         - cd octreegen/build
         - make package
-        - mv *.deb ..
+        - mv *.deb ../..
         - echo "$CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_TAG/raw/octreegen-$CI_COMMIT_TAG-$ARCH.deb?job=$CI_JOB_NAME"
     artifacts:
         paths:
