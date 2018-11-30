@@ -62,7 +62,7 @@ SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
 if(TAG)
 	SET(CPACK_PACKAGE_VERSION ${TAG})
 endif()
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-100, libqt5widgets5")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-100, libqt5widgets5, octreegen")
 
 INCLUDE(CPack)
 
