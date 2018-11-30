@@ -41,7 +41,7 @@ pack:octreegen:
     only:
         - tags
     before_script:
-        - echo "Packaging octreegen..."
+        - apt update && apt install -y cmake
     script:
         - cd octreegen/build
         - make package
