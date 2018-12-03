@@ -8,12 +8,14 @@ A user-friendly GUI interface for octreegen.
 
 * [octreegen](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen/)
 * LibHDF5
+* Qt5 Widgets
 
 ### Building from source
 
 * A C++ compiler (g++ for example)
 * CMake
 * LibHDF5
+* Qt5 Widgets
 
 ## Installation
 
@@ -21,6 +23,7 @@ A user-friendly GUI interface for octreegen.
 
 First install the required libraries :
 
+	sudo apt-get update
 	sudo apt-get install libhdf5-100 libqt5widgets5
 
 Then simply install the following deb package :

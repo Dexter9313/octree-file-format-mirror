@@ -20,6 +20,7 @@ Generates an octree file either from an HDF5 file or from a number to random par
 
 First install the required libraries :
 
+	sudo apt-get update
 	sudo apt-get install libhdf5-100
 
 Then simply install the following deb package :
