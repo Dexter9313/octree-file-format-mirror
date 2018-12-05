@@ -68,6 +68,7 @@ test:octreegen:
     script:
         - cd liboctree/build
         - make install
+        - ldconfig
         - cd ../../octreegen/build
         - ./tests
 
