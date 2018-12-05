@@ -66,7 +66,9 @@ test:octreegen:
     only:
         - pushes
     script:
-        - cd octreegen/build
+        - cd liboctree/build
+        - make install
+        - cd ../../octreegen/build
         - ./tests
 
 
