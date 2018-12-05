@@ -96,7 +96,9 @@ pack:octreegen:
     only:
         - tags
     script:
-        - cd octreegen/build
+        - cd liboctree/build
+        - make install
+        - cd ../../octreegen/build
         - make package
         - mv *.deb ../..
         - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
