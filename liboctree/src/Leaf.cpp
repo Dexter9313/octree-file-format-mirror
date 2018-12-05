@@ -61,7 +61,7 @@ std::string Leaf::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
 	for(unsigned int i(0); i < data.size(); i += 3)
-		oss << tabs << data[i] << "; " << data[i + 1] << "; "
-		          << data[i + 2] << std::endl;
+		oss << tabs << data[i] << "; " << data[i + 1] << "; " << data[i + 2]
+		    << std::endl;
 	return oss.str();
 }

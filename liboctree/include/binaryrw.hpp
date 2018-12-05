@@ -1,5 +1,30 @@
-#include "binaryrw.hpp"
+#ifndef BINARYRW_H
+#define BINARYRW_H
 
+#include <fstream>
+#include <iostream>
+#include <vector>
+
+namespace brw
+{
+// DECLARATIONS
+inline bool isLittleEndian();
+
+template <typename T>
+inline void write(std::ostream& stream, T& x, unsigned int n = 1);
+
+template <typename T>
+inline void read(std::istream& stream, T& res, unsigned int n = 1);
+
+template <typename T>
+inline void write(std::ostream& stream, std::vector<T>& array);
+
+template <typename T>
+inline void read(std::istream& stream, std::vector<T>& vec);
+
+inline void debugread(std::istream& stream, std::ostream& dbgstream);
+
+// DEFINITIONS
 bool isLittleEndian()
 {
 	uint32_t x(1);
@@ -54,3 +79,6 @@ void debugread(std::istream& stream, std::ostream& dbgstream)
 	}
 	dbgstream << std::endl;
 }
+} // ns brw
+
+#endif // BINARYRW_H

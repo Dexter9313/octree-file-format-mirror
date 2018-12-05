@@ -1,10 +1,11 @@
-#include "Octree.hpp"
-#include "binaryrw.hpp"
-#include "utils.hpp"
-
 #include <fstream>
 #include <iostream>
 #include <vector>
+
+#include <liboctree/Octree.hpp>
+#include <liboctree/binaryrw.hpp>
+
+#include "utils.hpp"
 
 namespace term
 {
