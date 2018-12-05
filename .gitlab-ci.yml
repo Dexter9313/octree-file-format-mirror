@@ -20,7 +20,6 @@ build:liboctree:
         - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
         - cmake .. -DTAG=$CI_COMMIT_TAG -DARCH=$ARCH
         - make -j4
-        - make install
     artifacts:
         untracked: true
         expire_in: 1h
@@ -28,10 +27,14 @@ build:liboctree:
 
 build:octreegen:
     stage: build
+    dependencies:
+        - build:liboctree
     only:
         - pushes
     script:
-        - cd octreegen
+        - cd liboctree/build
+        - make install
+        - cd ../../octreegen
         - mkdir build
         - cd build
         - ARCH=$(echo $CI_RUNNER_EXECUTABLE_ARCH | tr / _)
