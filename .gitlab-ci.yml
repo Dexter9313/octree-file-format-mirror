@@ -73,7 +73,7 @@ test:octreegen:
         - ./tests
 
 
-pack:octreegen:
+pack:liboctree:
     stage: pack
     dependencies:
         - build:liboctree
