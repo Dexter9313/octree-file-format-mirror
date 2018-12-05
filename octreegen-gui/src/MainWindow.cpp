@@ -86,19 +86,24 @@ void MainWindow::generate(int previousExitCode)
 		        SLOT(processOutput()));
 		connect(proc, SIGNAL(readyReadStandardError()), this,
 		        SLOT(processOutput()));
-		connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(generate(int)));
+		connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+		        SLOT(generate(int)));
 
-		progress = new QProgressDialog(tr("Generating trees..."), QString(), 0, selectsToExecute.size(), this);
+		progress = new QProgressDialog(tr("Generating trees..."), QString(), 0,
+		                               selectsToExecute.size(), this);
 		progress->setMinimumDuration(0);
 		progress->setValue(0);
 
 		procOutput = "";
-		procError = "";
-		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath() + " " + selectsToExecute[0]->getOutputPath());
+		procError  = "";
+		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath()
+		                + " " + selectsToExecute[0]->getOutputPath());
 		proc->start(cmdLine);
 		if(!proc->waitForStarted())
 		{
-			QMessageBox::critical(this, tr("Critical Error"), tr("Could not start octreegen. Please make sure it is installed."));
+			QMessageBox::critical(this, tr("Critical Error"),
+			                      tr("Could not start octreegen. Please make "
+			                         "sure it is installed."));
 			proc->waitForFinished();
 			delete proc;
 			delete progress;
@@ -115,7 +120,11 @@ void MainWindow::generate(int previousExitCode)
 			delete proc;
 			delete progress;
 			proc = nullptr;
-			dialogWithConsoleOutput(tr("Warning"), tr("Something went wrong during the octree generation..."), baseCmdLine + selectsToExecute[0]->getDatasetPath() + " " + selectsToExecute[0]->getOutputPath());
+			dialogWithConsoleOutput(
+			    tr("Warning"),
+			    tr("Something went wrong during the octree generation..."),
+			    baseCmdLine + selectsToExecute[0]->getDatasetPath() + " "
+			        + selectsToExecute[0]->getOutputPath());
 			return;
 		}
 		progress->setValue(progress->value() + 1);
@@ -130,19 +139,21 @@ void MainWindow::generate(int previousExitCode)
 			return;
 		}
 		procOutput = "";
-		procError = "";
-		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath() + " " + selectsToExecute[0]->getOutputPath());
+		procError  = "";
+		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath()
+		                + " " + selectsToExecute[0]->getOutputPath());
 		proc->start(cmdLine);
 		if(!proc->waitForStarted())
 		{
 			delete proc;
 			delete progress;
 			proc = nullptr;
-			QMessageBox::critical(this, tr("Critical Error"), tr("Could not start octreegen. Please make sure it is installed."));
+			QMessageBox::critical(this, tr("Critical Error"),
+			                      tr("Could not start octreegen. Please make "
+			                         "sure it is installed."));
 			return;
 		}
 	}
-
 }
 
 void MainWindow::processOutput()
@@ -151,15 +162,17 @@ void MainWindow::processOutput()
 	procError += proc->readAllStandardError();
 }
 
-void MainWindow::dialogWithConsoleOutput(QString const& title, QString const& text, QString const& launchedCmdLine)
+void MainWindow::dialogWithConsoleOutput(QString const& title,
+                                         QString const& text,
+                                         QString const& launchedCmdLine)
 {
 	QMessageBox box(this);
 	box.setModal(true);
 	box.setWindowTitle(title);
 	box.setIcon(QMessageBox::Warning);
 	box.setText(text);
-	box.setDetailedText("Command :\n" + launchedCmdLine + "\n\nOutput :\n" + procError);
+	box.setDetailedText("Command :\n" + launchedCmdLine + "\n\nOutput :\n"
+	                    + procError);
 	box.setStyleSheet("QTextEdit {background-color:black;color:white;} ");
 	box.exec();
 }
-

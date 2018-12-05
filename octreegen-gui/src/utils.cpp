@@ -16,7 +16,8 @@ herr_t iterateCallback(hid_t loc_id, const char* name, const H5L_info_t*,
 		case H5O_TYPE_GROUP:
 			obj.id = H5Gopen1(loc_id, name);
 			H5Literate_by_name(loc_id, name, H5_INDEX_NAME, H5_ITER_NATIVE,
-			                   NULL, iterateCallback, static_cast<void*>(&obj), H5P_DEFAULT);
+			                   NULL, iterateCallback, static_cast<void*>(&obj),
+			                   H5P_DEFAULT);
 			obj.parent->links.push_back(obj);
 			break;
 		case H5O_TYPE_DATASET:

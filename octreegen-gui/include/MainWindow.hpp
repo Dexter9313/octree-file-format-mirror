@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
 	QWidget centralWidget;
 	QPushButton generateButton;
 
-	//related to octreegen calls
+	// related to octreegen calls
 	QProcess* proc = nullptr;
 	QString procOutput;
 	QString procError;
@@ -45,7 +45,8 @@ class MainWindow : public QMainWindow
 	HDF5DatasetSelect starsSelect;
 	HDF5DatasetSelect darkmatterSelect;
 
-	void dialogWithConsoleOutput(QString const& title, QString const& text, QString const& launchedCmdLine);
+	void dialogWithConsoleOutput(QString const& title, QString const& text,
+	                             QString const& launchedCmdLine);
 };
 
 #endif // MAINWINDOW_H
