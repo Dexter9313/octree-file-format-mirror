@@ -127,12 +127,9 @@ pack:octreegen-gui:
 doc:liboctree:
     stage: doc
     only:
-        - tags
+        - pushes
     script:
-        - cd liboctree
-        - mkdir build
-        - cd build
-        - cmake ..
+        - cd liboctree/build
         - make doc
         - mv ./html/ ../../public/
     artifacts:
