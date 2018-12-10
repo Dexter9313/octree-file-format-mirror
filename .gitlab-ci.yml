@@ -124,7 +124,7 @@ pack:octreegen-gui:
         paths:
             - "*.deb"
 
-doc:liboctree:
+pages:
     stage: doc
     only:
         - pushes
