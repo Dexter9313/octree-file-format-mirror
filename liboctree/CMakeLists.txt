@@ -66,4 +66,6 @@ include(../cmake/common/Uninstall.cmake)
 
 # Including extra cmake rules
 #include(cmake/clang-dev-tools.cmake)
-#include(cmake/doc.cmake)
+
+file(GLOB_RECURSE DOCUMENTED_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/include/*.hpp)
+include(../cmake/common/Doc.cmake)

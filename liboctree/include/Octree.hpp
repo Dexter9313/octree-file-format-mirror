@@ -24,6 +24,11 @@
 class Octree : public Leaf
 {
   public:
+	  /*! Data constructor
+	   *
+	   * Constructs an octree from cartesian positions.
+	   * \param data Vector of the form {x0, y0, z0, x1, y1, z1, ... , xn, yn, zn}.
+	   */
 	Octree(std::vector<float> data);
 	Octree(std::istream& in);
 	virtual std::vector<long> getCompactData() const;

@@ -1,13 +1,14 @@
 image: gcc
 
 before_script:
-    - apt update && apt install -y cmake libhdf5-serial-dev qtbase5-dev
+    - apt update && apt install -y cmake libhdf5-serial-dev qtbase5-dev doxygen graphviz
 
 stages:
   - buildlib
   - build
   - test
   - pack
+  - doc
 
 build:liboctree:
     stage: buildlib
@@ -122,3 +123,18 @@ pack:octreegen-gui:
     artifacts:
         paths:
             - "*.deb"
+
+doc:liboctree:
+    stage: doc
+    only:
+        - tags
+    script:
+        - cd liboctree
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make doc
+        - mv ./html/ ../../public/
+    artifacts:
+        paths:
+            - public
