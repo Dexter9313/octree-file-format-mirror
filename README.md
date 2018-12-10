@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.com/Dexter9313/octree-file-format/badges/master/pipeline.svg)](https://gitlab.com/Dexter9313/octree-file-format/commits/master)
+
 # octree-file-format
 
 A collection of tools to handle the *.octree* file format and convert to it from HDF5. This file format is designed to efficiently store octrees to be used as input for [virup-prototype](https://gitlab.com/Dexter9313/virup-prototype).
