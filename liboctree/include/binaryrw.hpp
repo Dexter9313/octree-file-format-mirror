@@ -23,9 +23,13 @@
 #include <iostream>
 #include <vector>
 
+/*! Binary read-write.
+ */
 namespace brw
 {
 // DECLARATIONS
+/*! Returns true if and only if the machine this function is running on is little endian.
+ */
 inline bool isLittleEndian();
 
 template <typename T>
