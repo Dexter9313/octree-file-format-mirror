@@ -151,12 +151,23 @@ void write(std::ostream& stream, Octree& octree)
 {
 	uint32_t headerSize(octree.getCompactData().size());
 	long start(stream.tellp());
-	long zero;
-	for(unsigned int i(0); i < headerSize; ++i)
+
+	// write zeros to leave space, don't write first '('
+	long zero(0);
+	for(unsigned int i(1); i < headerSize; ++i)
 		brw::write(stream, zero);
+
+	// write chunks and hold their addresses
 	octree.writeData(stream);
 
+	// write real compact data (with true addresses)
 	stream.seekp(start);
-	std::vector<long> headerData(octree.getCompactData());
-	brw::write(stream, headerData);
+	// we don't need to write the vector's size and the first '('
+	std::vector<long> header(octree.getCompactData());
+	long u;
+	for(unsigned int i(1); i < headerSize; ++i)
+	{
+		u = header[i];
+		brw::write(stream, u);
+	}
 }

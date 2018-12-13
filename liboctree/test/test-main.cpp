@@ -173,10 +173,6 @@ int main(int, char* [])
 		f.resetCursor();
 		write(f, octree1);
 		f.resetCursor();
-		uint32_t foo;
-		long bar;
-		brw::read(f, foo);
-		brw::read(f, bar);
 		Octree octree2(f);
 		octree2.readData(f);
 		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");

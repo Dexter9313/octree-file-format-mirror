@@ -46,9 +46,9 @@ S (axiom)    -> STRUCTURE CHUNKS
 Separation of structure and chunks
 
 
-STRUCTURE    -> SIZE NODE
+STRUCTURE    -> ADDRESS TREE{,8} )
 
-The structure size (in 64-bit units, not in bytes - every value in the rest of the structure is represented as 64 bits) followed by the description of the root node.
+For pure implementation reasons (recursion combined with linear file reading), the root node (which represents the whole structure) doesn't start with a '(' (0 in 64-bit format) because each node should start reading the file once its corresponding '(' has already been read by its parent. See NODE below for more explanations about this rule's components.
 
 
 NODE         -> ( ADDRESS TREE{,8} )
