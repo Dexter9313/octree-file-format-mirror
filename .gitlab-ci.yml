@@ -60,6 +60,17 @@ build:octreegen-gui:
         untracked: true
         expire_in: 1h
 
+
+test:liboctree:
+    stage: test
+    dependencies:
+        - build:liboctree
+    only:
+        - pushes
+    script:
+        - cd octreegen/build
+        - ./tests
+
 test:octreegen:
     stage: test
     dependencies:

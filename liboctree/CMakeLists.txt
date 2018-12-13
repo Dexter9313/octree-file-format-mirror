@@ -22,7 +22,7 @@ set(COMMON_INCLUDES ${PROJECT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
-#file(GLOB_RECURSE TEST_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
+file(GLOB_RECURSE TEST_FILES ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
 
 #INCLUDE
@@ -38,11 +38,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 #EXECUTABLE 1 : tests
-#add_executable(${PROJECT_TEST_NAME} $<TARGET_OBJECTS:objects> ${TEST_FILES})
-#target_link_libraries(${PROJECT_TEST_NAME} ${LD_LIBS})
+add_executable(${PROJECT_TEST_NAME} ${TEST_FILES})
+target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME})
 
-#enable_testing ()
-#add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
+enable_testing ()
+add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
 
 include(GNUInstallDirs)
 
