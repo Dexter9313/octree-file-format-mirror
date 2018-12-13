@@ -68,7 +68,7 @@ test:liboctree:
     only:
         - pushes
     script:
-        - cd octreegen/build
+        - cd liboctree/build
         - ./tests
 
 test:octreegen:
