@@ -20,8 +20,8 @@
 #include <iostream>
 #include <vector>
 
-#include <liboctree/Octree.hpp>
-#include <liboctree/binaryrw.hpp>
+#include "Octree.hpp"
+#include "binaryrw.hpp"
 
 namespace term
 {
