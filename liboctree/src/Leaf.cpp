@@ -51,6 +51,11 @@ Leaf::Leaf(std::istream& in)
 	brw::read(in, file_addr);
 }
 
+Leaf::Leaf(long file_addr)
+    : file_addr(file_addr)
+{
+}
+
 void Leaf::writeData(std::ostream& out)
 {
 	file_addr = out.tellp();

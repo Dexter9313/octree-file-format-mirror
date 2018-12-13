@@ -35,6 +35,7 @@ class Leaf
   public:
 	Leaf(std::vector<float> const& data);
 	Leaf(std::istream& in);
+	Leaf(long file_addr);
 	virtual std::vector<long> getCompactData() const
 	{
 		return std::vector<long>({file_addr});

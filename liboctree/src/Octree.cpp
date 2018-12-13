@@ -61,20 +61,14 @@ Octree::Octree(std::istream& in)
 	unsigned int i(0);
 	while(true)
 	{
-		std::streampos pos(in.tellg());
 		brw::read(in, readVal);
 		if(readVal == 1) //) <= own end
 			break;
 
 		if(readVal == 0) //( <= sub node
-		{
 			children[i] = new Octree(in);
-		}
 		else if(readVal != -1) // null node
-		{
-			in.seekg(pos);
-			children[i] = new Leaf(in);
-		}
+			children[i] = new Leaf(readVal);
 		++i;
 	}
 }
