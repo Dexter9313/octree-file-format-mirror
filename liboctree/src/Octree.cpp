@@ -19,8 +19,34 @@
 #include "Octree.hpp"
 
 Octree::Octree(std::vector<float> data)
-    : Leaf(data)
 {
+	for(unsigned int i(0); i < data.size(); i += 3)
+	{
+		if(data[i] < minX)
+			minX = data[i];
+		if(data[i] > maxX)
+			maxX = data[i];
+		if(data[i + 1] < minY)
+			minY = data[i + 1];
+		if(data[i + 1] > maxY)
+			maxY = data[i + 1];
+		if(data[i + 2] < minZ)
+			minZ = data[i + 2];
+		if(data[i + 2] > maxZ)
+			maxZ = data[i + 2];
+
+		if(data.size() <= 3 * MAX_LEAF_SIZE
+		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+		          < (3 * MAX_LEAF_SIZE) / (float) data.size())
+		{
+			this->data.push_back(data[i]);
+			this->data.push_back(data[i + 1]);
+			this->data.push_back(data[i + 2]);
+		}
+	}
+	if(data.size() <= 3 * MAX_LEAF_SIZE)
+		return; // we don't need to create children
+
 	std::vector<float>* subvectors[8];
 	for(unsigned int i(0); i < 8; ++i)
 		subvectors[i] = new std::vector<float>;
@@ -42,21 +68,18 @@ Octree::Octree(std::vector<float> data)
 
 	for(unsigned int i(0); i < 8; ++i)
 	{
-		if(subvectors[i]->size() > 3 * MAX_LEAF_SIZE)
+		if(subvectors[i]->size() > 0)
 		{
 			children[i] = newOctree(*subvectors[i]);
-		}
-		else if(subvectors[i]->size() > 0)
-		{
-			children[i] = newLeaf(*subvectors[i]);
 		}
 		delete subvectors[i];
 	}
 }
 
 Octree::Octree(std::istream& in)
-    : Leaf(in)
 {
+	brw::read(in, file_addr);
+
 	long readVal;
 	unsigned int i(0);
 	while(true)
@@ -68,13 +91,29 @@ Octree::Octree(std::istream& in)
 		if(readVal == 0) //( <= sub node
 			children[i] = newOctree(in);
 		else if(readVal != -1) // null node
-			children[i] = newLeaf(readVal);
+			children[i] = newOctree(readVal);
 		++i;
 	}
 }
 
+Octree::Octree(long file_addr)
+    : file_addr(file_addr)
+{
+}
+
+bool Octree::isLeaf() const
+{
+	for(unsigned int i(0); i < 8; ++i)
+		if(children[i] != nullptr)
+			return false;
+	return true;
+}
+
 std::vector<long> Octree::getCompactData() const
 {
+	if(isLeaf())
+		return std::vector<long>({file_addr});
+
 	std::vector<long> res;
 	res.push_back(0); // (
 	res.push_back(file_addr);
@@ -102,7 +141,14 @@ std::vector<long> Octree::getCompactData() const
 
 void Octree::writeData(std::ostream& out)
 {
-	Leaf::writeData(out);
+	file_addr = out.tellp();
+	brw::write(out, minX);
+	brw::write(out, maxX);
+	brw::write(out, minY);
+	brw::write(out, maxY);
+	brw::write(out, minZ);
+	brw::write(out, maxZ);
+	brw::write(out, data);
 	for(unsigned int i(0); i < 8; ++i)
 		if(children[i] != nullptr)
 			children[i]->writeData(out);
@@ -110,7 +156,14 @@ void Octree::writeData(std::ostream& out)
 
 void Octree::readData(std::istream& in)
 {
-	Leaf::readData(in);
+	in.seekg(file_addr);
+	brw::read(in, minX);
+	brw::read(in, maxX);
+	brw::read(in, minY);
+	brw::read(in, maxY);
+	brw::read(in, minZ);
+	brw::read(in, maxZ);
+	brw::read(in, data);
 	for(unsigned int i(0); i < 8; ++i)
 	{
 		if(children[i] != nullptr)
@@ -122,7 +175,9 @@ std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
 	oss << tabs << "D:" << std::endl;
-	oss << Leaf::toString(tabs);
+	for(unsigned int i(0); i < data.size(); i += 3)
+		oss << tabs << data[i] << "; " << data[i + 1] << "; " << data[i + 2]
+		    << std::endl;
 	for(unsigned int i(0); i < 8; ++i)
 	{
 		oss << tabs << i << ":" << std::endl;
@@ -130,21 +185,6 @@ std::string Octree::toString(std::string const& tabs) const
 			oss << children[i]->toString(tabs + "\t");
 	}
 	return oss.str();
-}
-
-Leaf* Octree::newLeaf(std::vector<float> data) const
-{
-	return new Leaf(data);
-}
-
-Leaf* Octree::newLeaf(std::istream& in) const
-{
-	return new Leaf(in);
-}
-
-Leaf* Octree::newLeaf(long file_addr) const
-{
-	return new Leaf(file_addr);
 }
 
 Octree* Octree::newOctree(std::vector<float> data) const
@@ -157,9 +197,14 @@ Octree* Octree::newOctree(std::istream& in) const
 	return new Octree(in);
 }
 
+Octree* Octree::newOctree(long file_addr) const
+{
+	return new Octree(file_addr);
+}
+
 Octree::~Octree()
 {
-	for(Leaf* t : children)
+	for(Octree* t : children)
 	{
 		if(t != nullptr)
 			delete t;

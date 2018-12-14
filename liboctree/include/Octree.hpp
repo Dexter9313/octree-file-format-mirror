@@ -19,9 +19,18 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
-#include "Leaf.hpp"
+#include <cfloat>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
-class Octree : public Leaf
+#include "binaryrw.hpp"
+
+#define MAX_LEAF_SIZE 16000
+
+class Octree
 {
   public:
 	/*! Data constructor
@@ -32,6 +41,8 @@ class Octree : public Leaf
 	 */
 	Octree(std::vector<float> data);
 	Octree(std::istream& in);
+	Octree(long file_addr);
+	bool isLeaf() const;
 	virtual std::vector<long> getCompactData() const;
 	virtual void writeData(std::ostream& out);
 	virtual void readData(std::istream& in);
@@ -39,13 +50,21 @@ class Octree : public Leaf
 	virtual ~Octree();
 
   protected:
-	virtual Leaf* newLeaf(std::vector<float> data) const;
-	virtual Leaf* newLeaf(std::istream& in) const;
-	virtual Leaf* newLeaf(long file_addr) const;
 	virtual Octree* newOctree(std::vector<float> data) const;
 	virtual Octree* newOctree(std::istream& in) const;
+	virtual Octree* newOctree(long file_addr) const;
 
-	Leaf* children[8] = {nullptr, nullptr, nullptr, nullptr,
+	long file_addr = -2;
+
+	float minX = FLT_MAX;
+	float maxX = -FLT_MAX;
+	float minY = FLT_MAX;
+	float maxY = -FLT_MAX;
+	float minZ = FLT_MAX;
+	float maxZ = -FLT_MAX;
+
+	std::vector<float> data;
+	Octree* children[8] = {nullptr, nullptr, nullptr, nullptr,
 	                     nullptr, nullptr, nullptr, nullptr};
 };
 
