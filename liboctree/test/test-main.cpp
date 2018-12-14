@@ -168,12 +168,14 @@ int main(int, char* [])
 	}
 	// TEST BINARY RW random octree
 	{
-		Octree octree1(generateVertices(100000, seed));
+		Octree octree1;
+		octree1.init(generateVertices(100000, seed));
 		TestBinaryFile f;
 		f.resetCursor();
 		write(f, octree1);
 		f.resetCursor();
-		Octree octree2(f);
+		Octree octree2;
+		octree2.init(f);
 		octree2.readData(f);
 		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree" << std::endl;

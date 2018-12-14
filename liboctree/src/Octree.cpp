@@ -18,7 +18,7 @@
 
 #include "Octree.hpp"
 
-Octree::Octree(std::vector<float> data)
+void Octree::init(std::vector<float> data)
 {
 	for(unsigned int i(0); i < data.size(); i += 3)
 	{
@@ -70,13 +70,14 @@ Octree::Octree(std::vector<float> data)
 	{
 		if(subvectors[i]->size() > 0)
 		{
-			children[i] = newOctree(*subvectors[i]);
+			children[i] = newOctree();
+			children[i]->init(*subvectors[i]);
 		}
 		delete subvectors[i];
 	}
 }
 
-Octree::Octree(std::istream& in)
+void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
 
@@ -89,16 +90,22 @@ Octree::Octree(std::istream& in)
 			break;
 
 		if(readVal == 0) //( <= sub node
-			children[i] = newOctree(in);
+		{
+			children[i] = newOctree();
+			children[i]->init(in);
+		}
 		else if(readVal != -1) // null node
-			children[i] = newOctree(readVal);
+		{
+			children[i] = newOctree();
+			children[i]->init(readVal);
+		}
 		++i;
 	}
 }
 
-Octree::Octree(long file_addr)
-    : file_addr(file_addr)
+void Octree::init(long file_addr)
 {
+    this->file_addr = file_addr;
 }
 
 bool Octree::isLeaf() const
@@ -187,19 +194,9 @@ std::string Octree::toString(std::string const& tabs) const
 	return oss.str();
 }
 
-Octree* Octree::newOctree(std::vector<float> data) const
+Octree* Octree::newOctree() const
 {
-	return new Octree(data);
-}
-
-Octree* Octree::newOctree(std::istream& in) const
-{
-	return new Octree(in);
-}
-
-Octree* Octree::newOctree(long file_addr) const
-{
-	return new Octree(file_addr);
+	return new Octree();
 }
 
 Octree::~Octree()

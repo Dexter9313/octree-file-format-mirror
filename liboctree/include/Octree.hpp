@@ -33,15 +33,9 @@
 class Octree
 {
   public:
-	/*! Data constructor
-	 *
-	 * Constructs an octree from cartesian positions.
-	 * \param data Vector of the form {x0, y0, z0, x1, y1, z1, ... , xn, yn,
-	 * zn}.
-	 */
-	Octree(std::vector<float> data);
-	Octree(std::istream& in);
-	Octree(long file_addr);
+	virtual void init(std::vector<float> data);
+	virtual void init(std::istream& in);
+	virtual void init(long file_addr);
 	bool isLeaf() const;
 	virtual std::vector<long> getCompactData() const;
 	virtual void writeData(std::ostream& out);
@@ -50,9 +44,7 @@ class Octree
 	virtual ~Octree();
 
   protected:
-	virtual Octree* newOctree(std::vector<float> data) const;
-	virtual Octree* newOctree(std::istream& in) const;
-	virtual Octree* newOctree(long file_addr) const;
+	virtual Octree* newOctree() const;
 
 	long file_addr = -2;
 
