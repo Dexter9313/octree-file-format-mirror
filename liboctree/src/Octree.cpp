@@ -44,11 +44,11 @@ Octree::Octree(std::vector<float> data)
 	{
 		if(subvectors[i]->size() > 3 * MAX_LEAF_SIZE)
 		{
-			children[i] = new Octree(*subvectors[i]);
+			children[i] = newOctree(*subvectors[i]);
 		}
 		else if(subvectors[i]->size() > 0)
 		{
-			children[i] = new Leaf(*subvectors[i]);
+			children[i] = newLeaf(*subvectors[i]);
 		}
 		delete subvectors[i];
 	}
@@ -66,9 +66,9 @@ Octree::Octree(std::istream& in)
 			break;
 
 		if(readVal == 0) //( <= sub node
-			children[i] = new Octree(in);
+			children[i] = newOctree(in);
 		else if(readVal != -1) // null node
-			children[i] = new Leaf(readVal);
+			children[i] = newLeaf(readVal);
 		++i;
 	}
 }
@@ -130,6 +130,31 @@ std::string Octree::toString(std::string const& tabs) const
 			oss << children[i]->toString(tabs + "\t");
 	}
 	return oss.str();
+}
+
+Leaf* Octree::newLeaf(std::vector<float> data) const
+{
+	return new Leaf(data);
+}
+
+Leaf* Octree::newLeaf(std::istream& in) const
+{
+	return new Leaf(in);
+}
+
+Leaf* Octree::newLeaf(long file_addr) const
+{
+	return new Leaf(file_addr);
+}
+
+Octree* Octree::newOctree(std::vector<float> data) const
+{
+	return new Octree(data);
+}
+
+Octree* Octree::newOctree(std::istream& in) const
+{
+	return new Octree(in);
 }
 
 Octree::~Octree()

@@ -38,7 +38,13 @@ class Octree : public Leaf
 	virtual std::string toString(std::string const& tabs = "") const;
 	virtual ~Octree();
 
-  private:
+  protected:
+	virtual Leaf* newLeaf(std::vector<float> data) const;
+	virtual Leaf* newLeaf(std::istream& in) const;
+	virtual Leaf* newLeaf(long file_addr) const;
+	virtual Octree* newOctree(std::vector<float> data) const;
+	virtual Octree* newOctree(std::istream& in) const;
+
 	Leaf* children[8] = {nullptr, nullptr, nullptr, nullptr,
 	                     nullptr, nullptr, nullptr, nullptr};
 };
