@@ -34,7 +34,7 @@ include_directories(${COMMON_INCLUDES})# SYSTEM ${SYSTEM_INCLUDES})
 add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 1)
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/Octree.hpp;${PROJECT_SOURCE_DIR}/include/Leaf.hpp;${PROJECT_SOURCE_DIR}/include/binaryrw.hpp")
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/Octree.hpp;${PROJECT_SOURCE_DIR}/include/binaryrw.hpp")
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 #EXECUTABLE 1 : tests
