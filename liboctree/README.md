@@ -46,9 +46,9 @@ Optionally, you can generate a deb package to make installation managing easier 
 	make package
 	sudo dpkg -i ./*.deb
 
-## Usage
+## Documentation
 
-TODO
+To use this library, please read the documentation : [https://dexter9313.gitlab.io/octree-file-format/](https://dexter9313.gitlab.io/octree-file-format/).
 
 ## Uninstall
 
