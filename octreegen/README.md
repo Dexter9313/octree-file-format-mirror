@@ -6,12 +6,14 @@ Generates an octree file either from an HDF5 file or from a number to random par
 
 ### Running the tool
 
+* [liboctree](https://gitlab.com/Dexter9313/octree-file-format/blob/master/liboctree/)
 * LibHDF5
 
 ### Building from source
 
 * A C++ compiler (g++ for example)
 * CMake
+* [liboctree](https://gitlab.com/Dexter9313/octree-file-format/blob/master/liboctree/)
 * LibHDF5
 
 ## Installation
@@ -22,6 +24,8 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install libhdf5-100
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/liboctree-1.0.0-linux_amd64.deb?job=pack:liboctree
+	dpkg -i ./*.deb
 
 Then simply install the following deb package :
 
@@ -33,6 +37,8 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install build-essential cmake libhdf5-serial-dev
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/liboctree-1.0.0-linux_amd64.deb?job=pack:liboctree
+	dpkg -i ./*.deb
 
 Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
 
