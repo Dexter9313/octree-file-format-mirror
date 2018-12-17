@@ -163,6 +163,16 @@ void Octree::writeData(std::ostream& out)
 
 void Octree::readData(std::istream& in)
 {
+	readOwnData(in);
+	for(unsigned int i(0); i < 8; ++i)
+	{
+		if(children[i] != nullptr)
+			children[i]->readData(in);
+	}
+}
+
+void Octree::readOwnData(std::istream& in)
+{
 	in.seekg(file_addr);
 	brw::read(in, minX);
 	brw::read(in, maxX);
@@ -171,11 +181,6 @@ void Octree::readData(std::istream& in)
 	brw::read(in, minZ);
 	brw::read(in, maxZ);
 	brw::read(in, data);
-	for(unsigned int i(0); i < 8; ++i)
-	{
-		if(children[i] != nullptr)
-			children[i]->readData(in);
-	}
 }
 
 std::vector<float> Octree::getAllData() const
