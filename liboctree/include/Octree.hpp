@@ -40,6 +40,7 @@ class Octree
 	virtual std::vector<long> getCompactData() const;
 	virtual void writeData(std::ostream& out);
 	virtual void readData(std::istream& in);
+	virtual std::vector<float> getAllData() const;
 	virtual std::string toString(std::string const& tabs = "") const;
 	virtual ~Octree();
 

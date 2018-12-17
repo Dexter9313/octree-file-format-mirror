@@ -178,6 +178,20 @@ void Octree::readData(std::istream& in)
 	}
 }
 
+std::vector<float> Octree::getAllData() const
+{
+	std::vector<float> result(data);
+	for(unsigned int i(0); i < 8; ++i)
+	{
+		if(children[i])
+		{
+			std::vector<float> childResult(children[i]->getAllData());
+			result.insert(result.end(), childResult.begin(), childResult.end());
+		}
+	}
+	return result;
+}
+
 std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
