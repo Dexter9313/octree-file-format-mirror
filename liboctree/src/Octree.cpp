@@ -105,7 +105,7 @@ void Octree::init(std::istream& in)
 
 void Octree::init(long file_addr)
 {
-    this->file_addr = file_addr;
+	this->file_addr = file_addr;
 }
 
 bool Octree::isLeaf() const
@@ -237,12 +237,8 @@ void write(std::ostream& stream, Octree& octree)
 
 	// write real compact data (with true addresses)
 	stream.seekp(start);
-	// we don't need to write the vector's size and the first '('
+	// we don't want to write the vector's size and the first '('
+	// so we write manually from the second element
 	std::vector<long> header(octree.getCompactData());
-	long u;
-	for(unsigned int i(1); i < headerSize; ++i)
-	{
-		u = header[i];
-		brw::write(stream, u);
-	}
+	brw::write(stream, header[1], headerSize - 1);
 }
