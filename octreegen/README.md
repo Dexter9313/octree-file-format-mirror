@@ -38,7 +38,7 @@ First install the required libraries :
 	sudo apt-get update
 	sudo apt-get install build-essential cmake libhdf5-serial-dev
 	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/liboctree-1.0.0-linux_amd64.deb?job=pack:liboctree
-	dpkg -i ./*.deb
+	sudo dpkg -i ./*.deb
 
 Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
 
