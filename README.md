@@ -119,8 +119,6 @@ To represent this tree (D is the data of the node and 0-7 are its children):
 
 The corresponding file would contain the following values :
 
-	10
-	0
 	CHUNK0-ADDR
 	0
 	CHUNK1-ADDR
@@ -179,4 +177,4 @@ The corresponding file would contain the following values :
 	1.5
 
 All values starting with "//" are not in the file but are comments for this documentation.
-Also, CHUNKi-ADDR values should hold the true address of CHUNK i in bytes (e.g. CHUNK0-ADDR = 4 + 10x8 = 84 because it's the 12th value written in the file after one 4-bytes value and ten 8-bytes values), but for readability purposes, it was replaced by these "constant names".
+Also, CHUNKi-ADDR values should hold the true address of CHUNK i in bytes (e.g. CHUNK0-ADDR = 9x8 = 72 because it's the 10th value written in the file after nine 8-bytes values), but for readability purposes, it was replaced by these "constant names".
