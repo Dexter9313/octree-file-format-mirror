@@ -30,6 +30,14 @@
 
 #define MAX_LEAF_SIZE 16000
 
+/*! \mainpage
+ *
+ * This library is about constructing, reading and writing octrees in a way that is efficient for the VIRUP project. (But it should be possible to use it elsewhere if needed.)
+ * All the external interactions with the lib should involve the \ref Octree class. Among those interactions, you can use it to create octrees from position data, read an octree from an octree file or write an octree to an octree file. This class was designed to be inherited, so that you can extend it with other useful features (like OpenGL calls for drawing in the case of VIRUP for example).<br/>
+ *
+ * The more low-level side of the library was not designed to be useful from outside but is exposed through the \ref brw namespace if needed. It is a collection of functions to read/write binary data efficiently and is extensively used by the \ref Octree class to read/write octrees.
+ */
+
 /*! \brief Octree main class
  */
 class Octree
