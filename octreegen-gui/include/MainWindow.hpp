@@ -44,6 +44,8 @@ class MainWindow : public QMainWindow
 	void updateGenerateButton();
 	void generate(int previousExitCode = 0);
 	void processOutput();
+	void aboutOctreegenGUI();
+	void aboutQt();
 
   private:
 	QMenuBar menubar;
