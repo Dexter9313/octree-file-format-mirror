@@ -141,7 +141,7 @@ pages:
         - tags
     script:
         - cd liboctree/build
-        - ! make doc 2>&1 | grep "is not documented"
+        - "! make doc 2>&1 | grep \"is not documented\""
         - mv ./html/ ../../public/
     artifacts:
         paths:
