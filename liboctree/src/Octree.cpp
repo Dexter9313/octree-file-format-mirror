@@ -173,6 +173,22 @@ void Octree::readData(std::istream& in)
 
 void Octree::readOwnData(std::istream& in)
 {
+	readBBox(in);
+	brw::read(in, data);
+}
+
+void Octree::readBBoxes(std::istream& in)
+{
+	readBBox(in);
+	for(unsigned int i(0); i < 8; ++i)
+	{
+		if(children[i] != nullptr)
+			children[i]->readBBoxes(in);
+	}
+}
+
+void Octree::readBBox(std::istream& in)
+{
 	in.seekg(file_addr);
 	brw::read(in, minX);
 	brw::read(in, maxX);
@@ -180,7 +196,6 @@ void Octree::readOwnData(std::istream& in)
 	brw::read(in, maxY);
 	brw::read(in, minZ);
 	brw::read(in, maxZ);
-	brw::read(in, data);
 }
 
 std::vector<float> Octree::getAllData() const

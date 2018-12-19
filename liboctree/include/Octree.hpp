@@ -123,6 +123,22 @@ class Octree
 	 */
 	virtual void readOwnData(std::istream& in);
 
+	/*! \brief Reads only bounding box related data.
+	 *
+	 * Reads all min/maxes starts at file_addr and ask its children (if any)
+	 * to also do so.
+	 * \param in : stream from which to read
+	 */
+	virtual void readBBoxes(std::istream& in);
+
+	/*! \brief Reads only bounding box related data.
+	 *
+	 * Reads all min/maxes starts at file_addr but won't ask its children (if
+	 * any) to also do so.
+	 * \param in : stream from which to read
+	 */
+	virtual void readBBox(std::istream& in);
+
 	/*! \brief Returns all the position data contained within the whole octree.
 	 */
 	virtual std::vector<float> getAllData() const;
