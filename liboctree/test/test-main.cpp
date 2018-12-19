@@ -180,6 +180,20 @@ int main(int, char* [])
 		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree" << std::endl;
 	}
+	// TEST BINARY RW octree consisting of one leaf
+	{
+		Octree octree1;
+		octree1.init(generateVertices(10, seed));
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2;
+		octree2.init(f);
+		octree2.readData(f);
+		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
+		std::cout << success << "R/W random octree (only one leaf)" << std::endl;
+	}
 
 	return EXIT_SUCCESS;
 }

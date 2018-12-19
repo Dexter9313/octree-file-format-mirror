@@ -230,6 +230,10 @@ Octree::~Octree()
 void write(std::ostream& stream, Octree& octree)
 {
 	uint32_t headerSize(octree.getCompactData().size());
+	// if root is a leaf, surround it with parenthesis
+	if(headerSize == 1)
+		headerSize += 2;
+
 	long start(stream.tellp());
 
 	// write zeros to leave space, don't write first '('
@@ -245,5 +249,12 @@ void write(std::ostream& stream, Octree& octree)
 	// we don't want to write the vector's size and the first '('
 	// so we write manually from the second element
 	std::vector<long> header(octree.getCompactData());
-	brw::write(stream, header[1], headerSize - 1);
+	if(header.size() == 1)
+	{
+		brw::write(stream, header[0]);
+		long closingParenthesis(1);
+		brw::write(stream, closingParenthesis);
+	}
+	else
+		brw::write(stream, header[1], headerSize - 1);
 }
