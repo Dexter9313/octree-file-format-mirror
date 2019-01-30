@@ -44,25 +44,27 @@ target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME})
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})
 
-include(GNUInstallDirs)
+if(NOT WIN32)
+	include(GNUInstallDirs)
 
-INSTALL(TARGETS ${PROJECT_NAME}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liboctree)
+	INSTALL(TARGETS ${PROJECT_NAME}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/liboctree)
 
-SET(CPACK_GENERATOR "DEB")
-SET(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library that can build octrees, or read/write them from/to *.octree* files used by virup-prototype.
-")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
-if(TAG)
-	SET(CPACK_PACKAGE_VERSION ${TAG})
+	SET(CPACK_GENERATOR "DEB")
+	SET(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
+	SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library that can build octrees, or read/write them from/to *.octree* files used by VIRUP.
+	")
+	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
+	if(TAG)
+		SET(CPACK_PACKAGE_VERSION ${TAG})
+	endif()
+
+	INCLUDE(CPack)
+
+	#Create uninstall target
+	include(../cmake/common/Uninstall.cmake)
 endif()
-
-INCLUDE(CPack)
-
-#Create uninstall target
-include(../cmake/common/Uninstall.cmake)
 
 # Including extra cmake rules
 #include(cmake/clang-dev-tools.cmake)
