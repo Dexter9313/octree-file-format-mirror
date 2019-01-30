@@ -21,7 +21,7 @@ build_script:
     - cd %APPVEYOR_BUILD_FOLDER%\liboctree
     - mkdir build
     - cd build
-    - cmake .. -G %GENERATOR%
+    - cmake .. -G %GENERATOR% -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
     - cmake --build . --config Release --target octree
 
 after_build:
