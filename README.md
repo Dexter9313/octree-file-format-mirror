@@ -1,8 +1,9 @@
 [![pipeline status](https://gitlab.com/Dexter9313/octree-file-format/badges/master/pipeline.svg)](https://gitlab.com/Dexter9313/octree-file-format/commits/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/b59od2m9xi80ub27/branch/master?svg=true)](https://ci.appveyor.com/project/Dexter9313/octree-file-format-mirror/branch/master)
 
 # octree-file-format
 
-A collection of tools to handle the *.octree* file format and convert to it from HDF5. This file format is designed to efficiently store octrees to be used as input for [virup-prototype](https://gitlab.com/Dexter9313/virup-prototype).
+A collection of tools to handle the *.octree* file format and convert to it from HDF5. This file format is designed to efficiently store octrees to be used as input for [VIRUP](https://gitlab.com/Dexter9313/virup).
 
 This format was not designed to be optimal regarding disk usage (even if it is close to optimality in most cases [~= 0.1% more than necessary space used in practice]), but rather to be the closest representation of a VIRUP rendering octree as possible when loaded in memory during runtime. This is such that dynamically loading a node while rendering should be as fast as possible and shouldn't require zigzagging within the file.
 
@@ -14,7 +15,7 @@ What makes separating structure from data worth is that VIRUP octrees aren't ful
 
 Please read each tool's README inside its own directory !
 
-* [liboctree](https://gitlab.com/Dexter9313/octree-file-format/blob/master/liboctree/) : Library that can build octrees, or read/write them from/to *.octree* files used by virup.
+* [liboctree](https://gitlab.com/Dexter9313/octree-file-format/blob/master/liboctree/) : Library that can build octrees, or read/write them from/to *.octree* files used by VIRUP.
 * [octreegen](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen/) : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
 * [octreegen-gui](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen-gui/) : A user-friendly GUI interface for octreegen.
 

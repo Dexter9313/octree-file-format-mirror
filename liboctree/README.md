@@ -1,6 +1,6 @@
 # liboctree
 
-Library that can build octrees, or read/write them from/to *.octree* files used by [virup-prototype](https://gitlab.com/Dexter9313/virup-prototype).
+Library that can build octrees, or read/write them from/to *.octree* files used by [VIRUP](https://gitlab.com/Dexter9313/virup).
 
 ## Requirements
 
@@ -20,6 +20,10 @@ Everything should be self-contained.
 Simply install the following deb package :
 
 Download (.deb) : [liboctree 1.0.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.0.0/raw/liboctree-1.0.0-linux_amd64.deb?job=pack:liboctree)
+
+### Windows
+
+You will find the necessary headers and libs for Windows on GitHub at [octree-file-format-mirror Releases](https://github.com/Dexter9313/octree-file-format-mirror/releases).
 
 ### Build from source
 
