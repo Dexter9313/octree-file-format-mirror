@@ -22,7 +22,7 @@ build_script:
     - mkdir build
     - cd build
     - cmake .. -G %GENERATOR%
-    - cmake --build . --config Release
+    - cmake --build . --config Release --target octree
 
 after_build:
     - cd %BINDIR%
