@@ -1,0 +1,50 @@
+image:
+- Visual Studio 2015
+build:
+    verbosity: detailed
+environment:
+  global:
+    PROJECT_NAME: 'liboctree'
+  matrix:
+    - QTPATH: 'C:\Qt\5.11.2\msvc2015'
+      BUILD_TYPE: 32bit
+      GENERATOR: '"Visual Studio 14 2015"'
+    - QTPATH: 'C:\Qt\5.11.2\msvc2015_64'
+      BUILD_TYPE: 64bit
+      GENERATOR: '"Visual Studio 14 2015 Win64"'
+
+before_build:
+    - set BINDIR=%APPVEYOR_BUILD_FOLDER%\liboctree\build\Release\
+    - IF %APPVEYOR_REPO_TAG% == true (set VERSION=%APPVEYOR_REPO_TAG_NAME%) ELSE (set VERSION=snapshot-%APPVEYOR_BUILD_NUMBER%)
+
+build_script:
+    - cd %APPVEYOR_BUILD_FOLDER%\liboctree
+    - mkdir build
+    - cd build
+    - cmake .. -G %GENERATOR%
+    - cmake --build . --config Release
+
+after_build:
+    - cd %BINDIR%
+    - set RELEASE_DIR_NAME=%PROJECT_NAME%-%VERSION%-windows-%BUILD_TYPE%
+    - set RELEASE_DIR=%BINDIR%\%RELEASE_DIR_NAME%
+    - mkdir %RELEASE_DIR_NAME%
+    - cd %RELEASE_DIR_NAME%
+    - mkdir platforms
+    - cd ..
+    - dir
+    #- copy %PROJECT_NAME%.a %RELEASE_DIR%
+    #- copy %PROJECT_NAME%.dll %RELEASE_DIR%
+    #- copy %PROJECT_NAME%.h %RELEASE_DIR%
+    #- 7z a -tzip %RELEASE_DIR_NAME%.zip %RELEASE_DIR%
+artifacts:
+  - path: liboctree\build\Release\*.zip
+    name: zipfile
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: zl4QU+v4bBjyTAJkEVn7y1tBF63bC79DMH9rzcfYGMZnW8d1bDr8LWGHhNCrL44w
+  artifact: zipfile, installer
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true        # deploy on tag push only
