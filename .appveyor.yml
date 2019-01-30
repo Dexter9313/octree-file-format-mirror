@@ -35,8 +35,8 @@ after_build:
     - dir
     - copy %PROJECT_NAME%.lib %RELEASE_DIR%
     - copy %PROJECT_NAME%.dll %RELEASE_DIR%
-    - copy %APPVEYOR_BUILD_FOLDER%\liboctree\binaryrw.hpp %RELEASE_DIR%
-    - copy %APPVEYOR_BUILD_FOLDER%\liboctree\Octree.hpp %RELEASE_DIR%
+    - copy %APPVEYOR_BUILD_FOLDER%\liboctree\include\binaryrw.hpp %RELEASE_DIR%
+    - copy %APPVEYOR_BUILD_FOLDER%\liboctree\include\Octree.hpp %RELEASE_DIR%
     - 7z a -tzip %RELEASE_DIR_NAME%.zip %RELEASE_DIR%
 artifacts:
   - path: liboctree\build\Release\*.zip
