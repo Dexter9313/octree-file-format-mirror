@@ -79,7 +79,7 @@ class Octree
 	 *
 	 * \param file_addr : Address within the file where the data lies.
 	 */
-	virtual void init(long file_addr);
+	virtual void init(int64_t file_addr);
 
 	/*! \brief Tests if this node is in fact a leaf.
 	 *
@@ -88,7 +88,7 @@ class Octree
 	 */
 	bool isLeaf() const;
 
-	/*! \brief Returns a "string" of long ints that represents the octree's
+	/*! \brief Returns a "string" of 64bit ints that represents the octree's
 	 * structure
 	 *
 	 * This vector complies to the octree file format and can be written as is
@@ -96,7 +96,7 @@ class Octree
 	 * forget not to write the size of the vector and the first parenthesis to
 	 * fully comply to the format.
 	 */
-	virtual std::vector<long> getCompactData() const;
+	virtual std::vector<int64_t> getCompactData() const;
 
 	/*! \brief Writes the data within the stream and updates file_addr
 	 * accordingly.
@@ -176,7 +176,7 @@ class Octree
 
 	/*! \brief Address within a file where lies or should lie the data.
 	 */
-	long file_addr = -2;
+	int64_t file_addr = -2;
 
 	/*! \brief Min value of the positions' x component.
 	 *

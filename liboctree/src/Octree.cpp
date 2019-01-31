@@ -81,7 +81,7 @@ void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
 
-	long readVal;
+	int64_t readVal;
 	unsigned int i(0);
 	while(true)
 	{
@@ -103,7 +103,7 @@ void Octree::init(std::istream& in)
 	}
 }
 
-void Octree::init(long file_addr)
+void Octree::init(int64_t file_addr)
 {
 	this->file_addr = file_addr;
 }
@@ -116,12 +116,12 @@ bool Octree::isLeaf() const
 	return true;
 }
 
-std::vector<long> Octree::getCompactData() const
+std::vector<int64_t> Octree::getCompactData() const
 {
 	if(isLeaf())
-		return std::vector<long>({file_addr});
+		return std::vector<int64_t>({file_addr});
 
-	std::vector<long> res;
+	std::vector<int64_t> res;
 	res.push_back(0); // (
 	res.push_back(file_addr);
 	// compute nb of children to write (if last ones are nullptr, no need to
@@ -134,7 +134,7 @@ std::vector<long> Octree::getCompactData() const
 	{
 		if(children[i] != nullptr)
 		{
-			for(long d : children[i]->getCompactData())
+			for(int64_t d : children[i]->getCompactData())
 				res.push_back(d);
 		}
 		else
@@ -249,10 +249,10 @@ void write(std::ostream& stream, Octree& octree)
 	if(headerSize == 1)
 		headerSize += 2;
 
-	long start(stream.tellp());
+	int64_t start(stream.tellp());
 
 	// write zeros to leave space, don't write first '('
-	long zero(0);
+	int64_t zero(0);
 	for(unsigned int i(1); i < headerSize; ++i)
 		brw::write(stream, zero);
 
@@ -263,11 +263,11 @@ void write(std::ostream& stream, Octree& octree)
 	stream.seekp(start);
 	// we don't want to write the vector's size and the first '('
 	// so we write manually from the second element
-	std::vector<long> header(octree.getCompactData());
+	std::vector<int64_t> header(octree.getCompactData());
 	if(header.size() == 1)
 	{
 		brw::write(stream, header[0]);
-		long closingParenthesis(1);
+		int64_t closingParenthesis(1);
 		brw::write(stream, closingParenthesis);
 	}
 	else
