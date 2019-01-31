@@ -53,8 +53,7 @@ if(NOT WIN32)
 
 	SET(CPACK_GENERATOR "DEB")
 	SET(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
-	SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library that can build octrees, or read/write them from/to *.octree* files used by VIRUP.
-	")
+	SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library that can build octrees, or read/write them from/to *.octree* files used by VIRUP.")
 	SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
 	if(TAG)
 		SET(CPACK_PACKAGE_VERSION ${TAG})
