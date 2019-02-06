@@ -79,7 +79,14 @@ class Octree
 	 *
 	 * \param file_addr : Address within the file where the data lies.
 	 */
-	virtual void init(int64_t file_addr);
+	virtual void init(int64_t file_addr, std::istream& in);
+
+	/*! \brief Size of the total non-redundant data stored in the tree.
+	 *
+	 * It is effectively the sum of the data sizes of all the leaves.
+	 * This is computed during init() so should always be valid after calling init().
+	 */
+	unsigned int getTotalDataSize() const { return totalDataSize; };
 
 	/*! \brief Tests if this node is in fact a leaf.
 	 *
@@ -208,6 +215,13 @@ class Octree
 	 * Part of the data read/written.
 	 */
 	float maxZ = -FLT_MAX;
+
+	/*! \brief Size of data stored in leaves
+	 *
+	 * This is not the size of the data attribute, but the size of the data stored in the tree, without redundancy.
+	 * Can be read independently from data.
+	 */
+	unsigned int totalDataSize = 0;
 
 	/*! \brief Position data.
 	 *

@@ -177,7 +177,7 @@ int main(int, char* [])
 		Octree octree2;
 		octree2.init(f);
 		octree2.readData(f);
-		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
+		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree" << std::endl;
 	}
 	// TEST BINARY RW octree consisting of one leaf
@@ -191,8 +191,28 @@ int main(int, char* [])
 		Octree octree2;
 		octree2.init(f);
 		octree2.readData(f);
-		TEST_EQUAL(octree1.toString(), octree2.toString(), "R/W random octree");
+		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree");
 		std::cout << success << "R/W random octree (only one leaf)" << std::endl;
+	}
+	// TEST OCTREE totalDataSize from data
+	{
+		Octree octree;
+		octree.init(generateVertices(100000, seed));
+		TEST_EQUAL(octree.getTotalDataSize() / 3, (unsigned int) 100000, "OCTREE totalDataSize (from data)");
+		std::cout << success << "OCTREE totalDataSize (from data)" << std::endl;
+	}
+	// TEST OCTREE totalDataSize from file
+	{
+		Octree octree1;
+		octree1.init(generateVertices(100000, seed));
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2;
+		octree2.init(f);
+		TEST_EQUAL(octree2.getTotalDataSize() / 3, (unsigned int) 100000, "OCTREE totalDataSize (from file)");
+		std::cout << success << "OCTREE totalDataSize (from file)" << std::endl;
 	}
 
 	return EXIT_SUCCESS;

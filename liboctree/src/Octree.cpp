@@ -20,6 +20,7 @@
 
 void Octree::init(std::vector<float> data)
 {
+	totalDataSize = data.size();
 	for(unsigned int i(0); i < data.size(); i += 3)
 	{
 		if(data[i] < minX)
@@ -81,6 +82,7 @@ void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
 
+	totalDataSize = 0;
 	int64_t readVal;
 	unsigned int i(0);
 	while(true)
@@ -93,19 +95,29 @@ void Octree::init(std::istream& in)
 		{
 			children[i] = newOctree();
 			children[i]->init(in);
+			totalDataSize += children[i]->totalDataSize;
 		}
 		else if(readVal != -1) // null node
 		{
 			children[i] = newOctree();
-			children[i]->init(readVal);
+			children[i]->init(readVal, in);
+			totalDataSize += children[i]->totalDataSize;
 		}
 		++i;
 	}
 }
 
-void Octree::init(int64_t file_addr)
+void Octree::init(int64_t file_addr, std::istream& in)
 {
+	int64_t cursor(in.tellg());
+
 	this->file_addr = file_addr;
+	in.seekg(file_addr + 6*sizeof(float));
+	uint32_t size;
+	brw::read(in, size);
+	totalDataSize = size;
+
+	in.seekg(cursor);
 }
 
 bool Octree::isLeaf() const
