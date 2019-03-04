@@ -19,6 +19,7 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
+#include <array>
 #include <cfloat>
 #include <cstdint>
 #include <cstdlib>
@@ -84,7 +85,8 @@ class Octree
 	/*! \brief Size of the total non-redundant data stored in the tree.
 	 *
 	 * It is effectively the sum of the data sizes of all the leaves.
-	 * This is computed during init() so should always be valid after calling init().
+	 * This is computed during init() so should always be valid after calling
+	 * init().
 	 */
 	unsigned int getTotalDataSize() const { return totalDataSize; };
 
@@ -218,8 +220,9 @@ class Octree
 
 	/*! \brief Size of data stored in leaves
 	 *
-	 * This is not the size of the data attribute, but the size of the data stored in the tree, without redundancy.
-	 * Can be read independently from data.
+	 * This is not the size of the data attribute, but the size of the data
+	 * stored in the tree, without redundancy. Can be read independently from
+	 * data.
 	 */
 	unsigned int totalDataSize = 0;
 
@@ -236,8 +239,8 @@ class Octree
 	 *
 	 * If this node is a leaf, all the children will be nullptr.
 	 */
-	Octree* children[8] = {nullptr, nullptr, nullptr, nullptr,
-	                       nullptr, nullptr, nullptr, nullptr};
+	std::array<Octree*, 8> children = {{nullptr, nullptr, nullptr, nullptr,
+	                                    nullptr, nullptr, nullptr, nullptr}};
 };
 
 /*! \brief Writes an Octree in a stream.
