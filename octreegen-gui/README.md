@@ -25,13 +25,13 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install libhdf5-100 libqt5widgets5
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.1/raw/octreegen-1.2.1-linux_amd64.deb?job=pack:octreegen
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.1/raw/liboctree-1.2.1-linux_amd64.deb?job=pack:liboctree
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.2/raw/octreegen-1.2.2-linux_amd64.deb?job=pack:octreegen
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.2/raw/liboctree-1.2.2-linux_amd64.deb?job=pack:liboctree
 	sudo dpkg -i ./*.deb
 
 Then simply install the following deb package :
 
-Download (.deb) : [octreegen-gui 1.2.1](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.1/raw/octreegen-gui-1.2.1-linux_amd64.deb?job=pack:octreegen-gui)
+Download (.deb) : [octreegen-gui 1.2.2](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.2/raw/octreegen-gui-1.2.2-linux_amd64.deb?job=pack:octreegen-gui)
 
 ### Build from source
 

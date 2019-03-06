@@ -19,7 +19,7 @@ Everything should be self-contained.
 
 Simply install the following deb package :
 
-Download (.deb) : [liboctree 1.2.1](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.1/raw/liboctree-1.2.1-linux_amd64.deb?job=pack:liboctree)
+Download (.deb) : [liboctree 1.2.2](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.2.2/raw/liboctree-1.2.2-linux_amd64.deb?job=pack:liboctree)
 
 ### Windows
 

@@ -82,24 +82,33 @@ std::vector<float> readHDF5(std::string const& path,
 
 	/*status =*/H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
 	                    H5P_DEFAULT, rdata[0]);
+	H5Dclose(hdf5_dataset);
 
 	// put everything in the unit cube
+	hid_t hdf5_header = H5Gopen(hdf5_file, "/Header", 0);
+	hid_t hdf5_boxsize = H5Aopen(hdf5_header, "BoxSize", H5P_DEFAULT);
+
+	double boxsize(0.f);
+	H5Aread(hdf5_boxsize, H5T_IEEE_F64LE, &boxsize);
+	std::cout << "Box Size : " << boxsize << std::endl;
+
 	for(unsigned int j(0); j < 3; ++j)
 	{
-		float max(0.f), min(FLT_MAX);
+		/*float max(0.f), min(FLT_MAX);
 		for(unsigned int i(j); i < result.size(); i += 3)
 		{
 			if(result[i] > max)
 				max = result[i];
 			if(result[i] < min)
 				min = result[i];
-		}
+		}*/
 		for(unsigned int i(j); i < result.size(); i += 3)
 		{
-			result[i] -= min;
-			result[i] /= 0.5 * (max - min);
+			//result[i] -= min;
+			result[i] /= 0.5 * boxsize;
 			result[i] -= 1;
 		}
+		//std::cout << "min: " << min << " max: " << max << std::endl;
 	}
 
 	H5Fclose(hdf5_file);
