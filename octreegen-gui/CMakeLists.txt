@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 
 set(PROJECT_NAME octreegen-gui)
-project(${PROJECT_NAME} CXX)
+project(${PROJECT_NAME} C CXX)
 
 #GET CMAKE_SYSTEM_NAME VARIABLE
 include(../cmake/common/SystemName.cmake)

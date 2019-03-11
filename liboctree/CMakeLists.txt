@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 set(PROJECT_NAME octree)
 set(PROJECT_TEST_NAME tests)
-project(${PROJECT_NAME} LANGUAGES CXX VERSION 1.2.0)
+project(${PROJECT_NAME} LANGUAGES C CXX VERSION 1.2.0)
 
 #GET CMAKE_SYSTEM_NAME VARIABLE
 include(../cmake/common/SystemName.cmake)
