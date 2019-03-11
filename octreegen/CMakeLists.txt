@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 set(PROJECT_NAME octreegen)
 set(PROJECT_TEST_NAME tests)
-project(${PROJECT_NAME} C CXX)
+project(${PROJECT_NAME} CXX)
 
 #GET CMAKE_SYSTEM_NAME VARIABLE
 include(../cmake/common/SystemName.cmake)
