@@ -169,7 +169,8 @@ int main(int, char* [])
 	// TEST BINARY RW random octree
 	{
 		Octree octree1;
-		octree1.init(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(100000, seed));
+		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
 		write(f, octree1);
@@ -183,7 +184,8 @@ int main(int, char* [])
 	// TEST BINARY RW octree consisting of one leaf
 	{
 		Octree octree1;
-		octree1.init(generateVertices(10, seed));
+		std::vector<float> v(generateVertices(10, seed));
+		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
 		write(f, octree1);
@@ -197,14 +199,16 @@ int main(int, char* [])
 	// TEST OCTREE totalDataSize from data
 	{
 		Octree octree;
-		octree.init(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(100000, seed));
+		octree.init(v);
 		TEST_EQUAL(octree.getTotalDataSize() / 3, (unsigned int) 100000, "OCTREE totalDataSize (from data)");
 		std::cout << success << "OCTREE totalDataSize (from data)" << std::endl;
 	}
 	// TEST OCTREE totalDataSize from file
 	{
 		Octree octree1;
-		octree1.init(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(100000, seed));
+		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
 		write(f, octree1);

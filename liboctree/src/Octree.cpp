@@ -18,69 +18,117 @@
 
 #include "Octree.hpp"
 
-void Octree::init(std::vector<float> data)
+std::string Octree::tabs    = "";
+std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
+
+void Octree::init(std::vector<float>& data)
 {
-	totalDataSize = data.size();
-	for(unsigned int i(0); i < data.size(); i += 3)
-	{
-		if(data[i] < minX)
-			minX = data[i];
-		if(data[i] > maxX)
-			maxX = data[i];
-		if(data[i + 1] < minY)
-			minY = data[i + 1];
-		if(data[i + 1] > maxY)
-			maxY = data[i + 1];
-		if(data[i + 2] < minZ)
-			minZ = data[i + 2];
-		if(data[i + 2] > maxZ)
-			maxZ = data[i + 2];
+	init(data, 0, (data.size() / 3) - 1);
+}
 
-		if(data.size() <= 3 * MAX_LEAF_SIZE
+void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
+{
+	unsigned int verticesNumber(end - beg + 1);
+	totalDataSize = 3 * verticesNumber;
+	for(unsigned int i(beg); i <= end; ++i)
+	{
+		if(get(data, i, 0) < minX)
+			minX = get(data, i, 0);
+		if(get(data, i, 0) > maxX)
+			maxX = get(data, i, 0);
+		if(get(data, i, 1) < minY)
+			minY = get(data, i, 1);
+		if(get(data, i, 1) > maxY)
+			maxY = get(data, i, 1);
+		if(get(data, i, 2) < minZ)
+			minZ = get(data, i, 2);
+		if(get(data, i, 2) > maxZ)
+			maxZ = get(data, i, 2);
+
+		if(verticesNumber <= MAX_LEAF_SIZE
 		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
-		          < (3 * MAX_LEAF_SIZE) / (float) data.size())
+		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
-			this->data.push_back(data[i]);
-			this->data.push_back(data[i + 1]);
-			this->data.push_back(data[i + 2]);
+			this->data.push_back(get(data, i, 0));
+			this->data.push_back(get(data, i, 1));
+			this->data.push_back(get(data, i, 2));
 		}
 	}
-	if(data.size() <= 3 * MAX_LEAF_SIZE)
-		return; // we don't need to create children
-
-	std::vector<float>* subvectors[8];
-	for(unsigned int i(0); i < 8; ++i)
-		subvectors[i] = new std::vector<float>;
-	float midX((minX + maxX) / 2.0), midY((minY + maxY) / 2.0),
-	    midZ((minZ + maxZ) / 2.0);
-	for(unsigned int i(0); i < data.size(); i += 3)
+	if(verticesNumber <= MAX_LEAF_SIZE)
 	{
-		unsigned int addr = 0;
-		if(data[i] > midX)
-			addr += 4;
-		if(data[i + 1] > midY)
-			addr += 2;
-		if(data[i + 2] > midZ)
-			addr += 1;
-		subvectors[addr]->push_back(data[i]);
-		subvectors[addr]->push_back(data[i + 1]);
-		subvectors[addr]->push_back(data[i + 2]);
+		// delete our part of the vector, we know we are at the end of the
+		// vector per (*) (check after all the orderPivot calls)
+		data.resize(3 * beg);
+		// we don't need to create children
+		return;
 	}
 
-	for(unsigned int i(0); i < 8; ++i)
+	float midX((minX + maxX) / 2.f), midY((minY + maxY) / 2.f),
+	    midZ((minZ + maxZ) / 2.f);
+
+	// To construct the subtrees we will swap elements within the vector and
+	// split it at 7 places to have 8 parts, each corresponding to a subtree.
+	// The splitting is done with this priority : x, then y, then z. For each
+	// coordinate i, midI will be used as a pivot to put each point whose i
+	// coordinate is below midI before the i split, and each point whose i
+	// coordinate is above midI after the i split. When a split is done, it is
+	// equivalent to having two vectors instead of one, but for memory sake we
+	// keep everything in one single big vector with "splits" barriers.
+	//
+	// After this part of the algorithm, the data should be structure like this
+	// :
+	//
+	// child0 - splits[0] - child1 - splits[1] - child2 - splits[2] - child3 -
+	//             z                    y                    z
+	//
+	// splits[3] - child4 - splits[4] - child5 - splits[5] - child6 - splits[6]
+	//    x                    z                    y                    z
+	//
+	// - child7
+
+	unsigned int splits[7];
+
+	// split along x in half
+	splits[3] = orderPivot(data, beg, end, 0, midX);
+
+	// split each half along y in quarters
+	splits[1] = orderPivot(data, beg, splits[3] - 1, 1, midY);
+	splits[5] = orderPivot(data, splits[3], end, 1, midY);
+
+	// split each quarter by z in eighths
+	splits[0] = orderPivot(data, beg, splits[1] - 1, 2, midZ);
+	splits[2] = orderPivot(data, splits[1], splits[3] - 1, 2, midZ);
+	splits[4] = orderPivot(data, splits[3], splits[5] - 1, 2, midZ);
+	splits[6] = orderPivot(data, splits[5], end, 2, midZ);
+
+	// Now we just assign each child its part
+	// (*) we do it from end to begin to let the child use resize to free its
+	// part of the vector (and not erase, which is less efficient)
+
+	if(end > splits[6])
 	{
-		if(subvectors[i]->size() > 0)
+		children[0] = newOctree();
+		children[0]->init(data, splits[6], end);
+	}
+	for(unsigned int i(6); i > 0; --i)
+	{
+		if(splits[i] > splits[i - 1])
 		{
-			children[i] = newOctree();
-			children[i]->init(*subvectors[i]);
+			children[7 - i] = newOctree();
+			children[7 - i]->init(data, splits[i - 1], splits[i] - 1);
 		}
-		delete subvectors[i];
+	}
+	if(splits[0] > beg)
+	{
+		children[7] = newOctree();
+		children[7]->init(data, beg, splits[0] - 1);
 	}
 }
 
 void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
+	debug << tabs << file_addr << std::endl;
 
 	totalDataSize = 0;
 	int64_t readVal;
@@ -88,19 +136,24 @@ void Octree::init(std::istream& in)
 	while(true)
 	{
 		brw::read(in, readVal);
+		debug << tabs << readVal << std::endl;
 		if(readVal == 1) //) <= own end
 			break;
 
 		if(readVal == 0) //( <= sub node
 		{
+			tabs += '\t';
 			children[i] = newOctree();
 			children[i]->init(in);
+			tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		else if(readVal != -1) // null node
 		{
+			tabs += '\t';
 			children[i] = newOctree();
 			children[i]->init(readVal, in);
+			tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		++i;
@@ -112,7 +165,7 @@ void Octree::init(int64_t file_addr, std::istream& in)
 	int64_t cursor(in.tellg());
 
 	this->file_addr = file_addr;
-	in.seekg(file_addr + 6*sizeof(float));
+	in.seekg(file_addr + 6 * sizeof(float));
 	uint32_t size;
 	brw::read(in, size);
 	totalDataSize = size;
@@ -283,5 +336,69 @@ void write(std::ostream& stream, Octree& octree)
 		brw::write(stream, closingParenthesis);
 	}
 	else
+	{
+		std::ofstream debug("LIBOCTREE.debug");
+		std::string tabs = "";
+		for(unsigned int i(0); i < header.size(); ++i)
+		{
+			if(header[i] == 1)
+				tabs.pop_back();
+			debug << tabs << header[i] << std::endl;
+			if(header[i] == 0)
+				tabs += '\t';
+		}
 		brw::write(stream, header[1], headerSize - 1);
+	}
+}
+
+inline float Octree::get(std::vector<float> const& data, unsigned int vertex,
+                  unsigned int dim)
+{
+	return data[3 * vertex + dim];
+}
+
+inline void Octree::set(std::vector<float>& data, unsigned int vertex,
+                 unsigned int dim, float val)
+{
+	data[3 * vertex + dim] = val;
+}
+
+void Octree::swap(std::vector<float>& data, unsigned int i, unsigned int j)
+{
+	float x(get(data, i, 0)), y(get(data, i, 1)), z(get(data, i, 2));
+
+	set(data, i, 0, get(data, j, 0));
+	set(data, i, 1, get(data, j, 1));
+	set(data, i, 2, get(data, j, 2));
+	set(data, j, 0, x);
+	set(data, j, 1, y);
+	set(data, j, 2, z);
+}
+
+unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
+                                unsigned int end, unsigned int dim, float pivot)
+{
+	if(end < beg)
+	{
+		std::cout << "FUCK" << beg << " " << end << std::endl;
+		exit(1);
+	}
+	if(beg == end)
+		return beg;
+	while(beg < end)
+	{
+		if(get(data, beg, dim) >= pivot && get(data, end, dim) < pivot)
+			swap(data, beg, end);
+		if(get(data, beg, dim) < pivot)
+			++beg;
+		if(get(data, end, dim) >= pivot)
+			--end;
+	}
+	unsigned int split = beg;
+	while(get(data, split, dim) > pivot)
+		--split;
+	while(get(data, split, dim) < pivot)
+		++split;
+
+	return split;
 }

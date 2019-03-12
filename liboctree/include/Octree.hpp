@@ -21,6 +21,7 @@
 
 #include <array>
 #include <cfloat>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -30,6 +31,7 @@
 #include "binaryrw.hpp"
 
 #define MAX_LEAF_SIZE 16000
+#define MAX_THREADS 8
 
 /*! \mainpage
  *
@@ -58,10 +60,13 @@ class Octree
 	 *
 	 * It will also compute all the mins and maxes.
 	 *
+	 * \warning The \p data vector will get \e emptied by the octree as it
+	 * copies data from it to prevent excessive memory usage.
+	 *
 	 * \param data : vector holding positions, structured as follows for N
 	 * points : {x1, y1, z1, ... xN, yN, zN}.
 	 */
-	virtual void init(std::vector<float> data);
+	virtual void init(std::vector<float>& data);
 
 	/*! \brief Initializes the octree from a stream.
 	 *
@@ -241,6 +246,51 @@ class Octree
 	 */
 	std::array<Octree*, 8> children = {{nullptr, nullptr, nullptr, nullptr,
 	                                    nullptr, nullptr, nullptr, nullptr}};
+
+  private:
+	// Data indices go from 0 to data.size()-1.
+	// Vertices indices go from 0 to data.size()/3 - 1 (a triplet of values is
+	// ONE vertex).
+
+	// init helper that only uses data from beg to end (included).
+	// beg and end are vertices indices.
+	void init(std::vector<float>& data, unsigned int beg, unsigned int end);
+
+	// Gets a vertex's component from data.
+	// vertex is the vertex's index.
+	// (get(data, 10, 1) will return the y component of the 11th vertex.)
+	static float get(std::vector<float> const& data, unsigned int vertex,
+	                 unsigned int dim);
+	// Sets a vertex component in data (see get for indexing).
+	static void set(std::vector<float>& data, unsigned int vertex,
+	                unsigned int dim, float val);
+	// Swaps two vertices from data, the (i+1)th and the (j+1)th.
+	// This swaps all components of the vertices (x, y, z).
+	static void swap(std::vector<float>& data, unsigned int i, unsigned int j);
+	// Considers only dim's component of vertices from vertex indices beg to
+	// end. All vertices which value is bellow pivot will be sorted to be before
+	// all vertices which value is above or equal to pivot. This is a partial
+	// sort that splits the data into two parts : one below pivot and one above.
+	// This partial sort is O(end-beg).
+	// The split's index is returned and is the first index of the second part.
+	//
+	// ex :
+	// orderPivot({4, x, x, 5, x, x, 1, x, x, 2, x, x, 3, x, x, 0, x, x, 6,
+	// x, x}, 0, 6, 0, 3.5)
+	// will reorder the data as :
+	// {0, x, x, 3, x, x, 1, x, x, 2, x, x, 5, x, x 4, x, x, 6, x, x}
+	// and return 4
+	// x aren't important for this example but they are the other two components
+	// of the vertices and will be moved along with the first component.
+	// Vertices data is always conserved and triplets are always moved together.
+	static unsigned int orderPivot(std::vector<float>& data, unsigned int beg,
+	                               unsigned int end, unsigned int dim,
+	                               float pivot);
+
+	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
+	// the tree
+	static std::string tabs;
+	static std::ofstream debug;
 };
 
 /*! \brief Writes an Octree in a stream.
