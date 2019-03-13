@@ -64,7 +64,7 @@ void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
 		data.resize(3 * beg);
-		std::cout << "\r\033[K" << 100.f - 100.f*beg/totalNumberOfVertices << "%";
+		showProgress(1.f - beg/(float)totalNumberOfVertices);
 		// we don't need to create children
 		return;
 	}
@@ -384,7 +384,8 @@ void Octree::swap(std::vector<float>& data, unsigned int i, unsigned int j)
 unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
                                 unsigned int end, unsigned int dim, float pivot)
 {
-	if(end < beg)
+	// if end == beg - 1, this is not too bad, so let it go
+	if(beg != 0 && end < (beg-1))
 	{
 		std::cout << "\r\nCONSISTENCY ERROR : " << beg << " " << end << std::endl;
 		exit(1);
@@ -409,4 +410,19 @@ unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
 		++split;
 
 	return split;
+}
+
+void Octree::showProgress(float progress)
+{
+	const unsigned int barSize(78);
+	unsigned int numberOfXs(progress * barSize);
+	std::cout << "\r\033[K" << '[';
+	for(unsigned int i(0); i < numberOfXs; ++i)
+		std::cout << "\u25B1";
+	for(unsigned int i(0); i < barSize-numberOfXs; ++i)
+		std::cout << ' ';
+	std::cout << "] " << static_cast<unsigned int>(100 * progress) << '%';
+	std::fflush(stdout);
+	if(progress == 1.f)
+		std::cout << std::endl;
 }

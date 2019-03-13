@@ -167,7 +167,11 @@ class Octree
 	 */
 	virtual ~Octree();
 
-	static unsigned int totalNumberOfVertices;
+	/*! \brief Helper function to show and update a progress bar in the terminal
+	 *
+	 * \param progress : from 0.0 (0%) to 1.0 (100%)
+	 */
+	static void showProgress(float progress);
 
   protected:
 	/*! \brief Constructs a new octree.
@@ -293,6 +297,9 @@ class Octree
 	// the tree
 	static std::string tabs;
 	static std::ofstream debug;
+
+	static unsigned int totalNumberOfVertices;
+
 };
 
 /*! \brief Writes an Octree in a stream.

@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 		std::string coords = split(argv[1], ':')[1];
 		std::vector<float> v(readHDF5(file, coords.c_str()));
 		std::cout << "Constructing octree :" << std::endl;
-		std::cout << "\r\033[K0%";
+		Octree::showProgress(0.f);
 		octree.init(v);
 	}
 	else
@@ -81,15 +81,15 @@ int main(int argc, char* argv[])
 		}
 		std::vector<float> v(generateVertices(numberOfVertices, time(NULL)));
 		std::cout << "Constructing octree :" << std::endl;
-		showProgress(0.f);
+		Octree::showProgress(0.f);
 		octree.init(v);
 	}
 	std::cout << "\r\033[K100%" << std::endl;
 	std::ofstream f(argv[2], std::ios_base::out | std::ios_base::binary);
 	std::cout << "Writing octree to output file :" << std::endl;
-	showProgress(0.f);
+	Octree::showProgress(0.f);
 	write(f, octree);
-	showProgress(1.f);
+	Octree::showProgress(1.f);
 	f.close();
 	std::cout << "Conversion successfull !" << std::endl;
 	return EXIT_SUCCESS;

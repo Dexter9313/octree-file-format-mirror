@@ -81,10 +81,10 @@ std::vector<float> readHDF5(std::string const& path,
 		rdata[i] = rdata[0] + i * dims[1];
 
 	std::cout << "Reading HDF5 dataset :" << std::endl;
-	showProgress(0.f);
+	Octree::showProgress(0.f);
 	/*status =*/H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
 	                    H5P_DEFAULT, rdata[0]);
-	showProgress(1.f);
+	Octree::showProgress(1.f);
 	H5Dclose(hdf5_dataset);
 
 	// put everything in the unit cube
@@ -96,7 +96,7 @@ std::vector<float> readHDF5(std::string const& path,
 	std::cout << "Box Size : " << boxsize << std::endl;
 
 	std::cout << "Resizing data to fit in the unit cube :" << std::endl;
-	showProgress(0.f);
+	Octree::showProgress(0.f);
 	for(unsigned int j(0); j < 3; ++j)
 	{
 		/*float max(0.f), min(FLT_MAX);
@@ -110,14 +110,14 @@ std::vector<float> readHDF5(std::string const& path,
 		for(unsigned int i(j); i < result.size(); i += 3)
 		{
 			if((i+(result.size()*j) - j) % 300000000 == j)
-				showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
+				Octree::showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
 			// result[i] -= min;
 			result[i] /= 0.5 * boxsize;
 			result[i] -= 1;
 		}
 		// std::cout << "min: " << min << " max: " << max << std::endl;
 	}
-	showProgress(1.f);
+	Octree::showProgress(1.f);
 
 	H5Fclose(hdf5_file);
 	delete[] rdata;
@@ -125,19 +125,4 @@ std::vector<float> readHDF5(std::string const& path,
 	std::cout << "Loaded from file : " << result.size() / 3 << " points"
 	          << std::endl;
 	return result;
-}
-
-void showProgress(float progress)
-{
-	const unsigned int barSize(78);
-	unsigned int numberOfXs(progress * barSize);
-	std::cout << "\r\033[K" << '[';
-	for(unsigned int i(0); i < numberOfXs; ++i)
-		std::cout << "\u25B1";
-	for(unsigned int i(0); i < barSize-numberOfXs; ++i)
-		std::cout << ' ';
-	std::cout << "] " << static_cast<unsigned int>(100 * progress) << '%';
-	std::fflush(stdout);
-	if(progress == 1.f)
-		std::cout << std::endl;
 }
