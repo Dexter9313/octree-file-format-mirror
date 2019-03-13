@@ -62,6 +62,8 @@ int main(int argc, char* argv[])
 		std::string file   = split(argv[1], ':')[0];
 		std::string coords = split(argv[1], ':')[1];
 		std::vector<float> v(readHDF5(file, coords.c_str()));
+		std::cout << "Constructing octree :" << std::endl;
+		showProgress(0.f);
 		octree.init(v);
 	}
 	else
@@ -78,12 +80,17 @@ int main(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}
 		std::vector<float> v(generateVertices(numberOfVertices, time(NULL)));
+		std::cout << "Constructing octree :" << std::endl;
+		showProgress(0.f);
 		octree.init(v);
 	}
-	std::cout << "Tree construction finished." << std::endl;
+	showProgress(1.f);
 	std::ofstream f(argv[2], std::ios_base::out | std::ios_base::binary);
+	std::cout << "Writing octree to output file :" << std::endl;
+	showProgress(0.f);
 	write(f, octree);
+	showProgress(1.f);
 	f.close();
-	std::cout << "Tree writing finished." << std::endl;
+	std::cout << "Conversion successfull !" << std::endl;
 	return EXIT_SUCCESS;
 }

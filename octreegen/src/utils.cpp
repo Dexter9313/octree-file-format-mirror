@@ -109,8 +109,8 @@ std::vector<float> readHDF5(std::string const& path,
 		}*/
 		for(unsigned int i(j); i < result.size(); i += 3)
 		{
-			if(i % 300000000 == 0)
-				showProgress((float) i*j / (result.size()*3));
+			if((i+(result.size()*j) - j) % 300000000 == j)
+				showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
 			// result[i] -= min;
 			result[i] /= 0.5 * boxsize;
 			result[i] -= 1;
