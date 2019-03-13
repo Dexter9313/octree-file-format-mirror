@@ -44,6 +44,8 @@ include_directories(${COMMON_INCLUDES} SYSTEM ${SYSTEM_INCLUDES})
 
 #LINKING SETUP
 set(LD_LIBS ${HDF5_LIBRARIES} ${OCTREE_LIBRARIES})
+#to find so libs in executable directory
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath='$ORIGIN'")
 
 #COMMON OBJECTS
 add_library(objects OBJECT ${SRC_FILES})
