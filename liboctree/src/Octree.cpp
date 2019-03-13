@@ -21,9 +21,14 @@
 std::string Octree::tabs    = "";
 std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
+unsigned int Octree::totalNumberOfVertices = 0;
+
 void Octree::init(std::vector<float>& data)
 {
+	totalNumberOfVertices = (data.size() / 3) - 1;
+	std::cout.precision(3);
 	init(data, 0, (data.size() / 3) - 1);
+	std::cout.precision(6);
 }
 
 void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
@@ -59,6 +64,7 @@ void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
 		data.resize(3 * beg);
+		std::cout << "\r\033[K" << 100.f - 100.f*beg/totalNumberOfVertices << "%";
 		// we don't need to create children
 		return;
 	}
@@ -380,11 +386,13 @@ unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
 {
 	if(end < beg)
 	{
-		std::cout << "FUCK" << beg << " " << end << std::endl;
+		std::cout << "\r\nCONSISTENCY ERROR : " << beg << " " << end << std::endl;
 		exit(1);
 	}
 	if(beg == end)
 		return beg;
+
+	unsigned int begBAK(beg), endBAK(end);
 	while(beg < end)
 	{
 		if(get(data, beg, dim) >= pivot && get(data, end, dim) < pivot)
@@ -395,9 +403,9 @@ unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
 			--end;
 	}
 	unsigned int split = beg;
-	while(get(data, split, dim) > pivot)
+	while(get(data, split, dim) > pivot && beg != begBAK)
 		--split;
-	while(get(data, split, dim) < pivot)
+	while(get(data, split, dim) < pivot && end != endBAK)
 		++split;
 
 	return split;

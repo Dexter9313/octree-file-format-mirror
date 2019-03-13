@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 		std::string coords = split(argv[1], ':')[1];
 		std::vector<float> v(readHDF5(file, coords.c_str()));
 		std::cout << "Constructing octree :" << std::endl;
-		showProgress(0.f);
+		std::cout << "\r\033[K0%";
 		octree.init(v);
 	}
 	else
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 		showProgress(0.f);
 		octree.init(v);
 	}
-	showProgress(1.f);
+	std::cout << "\r\033[K100%" << std::endl;
 	std::ofstream f(argv[2], std::ios_base::out | std::ios_base::binary);
 	std::cout << "Writing octree to output file :" << std::endl;
 	showProgress(0.f);

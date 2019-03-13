@@ -167,6 +167,8 @@ class Octree
 	 */
 	virtual ~Octree();
 
+	static unsigned int totalNumberOfVertices;
+
   protected:
 	/*! \brief Constructs a new octree.
 	 *
