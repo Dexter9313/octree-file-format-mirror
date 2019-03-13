@@ -97,25 +97,40 @@ std::vector<float> readHDF5(std::string const& path,
 
 	std::cout << "Resizing data to fit in the unit cube :" << std::endl;
 	Octree::showProgress(0.f);
-	for(unsigned int j(0); j < 3; ++j)
+	if(boxsize == 0)
 	{
-		/*float max(0.f), min(FLT_MAX);
-		for(unsigned int i(j); i < result.size(); i += 3)
+		for(unsigned int j(0); j < 3; ++j)
 		{
-		    if(result[i] > max)
-		        max = result[i];
-		    if(result[i] < min)
-		        min = result[i];
-		}*/
-		for(unsigned int i(j); i < result.size(); i += 3)
-		{
-			if((i+(result.size()*j) - j) % 300000000 == j)
-				Octree::showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
-			// result[i] -= min;
-			result[i] /= 0.5 * boxsize;
-			result[i] -= 1;
+			float max(0.f), min(FLT_MAX);
+			for(unsigned int i(j); i < result.size(); i += 3)
+			{
+				if(result[i] > max)
+					max = result[i];
+				if(result[i] < min)
+					min = result[i];
+			}
+			for(unsigned int i(j); i < result.size(); i += 3)
+			{
+				result[i] -= min;
+				result[i] /= 0.5 * (max-min);
+				result[i] -= 1;
+			}
+			//std::cout << "min : " << min << " max : " << max << std::endl;
 		}
-		// std::cout << "min: " << min << " max: " << max << std::endl;
+	}
+	else
+	{
+		for(unsigned int j(0); j < 3; ++j)
+		{
+			for(unsigned int i(j); i < result.size(); i += 3)
+			{
+				if((i+(result.size()*j) - j) % 300000000 == j)
+					Octree::showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
+				// result[i] -= min;
+				result[i] /= 0.5 * boxsize;
+				result[i] -= 1;
+			}
+		}
 	}
 	Octree::showProgress(1.f);
 
