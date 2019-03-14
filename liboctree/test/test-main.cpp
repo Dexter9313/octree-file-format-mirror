@@ -70,10 +70,10 @@ void TEST_EQUAL(T result, T shouldbe, const char* testname,
 	}
 }
 
-unsigned char* randomByteArray(unsigned int n)
+unsigned char* randomByteArray(size_t n)
 {
 	unsigned char* result = new unsigned char[n];
-	for(unsigned int i(0); i < n; ++i)
+	for(size_t i(0); i < n; ++i)
 		result[i] = rand();
 	return result;
 }
@@ -87,14 +87,14 @@ T randomVal()
 	return result;
 }
 
-std::vector<float> generateVertices(unsigned int number, unsigned int seed)
+std::vector<float> generateVertices(size_t number, unsigned int seed)
 {
 	std::vector<float> vertices;
 	vertices.reserve(3 * number);
 
 	srand(seed);
 
-	for(unsigned int i(0); i < 3 * number; ++i)
+	for(size_t i(0); i < 3 * number; ++i)
 	{
 		vertices.push_back(
 		    2 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
@@ -201,7 +201,7 @@ int main(int, char* [])
 		Octree octree;
 		std::vector<float> v(generateVertices(100000, seed));
 		octree.init(v);
-		TEST_EQUAL(octree.getTotalDataSize() / 3, (unsigned int) 100000, "OCTREE totalDataSize (from data)");
+		TEST_EQUAL(octree.getTotalDataSize() / 3, (size_t) 100000, "OCTREE totalDataSize (from data)");
 		std::cout << success << "OCTREE totalDataSize (from data)" << std::endl;
 	}
 	// TEST OCTREE totalDataSize from file
@@ -215,7 +215,7 @@ int main(int, char* [])
 		f.resetCursor();
 		Octree octree2;
 		octree2.init(f);
-		TEST_EQUAL(octree2.getTotalDataSize() / 3, (unsigned int) 100000, "OCTREE totalDataSize (from file)");
+		TEST_EQUAL(octree2.getTotalDataSize() / 3, (size_t) 100000, "OCTREE totalDataSize (from file)");
 		std::cout << success << "OCTREE totalDataSize (from file)" << std::endl;
 	}
 

@@ -93,7 +93,7 @@ class Octree
 	 * This is computed during init() so should always be valid after calling
 	 * init().
 	 */
-	unsigned int getTotalDataSize() const { return totalDataSize; };
+	size_t getTotalDataSize() const { return totalDataSize; };
 
 	/*! \brief Tests if this node is in fact a leaf.
 	 *
@@ -235,7 +235,7 @@ class Octree
 	 * stored in the tree, without redundancy. Can be read independently from
 	 * data.
 	 */
-	unsigned int totalDataSize = 0;
+	size_t totalDataSize = 0;
 
 	/*! \brief Position data.
 	 *
@@ -260,19 +260,19 @@ class Octree
 
 	// init helper that only uses data from beg to end (included).
 	// beg and end are vertices indices.
-	void init(std::vector<float>& data, unsigned int beg, unsigned int end);
+	void init(std::vector<float>& data, size_t beg, size_t end);
 
 	// Gets a vertex's component from data.
 	// vertex is the vertex's index.
 	// (get(data, 10, 1) will return the y component of the 11th vertex.)
-	static float get(std::vector<float> const& data, unsigned int vertex,
+	static float get(std::vector<float> const& data, size_t vertex,
 	                 unsigned int dim);
 	// Sets a vertex component in data (see get for indexing).
-	static void set(std::vector<float>& data, unsigned int vertex,
-	                unsigned int dim, float val);
+	static void set(std::vector<float>& data, size_t vertex, unsigned int dim,
+	                float val);
 	// Swaps two vertices from data, the (i+1)th and the (j+1)th.
 	// This swaps all components of the vertices (x, y, z).
-	static void swap(std::vector<float>& data, unsigned int i, unsigned int j);
+	static void swap(std::vector<float>& data, size_t i, size_t j);
 	// Considers only dim's component of vertices from vertex indices beg to
 	// end. All vertices which value is bellow pivot will be sorted to be before
 	// all vertices which value is above or equal to pivot. This is a partial
@@ -289,17 +289,15 @@ class Octree
 	// x aren't important for this example but they are the other two components
 	// of the vertices and will be moved along with the first component.
 	// Vertices data is always conserved and triplets are always moved together.
-	static unsigned int orderPivot(std::vector<float>& data, unsigned int beg,
-	                               unsigned int end, unsigned int dim,
-	                               float pivot);
+	static size_t orderPivot(std::vector<float>& data, size_t beg, size_t end,
+	                         unsigned int dim, float pivot);
 
 	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
 	// the tree
 	static std::string tabs;
 	static std::ofstream debug;
 
-	static unsigned int totalNumberOfVertices;
-
+	static size_t totalNumberOfVertices;
 };
 
 /*! \brief Writes an Octree in a stream.

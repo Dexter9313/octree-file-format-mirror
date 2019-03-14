@@ -65,7 +65,7 @@ inline bool isLittleEndian();
  * elements to write
  */
 template <typename T>
-inline void write(std::ostream& stream, T& x, unsigned int n = 1);
+inline void write(std::ostream& stream, T& x, size_t n = 1);
 
 /*! \brief Reads some base-type data.
  *
@@ -93,7 +93,7 @@ inline void write(std::ostream& stream, T& x, unsigned int n = 1);
  * elements to read
  */
 template <typename T>
-inline void read(std::istream& stream, T& res, unsigned int n = 1);
+inline void read(std::istream& stream, T& res, size_t n = 1);
 
 /*! \brief Writes a vector of base-type.
  *
@@ -151,7 +151,7 @@ bool isLittleEndian()
 }
 
 template <typename T>
-void write(std::ostream& stream, T& x, unsigned int n)
+void write(std::ostream& stream, T& x, size_t n)
 {
 	if(isLittleEndian())
 		stream.write(reinterpret_cast<char*>(&x), n * sizeof(T));
@@ -161,20 +161,23 @@ void write(std::ostream& stream, T& x, unsigned int n)
 }
 
 template <typename T>
-void read(std::istream& stream, T& res, unsigned int n)
+void read(std::istream& stream, T& res, size_t n)
 {
 	char* buff = reinterpret_cast<char*>(&res);
 	if(isLittleEndian())
 		stream.read(buff, n * sizeof(T));
 	else
-		for(int i(n * sizeof(T) - 1); i >= 0; --i)
+	{
+		for(size_t i(n * sizeof(T) - 1); i > 0; --i)
 			stream.read(&buff[i], 1);
+		stream.read(&buff[0], 1);
+	}
 }
 
 template <typename T>
 void write(std::ostream& stream, std::vector<T>& vec)
 {
-	uint32_t size(vec.size());
+	uint64_t size(vec.size());
 	write(stream, size);
 	write(stream, vec[0], vec.size());
 }
@@ -182,7 +185,7 @@ void write(std::ostream& stream, std::vector<T>& vec)
 template <typename T>
 void read(std::istream& stream, std::vector<T>& vec)
 {
-	uint32_t size;
+	uint64_t size;
 	read(stream, size);
 	vec.resize(size);
 	read(stream, vec[0], size);

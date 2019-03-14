@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		unsigned int numberOfVertices;
+		size_t numberOfVertices;
 		try
 		{
 			numberOfVertices = std::stoi(argv[1]);

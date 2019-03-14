@@ -21,7 +21,7 @@
 std::string Octree::tabs    = "";
 std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
-unsigned int Octree::totalNumberOfVertices = 0;
+size_t Octree::totalNumberOfVertices = 0;
 
 void Octree::init(std::vector<float>& data)
 {
@@ -31,11 +31,11 @@ void Octree::init(std::vector<float>& data)
 	std::cout.precision(6);
 }
 
-void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
+void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 {
-	unsigned int verticesNumber(end - beg + 1);
+	size_t verticesNumber(end - beg + 1);
 	totalDataSize = 3 * verticesNumber;
-	for(unsigned int i(beg); i <= end; ++i)
+	for(size_t i(beg); i <= end; ++i)
 	{
 		if(get(data, i, 0) < minX)
 			minX = get(data, i, 0);
@@ -92,7 +92,7 @@ void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
 	//
 	// - child7
 
-	unsigned int splits[7];
+	size_t splits[7];
 
 	// split along x in half
 	splits[3] = orderPivot(data, beg, end, 0, midX);
@@ -106,6 +106,22 @@ void Octree::init(std::vector<float>& data, unsigned int beg, unsigned int end)
 	splits[2] = orderPivot(data, splits[1], splits[3] - 1, 2, midZ);
 	splits[4] = orderPivot(data, splits[3], splits[5] - 1, 2, midZ);
 	splits[6] = orderPivot(data, splits[5], end, 2, midZ);
+
+	if(splits[0] < beg || splits[6] > end)
+	{
+		std::cout << "ERR0" << std::endl;
+		int* foo = (int*)0x10;
+		*foo = 0;
+	}
+	for(unsigned int i(0); i < 6; ++i)
+	{
+		if(splits[i] > splits[i+1])
+		{
+			std::cout << "ERR1 " << i << std::endl;
+			int* foo = (int*)0x10;
+			*foo = 0;
+		}
+	}
 
 	// Now we just assign each child its part
 	// (*) we do it from end to begin to let the child use resize to free its
@@ -172,7 +188,7 @@ void Octree::init(int64_t file_addr, std::istream& in)
 
 	this->file_addr = file_addr;
 	in.seekg(file_addr + 6 * sizeof(float));
-	uint32_t size;
+	uint64_t size;
 	brw::read(in, size);
 	totalDataSize = size;
 
@@ -287,7 +303,7 @@ std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
 	oss << tabs << "D:" << std::endl;
-	for(unsigned int i(0); i < data.size(); i += 3)
+	for(size_t i(0); i < data.size(); i += 3)
 		oss << tabs << data[i] << "; " << data[i + 1] << "; " << data[i + 2]
 		    << std::endl;
 	for(unsigned int i(0); i < 8; ++i)
@@ -315,7 +331,7 @@ Octree::~Octree()
 
 void write(std::ostream& stream, Octree& octree)
 {
-	uint32_t headerSize(octree.getCompactData().size());
+	uint64_t headerSize(octree.getCompactData().size());
 	// if root is a leaf, surround it with parenthesis
 	if(headerSize == 1)
 		headerSize += 2;
@@ -324,7 +340,7 @@ void write(std::ostream& stream, Octree& octree)
 
 	// write zeros to leave space, don't write first '('
 	int64_t zero(0);
-	for(unsigned int i(1); i < headerSize; ++i)
+	for(size_t i(1); i < headerSize; ++i)
 		brw::write(stream, zero);
 
 	// write chunks and hold their addresses
@@ -345,7 +361,7 @@ void write(std::ostream& stream, Octree& octree)
 	{
 		std::ofstream debug("LIBOCTREE.debug");
 		std::string tabs = "";
-		for(unsigned int i(0); i < header.size(); ++i)
+		for(size_t i(0); i < header.size(); ++i)
 		{
 			if(header[i] == 1)
 				tabs.pop_back();
@@ -357,19 +373,19 @@ void write(std::ostream& stream, Octree& octree)
 	}
 }
 
-inline float Octree::get(std::vector<float> const& data, unsigned int vertex,
+inline float Octree::get(std::vector<float> const& data, size_t vertex,
                   unsigned int dim)
 {
 	return data[3 * vertex + dim];
 }
 
-inline void Octree::set(std::vector<float>& data, unsigned int vertex,
+inline void Octree::set(std::vector<float>& data, size_t vertex,
                  unsigned int dim, float val)
 {
 	data[3 * vertex + dim] = val;
 }
 
-void Octree::swap(std::vector<float>& data, unsigned int i, unsigned int j)
+void Octree::swap(std::vector<float>& data, size_t i, size_t j)
 {
 	float x(get(data, i, 0)), y(get(data, i, 1)), z(get(data, i, 2));
 
@@ -381,8 +397,8 @@ void Octree::swap(std::vector<float>& data, unsigned int i, unsigned int j)
 	set(data, j, 2, z);
 }
 
-unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
-                                unsigned int end, unsigned int dim, float pivot)
+size_t Octree::orderPivot(std::vector<float>& data, size_t beg,
+                                size_t end, unsigned int dim, float pivot)
 {
 	// if end == beg - 1, this is not too bad, so let it go
 	if(beg != 0 && end < (beg-1))
@@ -393,7 +409,7 @@ unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
 	if(beg == end)
 		return beg;
 
-	unsigned int begBAK(beg), endBAK(end);
+	size_t begBAK(beg), endBAK(end);
 	while(beg < end)
 	{
 		if(get(data, beg, dim) >= pivot && get(data, end, dim) < pivot)
@@ -403,7 +419,7 @@ unsigned int Octree::orderPivot(std::vector<float>& data, unsigned int beg,
 		if(get(data, end, dim) >= pivot)
 			--end;
 	}
-	unsigned int split = beg;
+	size_t split = beg;
 	while(get(data, split, dim) > pivot && beg != begBAK)
 		--split;
 	while(get(data, split, dim) < pivot && end != endBAK)

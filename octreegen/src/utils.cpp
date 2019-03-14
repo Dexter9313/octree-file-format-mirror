@@ -41,14 +41,14 @@ std::string join(std::vector<std::string> const& strs, char c)
 	return res;
 }
 
-std::vector<float> generateVertices(unsigned int number, unsigned int seed)
+std::vector<float> generateVertices(size_t number, unsigned int seed)
 {
 	std::vector<float> vertices;
 	vertices.reserve(3 * number);
 
 	srand(seed);
 
-	for(unsigned int i(0); i < 3 * number; ++i)
+	for(size_t i(0); i < 3 * number; ++i)
 	{
 		vertices.push_back(
 		    2 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
@@ -77,7 +77,7 @@ std::vector<float> readHDF5(std::string const& path,
 	std::vector<float> result(dims[0] * dims[1]);
 	rdata    = new float*[dims[0]];
 	rdata[0] = &result[0];
-	for(unsigned int i = 1; i < (unsigned int) dims[0]; i++)
+	for(size_t i = 1; i < (size_t) dims[0]; i++)
 		rdata[i] = rdata[0] + i * dims[1];
 
 	std::cout << "Reading HDF5 dataset :" << std::endl;
@@ -102,14 +102,14 @@ std::vector<float> readHDF5(std::string const& path,
 		for(unsigned int j(0); j < 3; ++j)
 		{
 			float max(0.f), min(FLT_MAX);
-			for(unsigned int i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += 3)
 			{
 				if(result[i] > max)
 					max = result[i];
 				if(result[i] < min)
 					min = result[i];
 			}
-			for(unsigned int i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += 3)
 			{
 				result[i] -= min;
 				result[i] /= 0.5 * (max-min);
@@ -122,7 +122,7 @@ std::vector<float> readHDF5(std::string const& path,
 	{
 		for(unsigned int j(0); j < 3; ++j)
 		{
-			for(unsigned int i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += 3)
 			{
 				if((i+(result.size()*j) - j) % 300000000 == j)
 					Octree::showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
