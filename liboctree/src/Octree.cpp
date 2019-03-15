@@ -18,8 +18,8 @@
 
 #include "Octree.hpp"
 
-std::string Octree::tabs    = "";
-std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
+//std::string Octree::tabs    = "";
+//std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
 size_t Octree::totalNumberOfVertices = 0;
 
@@ -150,7 +150,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
-	debug << tabs << file_addr << std::endl;
+	//debug << tabs << file_addr << std::endl;
 
 	totalDataSize = 0;
 	int64_t readVal;
@@ -158,24 +158,24 @@ void Octree::init(std::istream& in)
 	while(true)
 	{
 		brw::read(in, readVal);
-		debug << tabs << readVal << std::endl;
+		//debug << tabs << readVal << std::endl;
 		if(readVal == 1) //) <= own end
 			break;
 
 		if(readVal == 0) //( <= sub node
 		{
-			tabs += '\t';
+			//tabs += '\t';
 			children[i] = newOctree();
 			children[i]->init(in);
-			tabs.pop_back();
+			//tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		else if(readVal != -1) // null node
 		{
-			tabs += '\t';
+			//tabs += '\t';
 			children[i] = newOctree();
 			children[i]->init(readVal, in);
-			tabs.pop_back();
+			//tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		++i;
@@ -359,7 +359,7 @@ void write(std::ostream& stream, Octree& octree)
 	}
 	else
 	{
-		std::ofstream debug("LIBOCTREE.debug");
+		/*std::ofstream debug("LIBOCTREE.debug");
 		std::string tabs = "";
 		for(size_t i(0); i < header.size(); ++i)
 		{
@@ -368,7 +368,7 @@ void write(std::ostream& stream, Octree& octree)
 			debug << tabs << header[i] << std::endl;
 			if(header[i] == 0)
 				tabs += '\t';
-		}
+		}*/
 		brw::write(stream, header[1], headerSize - 1);
 	}
 }
