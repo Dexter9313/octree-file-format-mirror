@@ -88,18 +88,44 @@ std::vector<float> readHDF5(std::string const& path,
 	H5Dclose(hdf5_dataset);
 
 	// put everything in the unit cube
-	hid_t hdf5_header  = H5Gopen(hdf5_file, "/Header", 0);
-	hid_t hdf5_boxsize = H5Aopen(hdf5_header, "BoxSize", H5P_DEFAULT);
+	hid_t hdf5_header   = H5Gopen(hdf5_file, "/Header", 0);
+	hid_t hdf5_boxsize  = H5Aopen(hdf5_header, "BoxSize", H5P_DEFAULT);
+	hid_t boxsize_space = H5Aget_space(hdf5_boxsize);
+	int boxsize_dim
+	    = H5Sget_simple_extent_dims(boxsize_space, nullptr, nullptr);
 
-	double boxsize(0.f);
-	H5Aread(hdf5_boxsize, H5T_IEEE_F64LE, &boxsize);
-	std::cout << "Box Size : " << boxsize << std::endl;
+	double boxsize = 0.0;
+	if(boxsize_dim == 0)
+	{
+		H5Aread(hdf5_boxsize, H5T_IEEE_F64LE, &boxsize);
+		std::cout << "Box Size : " << boxsize << std::endl;
+	}
+	else
+	{
+		hsize_t* boxsize_size = new hsize_t[boxsize_dim];
+		H5Sget_simple_extent_dims(boxsize_space, boxsize_size, nullptr);
+		double* boxsize_data = new double[*boxsize_size];
+		H5Aread(hdf5_boxsize, H5T_IEEE_F64LE, boxsize_data);
+		boxsize = boxsize_data[0];
+		std::cout << "Box Size : [";
+		for(unsigned int i(0); i < *boxsize_size - 1; ++i)
+		{
+			std::cout << boxsize_data[i] << ", ";
+			if(boxsize_data[i] > boxsize)
+				boxsize = boxsize_data[i];
+		}
+		if(boxsize_data[*boxsize_size - 1] > boxsize)
+			boxsize = boxsize_data[*boxsize_size - 1];
+		std::cout << boxsize_data[*boxsize_size - 1] << "], max : " << boxsize << std::endl;
+		delete[] boxsize_size;
+		delete[] boxsize_data;
+	}
 
 	std::cout << "Resizing data to fit in the unit cube :" << std::endl;
 	Octree::showProgress(0.f);
-	if(boxsize == 0)
+	for(unsigned int j(0); j < 3; ++j)
 	{
-		for(unsigned int j(0); j < 3; ++j)
+		if(boxsize == 0.0)
 		{
 			float max(0.f), min(FLT_MAX);
 			for(size_t i(j); i < result.size(); i += 3)
@@ -112,20 +138,18 @@ std::vector<float> readHDF5(std::string const& path,
 			for(size_t i(j); i < result.size(); i += 3)
 			{
 				result[i] -= min;
-				result[i] /= 0.5 * (max-min);
+				result[i] /= 0.5 * (max - min);
 				result[i] -= 1;
 			}
-			//std::cout << "min : " << min << " max : " << max << std::endl;
+			// std::cout << "min : " << min << " max : " << max << std::endl;
 		}
-	}
-	else
-	{
-		for(unsigned int j(0); j < 3; ++j)
+		else
 		{
 			for(size_t i(j); i < result.size(); i += 3)
 			{
-				if((i+(result.size()*j) - j) % 300000000 == j)
-					Octree::showProgress((float) (i+(result.size()*j)-j) / (float)(3*(result.size() - 1)));
+				if((i + (result.size() * j) - j) % 300000000 == j)
+					Octree::showProgress((float) (i + (result.size() * j) - j)
+					                     / (float) (3 * (result.size() - 1)));
 				// result[i] -= min;
 				result[i] /= 0.5 * boxsize;
 				result[i] -= 1;
