@@ -18,6 +18,7 @@ Please read each tool's README inside its own directory !
 * [liboctree](https://gitlab.com/Dexter9313/octree-file-format/blob/master/liboctree/) : Library that can build octrees, or read/write them from/to *.octree* files used by VIRUP.
 * [octreegen](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen/) : Generates an octree file either from an HDF5 file or from a number to random particles to generate.
 * [octreegen-gui](https://gitlab.com/Dexter9313/octree-file-format/blob/master/octreegen-gui/) : A user-friendly GUI interface for octreegen.
+* [toHDF5utils](https://gitlab.com/Dexter9313/octree-file-format/blob/master/toHDF5utils/) : Collection of scripts to convert various data from various formats to HDF5. Those HDF5 files can then be used by octreegen to generate octree files.
 
 ## Complete Grammar Syntax and hints on semantics
 
