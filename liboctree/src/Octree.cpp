@@ -400,6 +400,14 @@ void Octree::swap(std::vector<float>& data, size_t i, size_t j)
 size_t Octree::orderPivot(std::vector<float>& data, size_t beg,
                                 size_t end, unsigned int dim, float pivot)
 {
+	// check if -1 has been passed as end (split[i]-1 if split[i] == 0)
+	size_t max(0);
+	--max;
+	if(end == max)
+	{
+		return beg;
+	}
+
 	// if end == beg - 1, this is not too bad, so let it go
 	if(beg != 0 && end < (beg-1))
 	{
