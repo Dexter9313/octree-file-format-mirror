@@ -24,22 +24,22 @@
 size_t Octree::totalNumberOfVertices = 0;
 
 Octree::Octree(Flags flags)
-    : flags(flags)
 {
+	setFlags(flags);
 }
 
 void Octree::init(std::vector<float>& data)
 {
-	totalNumberOfVertices = (data.size() / 3) - 1;
+	totalNumberOfVertices = (data.size() / dimPerVertex) - 1;
 	std::cout.precision(3);
-	init(data, 0, (data.size() / 3) - 1);
+	init(data, 0, (data.size() / dimPerVertex) - 1);
 	std::cout.precision(6);
 }
 
 void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 {
 	size_t verticesNumber(end - beg + 1);
-	totalDataSize = 3 * verticesNumber;
+	totalDataSize = dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
 	{
 		if(get(data, i, 0) < minX)
@@ -59,9 +59,10 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
-			this->data.push_back(get(data, i, 0));
-			this->data.push_back(get(data, i, 1));
-			this->data.push_back(get(data, i, 2));
+			for(unsigned int j(0); j < dimPerVertex; ++j)
+			{
+				this->data.push_back(get(data, i, j));
+			}
 		}
 	}
 	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
@@ -81,7 +82,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 			localScale = maxZ - minZ;
 		}
 
-		for(unsigned int i(0); i < data.size(); i += 3)
+		for(unsigned int i(0); i < data.size(); i += dimPerVertex)
 		{
 			data[i] -= minX;
 			data[i] /= localScale;
@@ -95,7 +96,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	{
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
-		data.resize(3 * beg);
+		data.resize(dimPerVertex * beg);
 		showProgress(1.f - beg/(float)totalNumberOfVertices);
 		// we don't need to create children
 		return;
@@ -187,7 +188,9 @@ void Octree::init(std::istream& in)
 	// if file_addr is -1, we are actually at the beginning of the file and we have flags to read !
 	if(file_addr == -1)
 	{
-		brw::read(in, flags);
+		Flags flags_temp;
+		brw::read(in, flags_temp);
+		setFlags(flags_temp);
 		// read file_addr again with the real value this time
 		brw::read(in, file_addr);
 	}
@@ -233,6 +236,16 @@ void Octree::init(int64_t file_addr, std::istream& in)
 	totalDataSize = size;
 
 	in.seekg(cursor);
+}
+
+void Octree::setFlags(Flags flags)
+{
+	this->flags = flags;
+	dimPerVertex = 3;
+	if((flags & Flags::STORE_RADIUS) != Flags::NONE)
+		++dimPerVertex;
+	if((flags & Flags::STORE_LUMINOSITY) != Flags::NONE)
+		++dimPerVertex;
 }
 
 bool Octree::isLeaf() const
@@ -343,9 +356,14 @@ std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
 	oss << tabs << "D:" << std::endl;
-	for(size_t i(0); i < data.size(); i += 3)
-		oss << tabs << data[i] << "; " << data[i + 1] << "; " << data[i + 2]
-		    << std::endl;
+	for(size_t i(0); i < data.size(); i += dimPerVertex)
+	{
+		for(unsigned int j(0); j < dimPerVertex; ++j)
+		{
+			oss << tabs << data[i+j] << "; ";
+		}
+		oss << std::endl;
+	}
 	for(unsigned int i(0); i < 8; ++i)
 	{
 		oss << tabs << i << ":" << std::endl;
@@ -436,25 +454,25 @@ Octree::Flags operator&(Octree::Flags a, Octree::Flags b)
 inline float Octree::get(std::vector<float> const& data, size_t vertex,
                   unsigned int dim)
 {
-	return data[3 * vertex + dim];
+	return data[dimPerVertex * vertex + dim];
 }
 
 inline void Octree::set(std::vector<float>& data, size_t vertex,
                  unsigned int dim, float val)
 {
-	data[3 * vertex + dim] = val;
+	data[dimPerVertex * vertex + dim] = val;
 }
 
 void Octree::swap(std::vector<float>& data, size_t i, size_t j)
 {
-	float x(get(data, i, 0)), y(get(data, i, 1)), z(get(data, i, 2));
+	std::vector<float> v(dimPerVertex);
 
-	set(data, i, 0, get(data, j, 0));
-	set(data, i, 1, get(data, j, 1));
-	set(data, i, 2, get(data, j, 2));
-	set(data, j, 0, x);
-	set(data, j, 1, y);
-	set(data, j, 2, z);
+	for(unsigned int k(0); k < dimPerVertex; ++k)
+	{
+		float tmp = get(data, i, k);
+		set(data, i, k, get(data, j, k));
+		set(data, j, k, tmp);
+	}
 }
 
 size_t Octree::orderPivot(std::vector<float>& data, size_t beg,

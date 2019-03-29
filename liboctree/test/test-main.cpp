@@ -87,14 +87,14 @@ T randomVal()
 	return result;
 }
 
-std::vector<float> generateVertices(size_t number, unsigned int seed)
+std::vector<float> generateVertices(size_t number, unsigned int seed, unsigned int dimPerVertex = 3)
 {
 	std::vector<float> vertices;
-	vertices.reserve(3 * number);
+	vertices.reserve(dimPerVertex * number);
 
 	srand(seed);
 
-	for(size_t i(0); i < 3 * number; ++i)
+	for(size_t i(0); i < dimPerVertex * number; ++i)
 	{
 		vertices.push_back(
 		    2 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
@@ -222,7 +222,7 @@ int main(int, char* [])
 	{
 		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES | Octree::Flags::STORE_RADIUS | Octree::Flags::STORE_LUMINOSITY);
 		Octree octree1(flags);
-		std::vector<float> v(generateVertices(10, seed));
+		std::vector<float> v(generateVertices(10, seed, 5));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
@@ -230,7 +230,7 @@ int main(int, char* [])
 		f.resetCursor();
 		Octree octree2(Octree::Flags::NONE);
 		octree2.init(f);
-		TEST_EQUAL(static_cast<uint64_t>(flags), static_cast<uint64_t>(octree2.getFlags()), "R/W octree flags");
+		TEST_EQUAL(static_cast<uint64_t>(octree2.getFlags()), static_cast<uint64_t>(flags), "R/W octree flags");
 		std::cout << success << "R/W octree flags" << std::endl;
 	}
 	// TEST BINARY RW random octree with normalized nodes
@@ -247,6 +247,22 @@ int main(int, char* [])
 		octree2.readData(f);
 		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree with normalized nodes");
 		std::cout << success << "R/W random octree with normalized nodes" << std::endl;
+	}
+	// TEST BINARY RW random octree with more than three components per vertex
+	{
+		Octree octree1(Octree::Flags::STORE_RADIUS | Octree::Flags::STORE_LUMINOSITY);
+		std::vector<float> v(generateVertices(100000, seed, 5));
+		octree1.init(v);
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2;
+		octree2.init(f);
+		octree2.readData(f);
+		TEST_EQUAL(octree2.getTotalDataSize(), (size_t) 500000, "R/W random octree with more than three components per vertex [size]");
+		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree with more than three components per vertex [content]");
+		std::cout << success << "R/W random octree with more than three components per vertex" << std::endl;
 	}
 
 	return EXIT_SUCCESS;

@@ -124,6 +124,13 @@ class Octree
 	 */
 	Flags getFlags() const { return flags; };
 
+	/*! \brief Sets this octree's \ref Flags
+	 *
+	 * \attention Be careful, changing flags when data is already loaded can 
+	 * have dramatic consequences.
+	 */
+	void setFlags(Flags flags);
+
 	/*! \brief Size of the total non-redundant data stored in the tree.
 	 *
 	 * It is effectively the sum of the data sizes of all the leaves.
@@ -234,10 +241,6 @@ class Octree
 	 */
 	virtual Octree* newOctree(Flags flags) const;
 
-	/*! \brief Flags of this octree.
-	 */
-	Flags flags = Flags::NONE;
-
 	/*! \brief Address within a file where lies or should lie the data.
 	 */
 	int64_t file_addr = -2;
@@ -309,14 +312,14 @@ class Octree
 	// Gets a vertex's component from data.
 	// vertex is the vertex's index.
 	// (get(data, 10, 1) will return the y component of the 11th vertex.)
-	static float get(std::vector<float> const& data, size_t vertex,
+	float get(std::vector<float> const& data, size_t vertex,
 	                 unsigned int dim);
 	// Sets a vertex component in data (see get for indexing).
-	static void set(std::vector<float>& data, size_t vertex, unsigned int dim,
+	void set(std::vector<float>& data, size_t vertex, unsigned int dim,
 	                float val);
 	// Swaps two vertices from data, the (i+1)th and the (j+1)th.
 	// This swaps all components of the vertices (x, y, z).
-	static void swap(std::vector<float>& data, size_t i, size_t j);
+	void swap(std::vector<float>& data, size_t i, size_t j);
 	// Considers only dim's component of vertices from vertex indices beg to
 	// end. All vertices which value is bellow pivot will be sorted to be before
 	// all vertices which value is above or equal to pivot. This is a partial
@@ -333,8 +336,12 @@ class Octree
 	// x aren't important for this example but they are the other two components
 	// of the vertices and will be moved along with the first component.
 	// Vertices data is always conserved and triplets are always moved together.
-	static size_t orderPivot(std::vector<float>& data, size_t beg, size_t end,
+	size_t orderPivot(std::vector<float>& data, size_t beg, size_t end,
 	                         unsigned int dim, float pivot);
+
+	Flags flags = Flags::NONE;
+	// number of dimensions per vertex (3 by default with only 3D positions)
+	unsigned int dimPerVertex = 3;
 
 	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
 	// the tree
