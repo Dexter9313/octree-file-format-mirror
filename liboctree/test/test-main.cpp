@@ -218,6 +218,21 @@ int main(int, char* [])
 		TEST_EQUAL(octree2.getTotalDataSize() / 3, (size_t) 100000, "OCTREE totalDataSize (from file)");
 		std::cout << success << "OCTREE totalDataSize (from file)" << std::endl;
 	}
+	// TEST OCTREE flags RW
+	{
+		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES | Octree::Flags::STORE_RADIUS | Octree::Flags::STORE_LUMINOSITY);
+		Octree octree1(flags);
+		std::vector<float> v(generateVertices(10, seed));
+		octree1.init(v);
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2(Octree::Flags::NONE);
+		octree2.init(f);
+		TEST_EQUAL(static_cast<uint64_t>(flags), static_cast<uint64_t>(octree2.getFlags()), "R/W octree flags");
+		std::cout << success << "R/W octree flags" << std::endl;
+	}
 
 	return EXIT_SUCCESS;
 }

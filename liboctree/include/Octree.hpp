@@ -56,6 +56,38 @@
 class Octree
 {
   public:
+	/*! \brief Holds information about the octree.
+	 *
+	 * This information concerns the octree itself or the data it holds (which
+	 * kind of data, how it is stored, etc...).
+	 */
+	enum class Flags : uint64_t
+	{
+		// MODIFIERS
+		/*! \brief Null flags, for comparison or initialization.
+		 */
+		NONE = 0x0000000000000000ULL,
+		/*! \brief Set if the positions are stored from (0, 0, 0) to (1, 1, 1)
+		 * relative to the node.
+		 *
+		 * The bounding box is still absolute and can be used to retrieve
+		 * absolute coordinates for the data.
+		 */
+		NORMALIZED_NODES = 0x0000000000000001ULL,
+
+		// DATA TYPES STORED
+		/*! \brief Set if the particles radii are also stored.
+		 */
+		STORE_RADIUS = 0x0000000100000000ULL,
+		/*! \brief Set if the particles luminosities are also stored.
+		 */
+		STORE_LUMINOSITY = 0x0000000200000000ULL,
+	};
+
+	/*! \brief Constructs an Octree with \p flags as \ref Flags
+	 */
+	Octree(Flags flags = Flags::NONE);
+
 	/*! \brief Initializes the octree from position data.
 	 *
 	 * It will also compute all the mins and maxes.
@@ -84,8 +116,13 @@ class Octree
 	 * No children will be created, only the file address will be set.
 	 *
 	 * \param file_addr : Address within the file where the data lies.
+	 * \param in : File stream from which the node is read.
 	 */
 	virtual void init(int64_t file_addr, std::istream& in);
+
+	/*! \brief Returns this octree's \ref Flags
+	 */
+	Flags getFlags() const { return flags; };
 
 	/*! \brief Size of the total non-redundant data stored in the tree.
 	 *
@@ -179,7 +216,7 @@ class Octree
 	 * Useful for inheritence and polymorphism. You SHOULD reimplement this
 	 * method if you inherit from Octree to return your own instance of it. This
 	 * is needed due to the recursive nature of this class. When Octree
-	 * initializes itself, it will call newOctree() to create children to ensure
+	 * initializes itself, it will call newOctree to create children to ensure
 	 * the whole tree will be of the right class.
 	 *
 	 * Example : inheriting from Octree
@@ -188,11 +225,18 @@ class Octree
 	 * {
 	 *    // ... some members ...
 	 *    protected:
-	 *      virtual Octree* newOctree() const { return new MyOctree(); };
+	 *      virtual Octree* newOctree(Flags flags) const
+	 *      {
+	 *          return new MyOctree(flags);
+	 *      };
 	 * }
 	 * @endcode
 	 */
-	virtual Octree* newOctree() const;
+	virtual Octree* newOctree(Flags flags) const;
+
+	/*! \brief Flags of this octree.
+	 */
+	Flags flags = Flags::NONE;
 
 	/*! \brief Address within a file where lies or should lie the data.
 	 */
@@ -310,5 +354,13 @@ class Octree
  * \param octree : octree to be written
  */
 void write(std::ostream& stream, Octree& octree);
+
+/*! \brief Returns bitwise OR value between two Octree#Flags considering they are equivalent to uint64_t.
+ */
+Octree::Flags operator|(Octree::Flags a, Octree::Flags b);
+
+/*! \brief Returns bitwise AND value between two Octree#Flags considering they are equivalent to uint64_t.
+ */
+Octree::Flags operator&(Octree::Flags a, Octree::Flags b);
 
 #endif // OCTREE_H

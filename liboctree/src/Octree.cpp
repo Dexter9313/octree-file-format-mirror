@@ -23,6 +23,11 @@
 
 size_t Octree::totalNumberOfVertices = 0;
 
+Octree::Octree(Flags flags)
+    : flags(flags)
+{
+}
+
 void Octree::init(std::vector<float>& data)
 {
 	totalNumberOfVertices = (data.size() / 3) - 1;
@@ -129,20 +134,20 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 
 	if(end > splits[6])
 	{
-		children[0] = newOctree();
+		children[0] = newOctree(flags);
 		children[0]->init(data, splits[6], end);
 	}
 	for(unsigned int i(6); i > 0; --i)
 	{
 		if(splits[i] > splits[i - 1])
 		{
-			children[7 - i] = newOctree();
+			children[7 - i] = newOctree(flags);
 			children[7 - i]->init(data, splits[i - 1], splits[i] - 1);
 		}
 	}
 	if(splits[0] > beg)
 	{
-		children[7] = newOctree();
+		children[7] = newOctree(flags);
 		children[7]->init(data, beg, splits[0] - 1);
 	}
 }
@@ -150,7 +155,15 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 void Octree::init(std::istream& in)
 {
 	brw::read(in, file_addr);
-	//debug << tabs << file_addr << std::endl;
+	// debug << tabs << file_addr << std::endl;
+
+	// if file_addr is -1, we are actually at the beginning of the file and we have flags to read !
+	if(file_addr == -1)
+	{
+		brw::read(in, flags);
+		// read file_addr again with the real value this time
+		brw::read(in, file_addr);
+	}
 
 	totalDataSize = 0;
 	int64_t readVal;
@@ -164,16 +177,16 @@ void Octree::init(std::istream& in)
 
 		if(readVal == 0) //( <= sub node
 		{
-			//tabs += '\t';
-			children[i] = newOctree();
+			// tabs += '\t';
+			children[i] = newOctree(flags);
 			children[i]->init(in);
 			//tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		else if(readVal != -1) // null node
 		{
-			//tabs += '\t';
-			children[i] = newOctree();
+			// tabs += '\t';
+			children[i] = newOctree(flags);
 			children[i]->init(readVal, in);
 			//tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
@@ -315,9 +328,9 @@ std::string Octree::toString(std::string const& tabs) const
 	return oss.str();
 }
 
-Octree* Octree::newOctree() const
+Octree* Octree::newOctree(Flags flags) const
 {
-	return new Octree();
+	return new Octree(flags);
 }
 
 Octree::~Octree()
@@ -331,6 +344,16 @@ Octree::~Octree()
 
 void write(std::ostream& stream, Octree& octree)
 {
+	// write flags if any
+	if(octree.getFlags() != Octree::Flags::NONE)
+	{
+		int64_t minusone(-1);
+		uint64_t flags(static_cast<uint64_t>(octree.getFlags()));
+		brw::write(stream, minusone);
+		brw::write(stream, flags);
+	}
+
+	// write the rest of the tree
 	uint64_t headerSize(octree.getCompactData().size());
 	// if root is a leaf, surround it with parenthesis
 	if(headerSize == 1)
@@ -371,6 +394,16 @@ void write(std::ostream& stream, Octree& octree)
 		}*/
 		brw::write(stream, header[1], headerSize - 1);
 	}
+}
+
+Octree::Flags operator|(Octree::Flags a, Octree::Flags b)
+{
+	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b));
+}
+
+Octree::Flags operator&(Octree::Flags a, Octree::Flags b)
+{
+	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b));
 }
 
 inline float Octree::get(std::vector<float> const& data, size_t vertex,
