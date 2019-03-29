@@ -64,6 +64,33 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 			this->data.push_back(get(data, i, 2));
 		}
 	}
+	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
+	{
+		float localScale(1.f);
+		if((maxX - minX > maxY - minY)
+		   && (maxX - minX > maxZ - minZ))
+		{
+			localScale = maxX - minX;
+		}
+		else if(maxY - minY > maxZ - minZ)
+		{
+			localScale = maxY - minY;
+		}
+		else if(maxZ != minZ)
+		{
+			localScale = maxZ - minZ;
+		}
+
+		for(unsigned int i(0); i < data.size(); i += 3)
+		{
+			data[i] -= minX;
+			data[i] /= localScale;
+			data[i + 1] -= minY;
+			data[i + 1] /= localScale;
+			data[i + 2] -= minY;
+			data[i + 2] /= localScale;
+		}
+	}
 	if(verticesNumber <= MAX_LEAF_SIZE)
 	{
 		// delete our part of the vector, we know we are at the end of the

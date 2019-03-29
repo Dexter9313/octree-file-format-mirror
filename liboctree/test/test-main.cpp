@@ -233,6 +233,21 @@ int main(int, char* [])
 		TEST_EQUAL(static_cast<uint64_t>(flags), static_cast<uint64_t>(octree2.getFlags()), "R/W octree flags");
 		std::cout << success << "R/W octree flags" << std::endl;
 	}
+	// TEST BINARY RW random octree with normalized nodes
+	{
+		Octree octree1(Octree::Flags::NORMALIZED_NODES);
+		std::vector<float> v(generateVertices(100000, seed));
+		octree1.init(v);
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2;
+		octree2.init(f);
+		octree2.readData(f);
+		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree with normalized nodes");
+		std::cout << success << "R/W random octree with normalized nodes" << std::endl;
+	}
 
 	return EXIT_SUCCESS;
 }
