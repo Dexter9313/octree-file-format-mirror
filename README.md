@@ -29,7 +29,7 @@ If you wish to write your own octree file format reader/writer or edit this proj
 
 FLOAT   : a 32-bit floating point value
 
-SIZE    : a 32-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit value would be of SIZE 4)
+SIZE    : a 64-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit values would be of SIZE 4)
 
 (       : a 64-bit constant 0x0000000000000000 (0)
 
