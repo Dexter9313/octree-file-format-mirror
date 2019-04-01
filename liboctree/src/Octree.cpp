@@ -82,14 +82,14 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 			localScale = maxZ - minZ;
 		}
 
-		for(unsigned int i(0); i < data.size(); i += dimPerVertex)
+		for(size_t i(beg); i <= end; ++i)
 		{
-			data[i] -= minX;
-			data[i] /= localScale;
-			data[i + 1] -= minY;
-			data[i + 1] /= localScale;
-			data[i + 2] -= minY;
-			data[i + 2] /= localScale;
+			set(data, i, 0, get(data, i, 0) - minX);
+			set(data, i, 0, get(data, i, 0) / localScale);
+			set(data, i, 1, get(data, i, 1) - minY);
+			set(data, i, 1, get(data, i, 1) / localScale);
+			set(data, i, 2, get(data, i, 2) - minZ);
+			set(data, i, 2, get(data, i, 2) / localScale);
 		}
 	}
 	if(verticesNumber <= MAX_LEAF_SIZE)
