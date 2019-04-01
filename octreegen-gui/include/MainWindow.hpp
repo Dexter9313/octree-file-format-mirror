@@ -19,6 +19,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <streambuf>
+#include <sstream>
+
+#include <QCoreApplication>
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMenuBar>
@@ -26,6 +30,7 @@
 #include <QProcess>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 #include <iostream>
@@ -42,31 +47,27 @@ class MainWindow : public QMainWindow
   public slots:
 	void openHDF5();
 	void updateGenerateButton();
-	void generate(int previousExitCode = 0);
-	void processOutput();
+	void generate();
 	void aboutOctreegenGUI();
 	void aboutQt();
+	void selectSaveAs();
 
   private:
 	QMenuBar menubar;
 	QWidget centralWidget;
 	QPushButton generateButton;
+	QLineEdit lineEditSaveAs;
 
 	// related to octreegen calls
 	QProcess* proc = nullptr;
-	QString procOutput;
-	QString procError;
-	QProgressDialog* progress;
-	std::vector<HDF5DatasetSelect*> selectsToExecute;
 
 	QString fileName;
 
-	HDF5DatasetSelect gazSelect;
-	HDF5DatasetSelect starsSelect;
-	HDF5DatasetSelect darkmatterSelect;
+	HDF5DatasetSelect coordinatesSelect;
+	HDF5DatasetSelect radiusSelect;
+	HDF5DatasetSelect luminositySelect;
 
-	void dialogWithConsoleOutput(QString const& title, QString const& text,
-	                             QString const& launchedCmdLine);
+	static void processCarriageReturns(QString& str);
 };
 
 #endif // MAINWINDOW_H

@@ -23,10 +23,9 @@ MainWindow::MainWindow()
     , menubar(this)
     , centralWidget(this)
     , generateButton(tr("Generate octrees"), this)
-    , gazSelect(this, tr("Select gaz particles positions :"), ".gaz")
-    , starsSelect(this, tr("Select stars particles positions :"), ".stars")
-    , darkmatterSelect(this, tr("Select dark matter particles positions :"),
-                       ".dm")
+    , coordinatesSelect(this, tr("Select particles coordinates :"))
+    , radiusSelect(this, tr("Select particles radius (optional) :"))
+    , luminositySelect(this, tr("Select particles luminosity (optional) :"))
 {
 	QMenu* menu = new QMenu("File", &menubar);
 	connect(menu->addAction(tr("&Open HDF5 File...")), SIGNAL(triggered()),
@@ -49,21 +48,30 @@ MainWindow::MainWindow()
 
 	QHBoxLayout* layout = new QHBoxLayout(w0);
 
-	layout->addWidget(&gazSelect);
-	layout->addWidget(&starsSelect);
-	layout->addWidget(&darkmatterSelect);
+	layout->addWidget(&coordinatesSelect);
+	layout->addWidget(&radiusSelect);
+	layout->addWidget(&luminositySelect);
 
 	mainLayout->addWidget(w0);
 
 	QWidget* bottom      = new QWidget(this);
 	QHBoxLayout* bottomL = new QHBoxLayout(bottom);
 
-	connect(&gazSelect, SIGNAL(selectedObjChanged()), this,
+	connect(&coordinatesSelect, SIGNAL(selectedObjChanged()), this,
 	        SLOT(updateGenerateButton()));
-	connect(&starsSelect, SIGNAL(selectedObjChanged()), this,
+	connect(&radiusSelect, SIGNAL(selectedObjChanged()), this,
 	        SLOT(updateGenerateButton()));
-	connect(&darkmatterSelect, SIGNAL(selectedObjChanged()), this,
+	connect(&luminositySelect, SIGNAL(selectedObjChanged()), this,
 	        SLOT(updateGenerateButton()));
+
+	QWidget* w2           = new QWidget(this);
+	QHBoxLayout* layoutH2 = new QHBoxLayout(w2);
+	layoutH2->addWidget(new QLabel(tr("Save as :"), this));
+	layoutH2->addWidget(&lineEditSaveAs);
+	QPushButton* b = new QPushButton("...", this);
+	connect(b, SIGNAL(clicked(bool)), this, SLOT(selectSaveAs()));
+	layoutH2->addWidget(b);
+	mainLayout->addWidget(w2);
 
 	connect(&generateButton, SIGNAL(clicked(bool)), this, SLOT(generate()));
 	generateButton.setEnabled(false);
@@ -80,46 +88,50 @@ void MainWindow::openHDF5()
 	fileName = QFileDialog::getOpenFileName(
 	    this, tr("Open HDF5 File"), QString(""), tr("HDF5 Files (*.hdf5)"));
 	std::cout << fileName.toStdString() << std::endl;
-	gazSelect.load(fileName);
-	starsSelect.load(fileName);
-	darkmatterSelect.load(fileName);
+	coordinatesSelect.load(fileName);
+	radiusSelect.load(fileName);
+	luminositySelect.load(fileName);
 	centralWidget.setEnabled(true);
+	QFileInfo fi(fileName);
+	lineEditSaveAs.setText(fi.dir().absolutePath() + QDir::separator()
+	                       + fi.completeBaseName() + ".octree");
 }
 
 void MainWindow::updateGenerateButton()
 {
-	if(gazSelect.datasetPathIsValid() && starsSelect.datasetPathIsValid()
-	   && darkmatterSelect.datasetPathIsValid())
+	if(coordinatesSelect.datasetPathIsValid())
+	{
 		generateButton.setEnabled(true);
+
+		QString datasetPath(coordinatesSelect.getDatasetPath());
+		QStringList splittedPath = datasetPath.split('/');
+		splittedPath.pop_back();
+
+		QFileInfo fi(fileName);
+		lineEditSaveAs.setText(fi.dir().absolutePath() + QDir::separator()
+		                       + fi.completeBaseName() + "."
+		                       + splittedPath.last() + ".octree");
+	}
 	else
 		generateButton.setEnabled(false);
 }
 
-void MainWindow::generate(int previousExitCode)
+void MainWindow::generate()
 {
-	QString baseCmdLine(QString("octreegen ") + fileName + ":");
+	QString cmdLine(QString("octreegen ") + fileName + ":"
+	                + coordinatesSelect.getDatasetPath());
+	if(radiusSelect.datasetPathIsValid()
+	   || luminositySelect.datasetPathIsValid())
+		cmdLine += ":";
+	if(radiusSelect.datasetPathIsValid())
+		cmdLine += radiusSelect.getDatasetPath();
+	if(luminositySelect.datasetPathIsValid())
+		cmdLine += ":" + luminositySelect.getDatasetPath();
+	cmdLine += " " + lineEditSaveAs.text();
 
 	if(proc == nullptr)
 	{
-		selectsToExecute = {&gazSelect, &starsSelect, &darkmatterSelect};
-
 		proc = new QProcess(this);
-		connect(proc, SIGNAL(readyReadStandardOutput()), this,
-		        SLOT(processOutput()));
-		connect(proc, SIGNAL(readyReadStandardError()), this,
-		        SLOT(processOutput()));
-		connect(proc, SIGNAL(finished(int, QProcess::ExitStatus)), this,
-		        SLOT(generate(int)));
-
-		progress = new QProgressDialog(tr("Generating trees..."), QString(), 0,
-		                               selectsToExecute.size(), this);
-		progress->setMinimumDuration(0);
-		progress->setValue(0);
-
-		procOutput = "";
-		procError  = "";
-		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath()
-		                + " " + selectsToExecute[0]->getOutputPath());
 		proc->start(cmdLine);
 		if(!proc->waitForStarted())
 		{
@@ -128,60 +140,42 @@ void MainWindow::generate(int previousExitCode)
 			                         "sure it is installed."));
 			proc->waitForFinished();
 			delete proc;
-			delete progress;
 			proc = nullptr;
 			return;
 		}
-	}
-	else
-	{
-		std::cout << procOutput.toStdString() << std::endl;
-		std::cout << procError.toStdString() << std::endl;
-		if(previousExitCode != 0)
-		{
-			delete proc;
-			delete progress;
-			proc = nullptr;
-			dialogWithConsoleOutput(
-			    tr("Warning"),
-			    tr("Something went wrong during the octree generation..."),
-			    baseCmdLine + selectsToExecute[0]->getDatasetPath() + " "
-			        + selectsToExecute[0]->getOutputPath());
-			return;
-		}
-		progress->setValue(progress->value() + 1);
 
-		selectsToExecute.erase(selectsToExecute.begin());
-		if(selectsToExecute.size() == 0)
-		{
-			delete proc;
-			delete progress;
-			proc = nullptr;
-			QMessageBox::information(this, tr("Information"), tr("Success !"));
-			return;
-		}
-		procOutput = "";
-		procError  = "";
-		QString cmdLine(baseCmdLine + selectsToExecute[0]->getDatasetPath()
-		                + " " + selectsToExecute[0]->getOutputPath());
-		proc->start(cmdLine);
-		if(!proc->waitForStarted())
-		{
-			delete proc;
-			delete progress;
-			proc = nullptr;
-			QMessageBox::critical(this, tr("Critical Error"),
-			                      tr("Could not start octreegen. Please make "
-			                         "sure it is installed."));
-			return;
-		}
-	}
-}
+		QString detailed("Command :\n" + cmdLine + "\n\nOutput :\n");
 
-void MainWindow::processOutput()
-{
-	procOutput += proc->readAllStandardOutput();
-	procError += proc->readAllStandardError();
+		QTextEdit te(nullptr);
+		te.setReadOnly(true);
+		te.setFont(QFont("Monospace", 10));
+		te.setFixedSize(QSize(800, 400));
+		te.setStyleSheet("QTextEdit {background-color:black;color:white;} ");
+		te.show();
+		while(!proc->waitForFinished(100))
+		{
+			QCoreApplication::processEvents();
+			detailed += proc->readAll().toStdString().c_str();
+			processCarriageReturns(detailed);
+			te.setText(detailed);
+		}
+		detailed += proc->readAll().toStdString().c_str();
+		processCarriageReturns(detailed);
+		te.setText(detailed);
+		if(proc->exitCode() != 0)
+		{
+			delete proc;
+			proc = nullptr;
+			QMessageBox::warning(
+			    this, tr("Warning"),
+			    tr("Something went wrong during the octree generation..."));
+			return;
+		}
+
+		delete proc;
+		proc = nullptr;
+		QMessageBox::information(this, tr("Information"), tr("Success !"));
+	}
 }
 
 void MainWindow::aboutOctreegenGUI()
@@ -214,17 +208,22 @@ void MainWindow::aboutQt()
 	QMessageBox::aboutQt(this);
 }
 
-void MainWindow::dialogWithConsoleOutput(QString const& title,
-                                         QString const& text,
-                                         QString const& launchedCmdLine)
+void MainWindow::selectSaveAs()
 {
-	QMessageBox box(this);
-	box.setModal(true);
-	box.setWindowTitle(title);
-	box.setIcon(QMessageBox::Warning);
-	box.setText(text);
-	box.setDetailedText("Command :\n" + launchedCmdLine + "\n\nOutput :\n"
-	                    + procError);
-	box.setStyleSheet("QTextEdit {background-color:black;color:white;} ");
-	box.exec();
+	QString result = QFileDialog::getSaveFileName(
+	    this, tr("Save as"), lineEditSaveAs.text(),
+	    tr("Octree files (*.octree)"));
+	if(result != "")
+		lineEditSaveAs.setText(result);
+}
+
+void MainWindow::processCarriageReturns(QString& str)
+{
+	int cr;
+	while((cr = str.indexOf('\r')) >= 0)
+	{
+		int lineBreak = str.lastIndexOf('\n', cr);
+		// + 3 := remove "\r\033[K" after '\r'
+		str.remove(lineBreak + 1, cr - lineBreak + 3);
+	}
 }

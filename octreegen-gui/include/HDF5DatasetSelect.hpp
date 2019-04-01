@@ -36,16 +36,13 @@ class HDF5DatasetSelect : public QWidget
 {
 	Q_OBJECT
   public:
-	HDF5DatasetSelect(QWidget* parent, QString const& particlesLabel,
-	                  QString const& preExtension);
+	HDF5DatasetSelect(QWidget* parent, QString const& particlesLabel);
 	bool datasetPathIsValid();
 	QString getDatasetPath() const { return lineEditDataset.text(); };
-	QString getOutputPath() const { return lineEditSaveAs.text(); }
   public slots:
 	void load(QString const& path);
 	void lineEdited(QString const& path);
 	void fixLineEdit();
-	void selectSaveAs();
 
   signals:
 	void selectedObjChanged();
@@ -54,8 +51,6 @@ class HDF5DatasetSelect : public QWidget
 	QTreeWidget tree;
 	QLineEdit lineEditDataset;
 	QLabel infoLabel;
-	QLineEdit lineEditSaveAs;
-	QString preExtension;
 
 	HDF5Object hdf5_obj;
 

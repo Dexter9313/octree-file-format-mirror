@@ -20,14 +20,11 @@
 #include <iostream>
 
 HDF5DatasetSelect::HDF5DatasetSelect(QWidget* parent,
-                                     QString const& particlesLabel,
-                                     QString const& preExtension)
+                                     QString const& particlesLabel)
     : QWidget(parent)
     , tree(this)
     , lineEditDataset(this)
     , infoLabel(this)
-    , lineEditSaveAs(this)
-    , preExtension(preExtension)
 {
 	QVBoxLayout* layoutV = new QVBoxLayout(this);
 	layoutV->addWidget(new QLabel(particlesLabel, this));
@@ -50,16 +47,6 @@ HDF5DatasetSelect::HDF5DatasetSelect(QWidget* parent,
 	updateInfoLabel();
 	layoutV->addWidget(&infoLabel);
 
-	QWidget* w2           = new QWidget(this);
-	QHBoxLayout* layoutH2 = new QHBoxLayout(w2);
-	layoutH2->addWidget(new QLabel(tr("Save as :"), this));
-	connect(&lineEditSaveAs, SIGNAL(textEdited(QString const&)), this,
-	        SLOT(lineEdited(QString const&)));
-	layoutH2->addWidget(&lineEditSaveAs);
-	QPushButton* b = new QPushButton("...", this);
-	connect(b, SIGNAL(clicked(bool)), this, SLOT(selectSaveAs()));
-	layoutH2->addWidget(b);
-	layoutV->addWidget(w2);
 }
 
 bool HDF5DatasetSelect::datasetPathIsValid()
@@ -89,9 +76,6 @@ void HDF5DatasetSelect::load(QString const& path)
 	hdf5_obj = readHDF5RootObject(path.toStdString());
 	constructItems(hdf5_obj);
 	tree.setRootIsDecorated(true);
-	QFileInfo fi(path);
-	lineEditSaveAs.setText(fi.dir().absolutePath() + QDir::separator()
-	                       + fi.completeBaseName() + preExtension + ".octree");
 }
 
 void HDF5DatasetSelect::lineEdited(QString const& path)
@@ -125,15 +109,6 @@ void HDF5DatasetSelect::fixLineEdit()
 	updateInfoLabel();
 
 	emit selectedObjChanged();
-}
-
-void HDF5DatasetSelect::selectSaveAs()
-{
-	QString result = QFileDialog::getSaveFileName(
-	    this, tr("Save as"), lineEditSaveAs.text(),
-	    tr("Octree files (*.octree)"));
-	if(result != "")
-		lineEditSaveAs.setText(result);
 }
 
 QTreeWidgetItem* HDF5DatasetSelect::constructItems(HDF5Object const& obj,
