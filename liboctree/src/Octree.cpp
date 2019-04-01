@@ -446,9 +446,21 @@ Octree::Flags operator|(Octree::Flags a, Octree::Flags b)
 	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b));
 }
 
+Octree::Flags& operator|=(Octree::Flags& a, Octree::Flags b)
+{
+	a = a | b;
+	return a;
+}
+
 Octree::Flags operator&(Octree::Flags a, Octree::Flags b)
 {
 	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b));
+}
+
+Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b)
+{
+	a = a & b;
+	return a;
 }
 
 inline float Octree::get(std::vector<float> const& data, size_t vertex,

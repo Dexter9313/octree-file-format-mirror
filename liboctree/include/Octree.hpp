@@ -366,8 +366,17 @@ void write(std::ostream& stream, Octree& octree);
  */
 Octree::Flags operator|(Octree::Flags a, Octree::Flags b);
 
+/*! \brief Stores the result of \p a | \p b in \p a.
+ */
+Octree::Flags& operator|=(Octree::Flags& a, Octree::Flags b);
+
 /*! \brief Returns bitwise AND value between two Octree#Flags considering they are equivalent to uint64_t.
  */
 Octree::Flags operator&(Octree::Flags a, Octree::Flags b);
+
+/*! \brief Stores the result of \p a & \p b in \p a.
+ */
+Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b);
+
 
 #endif // OCTREE_H
