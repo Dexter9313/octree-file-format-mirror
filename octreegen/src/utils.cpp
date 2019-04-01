@@ -58,36 +58,76 @@ std::vector<float> generateVertices(size_t number, unsigned int seed)
 	return vertices;
 }
 
-std::vector<float> readHDF5(std::string const& path,
-                            const char* pathToCoordinates)
+void readHDF5Dataset(std::string const& filePath, const char* datasetPath, std::vector<float>& result, unsigned int offset, unsigned int stride)
 {
+	(void) offset;
 	hid_t hdf5_file;
 	hid_t hdf5_dataset;
 	hsize_t dims[2];
+	dims[1] = 1;
 
-	hid_t space;
-	float** rdata;
+	hid_t space, memspace;
 	// int status;
 
-	hdf5_file    = H5Fopen(path.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
-	hdf5_dataset = H5Dopen(hdf5_file, pathToCoordinates, H5P_DEFAULT);
+	hdf5_file    = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+	hdf5_dataset = H5Dopen(hdf5_file, datasetPath, H5P_DEFAULT);
 	space        = H5Dget_space(hdf5_dataset);
 	H5Sget_simple_extent_dims(space, dims, NULL);
 
-	std::vector<float> result(dims[0] * dims[1]);
-	rdata    = new float*[dims[0]];
-	rdata[0] = &result[0];
-	for(size_t i = 1; i < (size_t) dims[0]; i++)
-		rdata[i] = rdata[0] + i * dims[1];
+	hsize_t totalSize(dims[0] * stride);
+	if(result.size() == 0)
+	{
+		result.resize(totalSize);
+	}
 
-	std::cout << "Reading HDF5 dataset :" << std::endl;
-	Octree::showProgress(0.f);
-	/*status =*/H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL,
-	                    H5P_DEFAULT, rdata[0]);
-	Octree::showProgress(1.f);
+	memspace = H5Screate_simple(1, &totalSize, NULL);
+
+	hsize_t hoffset(offset), hstride(stride);
+	H5Sselect_hyperslab(memspace, H5S_SELECT_SET, &hoffset, &hstride, &dims[0], &dims[1]);
+
+	/*status =*/H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, memspace, H5S_ALL,
+	                    H5P_DEFAULT, &result[0]);
+
 	H5Dclose(hdf5_dataset);
 
+	H5Fclose(hdf5_file);
+}
+
+std::vector<float> readHDF5(std::string const& filePath,
+                            const char* pathToCoordinates,
+                            const char* pathToRadius,
+                            const char* pathToLuminosity)
+{
+	bool radius(pathToRadius[0] != '\0');
+	bool luminosity(pathToLuminosity[0] != '\0');
+	unsigned int offset(0), stride(3);
+	if(radius)
+		stride++;
+	if(luminosity)
+		stride++;
+
+	std::vector<float> result;
+	std::cout << "Reading HDF5 data :" << std::endl;
+	Octree::showProgress(0.f);
+	readHDF5Dataset(filePath, pathToCoordinates, result, offset, stride);
+	offset += 3;
+	Octree::showProgress(0.333f);
+	// radius
+	if(radius)
+	{
+		readHDF5Dataset(filePath, pathToRadius, result, offset, stride);
+		offset++;
+	}
+	Octree::showProgress(0.666f);
+	if(luminosity)
+	{
+		readHDF5Dataset(filePath, pathToLuminosity, result, offset, stride);
+		offset++;
+	}
+	Octree::showProgress(1.f);
+
 	// put everything in the unit cube
+	hid_t hdf5_file     = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 	hid_t hdf5_header   = H5Gopen(hdf5_file, "/Header", 0);
 	hid_t hdf5_boxsize  = H5Aopen(hdf5_header, "BoxSize", H5P_DEFAULT);
 	hid_t boxsize_space = H5Aget_space(hdf5_boxsize);
@@ -116,10 +156,12 @@ std::vector<float> readHDF5(std::string const& path,
 		}
 		if(boxsize_data[*boxsize_size - 1] > boxsize)
 			boxsize = boxsize_data[*boxsize_size - 1];
-		std::cout << boxsize_data[*boxsize_size - 1] << "], max : " << boxsize << std::endl;
+		std::cout << boxsize_data[*boxsize_size - 1] << "], max : " << boxsize
+		          << std::endl;
 		delete[] boxsize_size;
 		delete[] boxsize_data;
 	}
+	H5Fclose(hdf5_file);
 
 	std::cout << "Resizing data to fit in the unit cube :" << std::endl;
 	Octree::showProgress(0.f);
@@ -128,14 +170,14 @@ std::vector<float> readHDF5(std::string const& path,
 		if(boxsize == 0.0)
 		{
 			float max(0.f), min(FLT_MAX);
-			for(size_t i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += stride)
 			{
 				if(result[i] > max)
 					max = result[i];
 				if(result[i] < min)
 					min = result[i];
 			}
-			for(size_t i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += stride)
 			{
 				result[i] -= min;
 				result[i] /= 0.5 * (max - min);
@@ -145,11 +187,11 @@ std::vector<float> readHDF5(std::string const& path,
 		}
 		else
 		{
-			for(size_t i(j); i < result.size(); i += 3)
+			for(size_t i(j); i < result.size(); i += stride)
 			{
 				if((i + (result.size() * j) - j) % 300000000 == j)
 					Octree::showProgress((float) (i + (result.size() * j) - j)
-					                     / (float) (3 * (result.size() - 1)));
+					                     / (float) (stride * (result.size() - 1)));
 				// result[i] -= min;
 				result[i] /= 0.5 * boxsize;
 				result[i] -= 1;
@@ -158,10 +200,7 @@ std::vector<float> readHDF5(std::string const& path,
 	}
 	Octree::showProgress(1.f);
 
-	H5Fclose(hdf5_file);
-	delete[] rdata;
-
-	std::cout << "Loaded from file : " << result.size() / 3 << " points"
+	std::cout << "Loaded from file : " << result.size() / stride << " points"
 	          << std::endl;
 	return result;
 }

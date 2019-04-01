@@ -28,17 +28,17 @@
 void man(const char* argv_0)
 {
 	std::cout << "Usage: " << std::endl
-	          << "\t" << argv_0 << " FILE_IN:DATASET_PATH FILE_OUT" << std::endl
+	          << "\t" << argv_0 << " FILE_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl;
 	std::cout << "Examples: " << std::endl
 	          << "\t"
-	          << "To read gaz data coordinates within snapshot.hdf5 in "
+	          << "To read gaz data coordinates and luminosity within snapshot.hdf5 in "
 	          << std::endl
 	          << "\tgroup /PartType0 and write the corresponding octree in "
 	          << std::endl
 	          << "\tthe gaz.octree file :" << std::endl
 	          << "\t" << argv_0
-	          << " snapshot.hdf5:/PartType0/Coordinates gaz.octree" << std::endl
+	          << " snapshot.hdf5:/PartType0/Coordinates::/PartType0/Luminosities gaz.octree" << std::endl
 	          << std::endl
 	          << "\t"
 	          << "To generate 1 million uniformly random particles and "
@@ -57,11 +57,25 @@ int main(int argc, char* argv[])
 		man(argv[0]);
 		return EXIT_SUCCESS;
 	}
-	else if(split(argv[1], ':').size() == 2)
+	else if(split(argv[1], ':').size() >= 2)
 	{
+		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES);
 		std::string file   = split(argv[1], ':')[0];
 		std::string coords = split(argv[1], ':')[1];
-		std::vector<float> v(readHDF5(file, coords.c_str()));
+		std::string radius = "";
+		if(split(argv[1], ':').size() >= 3)
+		{
+			radius = split(argv[1], ':')[2];
+			flags |= Octree::Flags::STORE_RADIUS;
+		}
+		std::string luminosity = "";
+		if(split(argv[1], ':').size() >= 4)
+		{
+			luminosity = split(argv[1], ':')[3];
+			flags |= Octree::Flags::STORE_LUMINOSITY;
+		}
+		octree.setFlags(flags);
+		std::vector<float> v(readHDF5(file, coords.c_str(), radius.c_str(), luminosity.c_str()));
 		std::cout << "Constructing octree :" << std::endl;
 		Octree::showProgress(0.f);
 		octree.init(v);
@@ -84,7 +98,6 @@ int main(int argc, char* argv[])
 		Octree::showProgress(0.f);
 		octree.init(v);
 	}
-	std::cout << "\r\033[K100%" << std::endl;
 	std::ofstream f(argv[2], std::ios_base::out | std::ios_base::binary);
 	std::cout << "Writing octree to output file :" << std::endl;
 	Octree::showProgress(0.f);
