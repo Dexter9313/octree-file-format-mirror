@@ -118,6 +118,7 @@ void MainWindow::updateGenerateButton()
 
 void MainWindow::generate()
 {
+	this->setEnabled(false);
 	QString cmdLine(QString("octreegen ") + fileName + ":"
 	                + coordinatesSelect.getDatasetPath());
 	if(radiusSelect.datasetPathIsValid()
@@ -176,6 +177,7 @@ void MainWindow::generate()
 		proc = nullptr;
 		QMessageBox::information(this, tr("Information"), tr("Success !"));
 	}
+	this->setEnabled(true);
 }
 
 void MainWindow::aboutOctreegenGUI()
