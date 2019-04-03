@@ -197,9 +197,13 @@ class Octree
 	 */
 	virtual void readBBox(std::istream& in);
 
+	/*! \brief Returns the position data only contained within this node.
+	 */
+	virtual std::vector<float> getOwnData() const;
+
 	/*! \brief Returns all the position data contained within the whole octree.
 	 */
-	virtual std::vector<float> getAllData() const;
+	virtual std::vector<float> getData() const;
 
 	/*! \brief Returns a displayable string to represent the tree.
 	 */
@@ -300,6 +304,10 @@ class Octree
 	std::array<Octree*, 8> children = {{nullptr, nullptr, nullptr, nullptr,
 	                                    nullptr, nullptr, nullptr, nullptr}};
 
+	/*! @brief Number of dimensions per vertex (3 by default with only 3D positions).
+	 */
+	unsigned int const& dimPerVertex = dimPerVertex_;
+
   private:
 	// Data indices go from 0 to data.size()-1.
 	// Vertices indices go from 0 to data.size()/3 - 1 (a triplet of values is
@@ -340,8 +348,7 @@ class Octree
 	                         unsigned int dim, float pivot);
 
 	Flags flags = Flags::NONE;
-	// number of dimensions per vertex (3 by default with only 3D positions)
-	unsigned int dimPerVertex = 3;
+	unsigned int dimPerVertex_ = 3;
 
 	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
 	// the tree

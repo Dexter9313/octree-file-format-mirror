@@ -241,11 +241,11 @@ void Octree::init(int64_t file_addr, std::istream& in)
 void Octree::setFlags(Flags flags)
 {
 	this->flags = flags;
-	dimPerVertex = 3;
+	dimPerVertex_ = 3;
 	if((flags & Flags::STORE_RADIUS) != Flags::NONE)
-		++dimPerVertex;
+		++dimPerVertex_;
 	if((flags & Flags::STORE_LUMINOSITY) != Flags::NONE)
-		++dimPerVertex;
+		++dimPerVertex_;
 }
 
 bool Octree::isLeaf() const
@@ -338,14 +338,47 @@ void Octree::readBBox(std::istream& in)
 	brw::read(in, maxZ);
 }
 
-std::vector<float> Octree::getAllData() const
+std::vector<float> Octree::getOwnData() const
 {
 	std::vector<float> result(data);
+	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
+	{
+		float localScale(1.f);
+		if((maxX - minX > maxY - minY)
+		   && (maxX - minX > maxZ - minZ))
+		{
+			localScale = maxX - minX;
+		}
+		else if(maxY - minY > maxZ - minZ)
+		{
+			localScale = maxY - minY;
+		}
+		else if(maxZ != minZ)
+		{
+			localScale = maxZ - minZ;
+		}
+
+		for(size_t i(0); i < this->data.size(); i += dimPerVertex)
+		{
+			result[i] *= localScale;
+			result[i] += minX;
+			result[i+1] *= localScale;
+			result[i+1] += minY;
+			result[i+2] *= localScale;
+			result[i+2] += minZ;
+		}
+	}
+	return result;
+}
+
+std::vector<float> Octree::getData() const
+{
+	std::vector<float> result(getOwnData());
 	for(unsigned int i(0); i < 8; ++i)
 	{
 		if(children[i])
 		{
-			std::vector<float> childResult(children[i]->getAllData());
+			std::vector<float> childResult(children[i]->getData());
 			result.insert(result.end(), childResult.begin(), childResult.end());
 		}
 	}
