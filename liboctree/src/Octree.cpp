@@ -373,7 +373,12 @@ std::vector<float> Octree::getOwnData() const
 
 std::vector<float> Octree::getData() const
 {
-	std::vector<float> result(getOwnData());
+	if(isLeaf())
+	{
+		return getOwnData();
+	}
+
+	std::vector<float> result;
 	for(unsigned int i(0); i < 8; ++i)
 	{
 		if(children[i])
