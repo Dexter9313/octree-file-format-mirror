@@ -61,10 +61,6 @@ for f in filenames:
 
 output = File(output, "w")
 
-# need to create boxsize
-h = output.create_group("Header")
-h.attrs["BoxSize"] = 0.
-
 for i in range(len(positions)):
     print("Writing type {}".format(i))
     pos = positions[i][0]

@@ -96,10 +96,6 @@ for i in range(Nspecies):
 # write the HDF5 file
 f = File(output, "w")
 
-# need to create boxsize
-h = f.create_group("Header")
-h.attrs["BoxSize"] = 0.
-
 for i in range(Nspecies):
     if verbose:
         print("Writing type {}".format(i))
