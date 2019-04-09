@@ -40,7 +40,7 @@ class HDF5DatasetSelect : public QWidget
 	bool datasetPathIsValid();
 	QString getDatasetPath() const { return lineEditDataset.text(); };
   public slots:
-	void load(QString const& path);
+	void load(QStringList const& filePaths);
 	void lineEdited(QString const& path);
 	void fixLineEdit();
 
@@ -62,6 +62,7 @@ class HDF5DatasetSelect : public QWidget
 	static QTreeWidgetItem* itemFromPath(QStringList& path,
 	                                     QTreeWidgetItem* rootItem);
 	static HDF5Object* objFromPath(QStringList& path, HDF5Object* rootObj);
+	static HDF5Object intersection(HDF5Object const& obj1, HDF5Object const& obj2, bool& ok);
 };
 
 #endif // HDF5DATASETSELECT_H

@@ -85,16 +85,18 @@ MainWindow::MainWindow()
 
 void MainWindow::openHDF5()
 {
-	fileName = QFileDialog::getOpenFileName(
-	    this, tr("Open HDF5 File"), QString(""), tr("HDF5 Files (*.hdf5)"));
-	std::cout << fileName.toStdString() << std::endl;
-	coordinatesSelect.load(fileName);
-	radiusSelect.load(fileName);
-	luminositySelect.load(fileName);
+	fileNames = QFileDialog::getOpenFileNames(
+	    this, tr("Open HDF5 File(s)"), QString(""), tr("HDF5 Files (*.hdf5)"));
+	if(fileNames.empty())
+		return;
+	coordinatesSelect.load(fileNames);
+	radiusSelect.load(fileNames);
+	luminositySelect.load(fileNames);
 	centralWidget.setEnabled(true);
-	QFileInfo fi(fileName);
+
+	QFileInfo fi(fileNames[0]);
 	lineEditSaveAs.setText(fi.dir().absolutePath() + QDir::separator()
-	                       + fi.completeBaseName() + ".octree");
+	                       + fi.baseName() + ".octree");
 }
 
 void MainWindow::updateGenerateButton()
@@ -107,9 +109,9 @@ void MainWindow::updateGenerateButton()
 		QStringList splittedPath = datasetPath.split('/');
 		splittedPath.pop_back();
 
-		QFileInfo fi(fileName);
+		QFileInfo fi(fileNames[0]);
 		lineEditSaveAs.setText(fi.dir().absolutePath() + QDir::separator()
-		                       + fi.completeBaseName() + "."
+		                       + fi.baseName() + "."
 		                       + splittedPath.last() + ".octree");
 	}
 	else
@@ -119,8 +121,15 @@ void MainWindow::updateGenerateButton()
 void MainWindow::generate()
 {
 	this->setEnabled(false);
-	QString cmdLine(QString("octreegen ") + fileName + ":"
-	                + coordinatesSelect.getDatasetPath());
+	QString cmdLine("octreegen ");
+	cmdLine += '"';
+	for(auto fileName : fileNames)
+	{
+		cmdLine += fileName + ' ';
+	}
+	cmdLine.remove(cmdLine.size() - 1, 1);
+	cmdLine +=  "\":" + coordinatesSelect.getDatasetPath();
+
 	if(radiusSelect.datasetPathIsValid()
 	   || luminositySelect.datasetPathIsValid())
 		cmdLine += ":";
@@ -152,6 +161,7 @@ void MainWindow::generate()
 		te.setFont(QFont("Monospace", 10));
 		te.setFixedSize(QSize(800, 400));
 		te.setStyleSheet("QTextEdit {background-color:black;color:white;} ");
+		te.ensureCursorVisible();
 		te.show();
 		while(!proc->waitForFinished(100))
 		{
@@ -159,10 +169,12 @@ void MainWindow::generate()
 			detailed += proc->readAll().toStdString().c_str();
 			processCarriageReturns(detailed);
 			te.setText(detailed);
+			te.verticalScrollBar()->setValue(te.verticalScrollBar()->maximum());
 		}
 		detailed += proc->readAll().toStdString().c_str();
 		processCarriageReturns(detailed);
 		te.setText(detailed);
+		te.verticalScrollBar()->setValue(te.verticalScrollBar()->maximum());
 		if(proc->exitCode() != 0)
 		{
 			delete proc;

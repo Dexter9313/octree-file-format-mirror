@@ -70,10 +70,17 @@ bool HDF5DatasetSelect::datasetPathIsValid()
 	return false;
 }
 
-void HDF5DatasetSelect::load(QString const& path)
+void HDF5DatasetSelect::load(QStringList const& filePaths)
 {
 	tree.clear();
-	hdf5_obj = readHDF5RootObject(path.toStdString());
+	hdf5_obj = readHDF5RootObject(filePaths[0].toStdString());
+	bool ok;
+	for(int i(1); i < filePaths.size(); ++i)
+	{
+		hdf5_obj = intersection(hdf5_obj, readHDF5RootObject(filePaths[i].toStdString()), ok);
+		if(!ok)
+			return;
+	}
 	constructItems(hdf5_obj);
 	tree.setRootIsDecorated(true);
 }
@@ -205,4 +212,29 @@ HDF5Object* HDF5DatasetSelect::objFromPath(QStringList& path,
 	}
 
 	return nullptr;
+}
+
+HDF5Object HDF5DatasetSelect::intersection(HDF5Object const& obj1, HDF5Object const& obj2, bool& ok)
+{
+	HDF5Object result;
+	if(obj1.name != obj2.name || obj1.type != obj2.type)
+	{
+		ok = false;
+		return result;
+	}
+
+	result.name = obj1.name;
+	result.type = obj1.type;
+
+	for(unsigned int i(0); i < obj1.links.size(); ++i)
+	{
+		for(unsigned int j(0); j < obj2.links.size(); ++j)
+		{
+			HDF5Object link(intersection(obj1.links[i], obj2.links[j], ok));
+			if(ok)
+				result.links.push_back(link);
+		}
+	}
+	ok = true;
+	return result;
 }

@@ -30,6 +30,7 @@
 #include <QProcess>
 #include <QProgressDialog>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QTextEdit>
 #include <QVBoxLayout>
 
@@ -61,7 +62,7 @@ class MainWindow : public QMainWindow
 	// related to octreegen calls
 	QProcess* proc = nullptr;
 
-	QString fileName;
+	QStringList fileNames;
 
 	HDF5DatasetSelect coordinatesSelect;
 	HDF5DatasetSelect radiusSelect;
