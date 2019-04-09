@@ -28,17 +28,21 @@
 void man(const char* argv_0)
 {
 	std::cout << "Usage: " << std::endl
-	          << "\t" << argv_0 << " FILE_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT" << std::endl
-	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl;
-	std::cout << "Examples: " << std::endl
+	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT" << std::endl
+	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl
+	          << "\n\t" << "FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported.";
+	std::cout << "\nExamples: " << std::endl
 	          << "\t"
-	          << "To read gaz data coordinates and luminosity within snapshot.hdf5 in "
+	          << "To read gaz data coordinates and luminosity within snapshot.&ast;.hdf5 files (will be expanded as \"snapshot.0.hdf5 snapshot.1.hdf5\" for example) in "
 	          << std::endl
 	          << "\tgroup /PartType0 and write the corresponding octree in "
 	          << std::endl
 	          << "\tthe gaz.octree file :" << std::endl
 	          << "\t" << argv_0
-	          << " snapshot.hdf5:/PartType0/Coordinates::/PartType0/Luminosities gaz.octree" << std::endl
+	          << " snapshot.*.hdf5:/PartType0/Coordinates::/PartType0/Luminosities gaz.octree" << std::endl
+			  << "\twhich is equivalent to :" << std::endl
+	          << "\t" << argv_0
+	          << " \"snapshot.0.hdf5 snapshot.1.hdf5\":/PartType0/Coordinates::/PartType0/Luminosities gaz.octree" << std::endl
 	          << std::endl
 	          << "\t"
 	          << "To generate 1 million uniformly random particles and "
@@ -75,7 +79,17 @@ int main(int argc, char* argv[])
 			flags |= Octree::Flags::STORE_LUMINOSITY;
 		}
 		octree.setFlags(flags);
-		std::vector<float> v(readHDF5(file, coords.c_str(), radius.c_str(), luminosity.c_str()));
+		std::vector<float> v;
+		try
+		{
+			v = readHDF5(file, coords.c_str(), radius.c_str(), luminosity.c_str());
+		}
+		catch(std::string s)
+		{
+			std::cerr << "Error while reading HDF5 file(s) :" << std::endl;
+			std::cerr << s << std::endl;
+			return EXIT_FAILURE;
+		}
 		std::cout << "Constructing octree :" << std::endl;
 		Octree::showProgress(0.f);
 		octree.init(v);

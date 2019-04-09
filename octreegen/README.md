@@ -24,12 +24,12 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install libhdf5-100
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.8.0/raw/liboctree-1.8.0-linux_amd64.deb?job=pack:liboctree
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.9.0/raw/liboctree-1.9.0-linux_amd64.deb?job=pack:liboctree
 	sudo dpkg -i ./*.deb
 
 Then simply install the following deb package :
 
-Download (.deb) : [octreegen 1.8.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.8.0/raw/octreegen-1.8.0-linux_amd64.deb?job=pack:octreegen)
+Download (.deb) : [octreegen 1.9.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.9.0/raw/octreegen-1.9.0-linux_amd64.deb?job=pack:octreegen)
 
 ### Build from source
 
@@ -37,7 +37,7 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install build-essential cmake libhdf5-serial-dev
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.8.0/raw/liboctree-1.8.0-linux_amd64.deb?job=pack:liboctree
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.9.0/raw/liboctree-1.9.0-linux_amd64.deb?job=pack:liboctree
 	sudo dpkg -i ./*.deb
 
 Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
@@ -60,17 +60,23 @@ Optionally, you can generate a deb package to make installation managing easier 
 
 ## Usage
 
-	octreegen FILE_IN:DATASET_PATH FILE_OUT
+	octreegen FILES_IN:DATASET_PATH FILE_OUT
 
 	octreegen PARTICLES_NUMBER FILE_OUT
 
+	FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported.
+
 ### Examples
 
-To read gaz data coordinates within snapshot.hdf5 in 
+To read gaz data coordinates within all snapshot.&ast;.hdf5 files (will be expanded as "snapshot.0.hdf5 snapshot.1.hdf5" for example) in 
 group /PartType0 and write the corresponding octree in 
 the gaz.octree file :
 
-	octreegen snapshot.hdf5:/PartType0/Coordinates gaz.octree
+	octreegen snapshot.*.hdf5:/PartType0/Coordinates gaz.octree
+
+equivalent to :
+
+	octreegen "snapshot.0.hdf5 snapshot.1.hdf5":/PartType0/Coordinates gaz.octree
 
 To generate 1 million uniformly random particles and 
 write the corresponding octree in the random.octree file :
