@@ -60,7 +60,7 @@ Optionally, you can generate a deb package to make installation managing easier 
 
 ## Usage
 
-Simply open an HDF5 file with File->Open then highlight each corresponding dataset in the HDF5 explorer (gaz, stars and dark matter). You can select different output files if you want. Then click the generate button and you are done when the load bar reaches 100% !
+Simply open an HDF5 file with File->Open then select a coordinates dataset within the datasets hierarchy (optionally radius and luminosity too). You can open several files at once if your data is spread out between multiple files. Then click the generate button and you are done when the load bar reaches 100% !
 
 ## Uninstall
 
