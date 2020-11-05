@@ -29,6 +29,10 @@ If you wish to write your own octree file format reader/writer or edit this proj
 
 FLOAT   : a 32-bit floating point value
 
+NEGSIZE : a 64-bit signed integer, used to store -1 times a size.
+
+FLAGS   : a 64-bit bitfield storing or-ed flags described in Octree.hpp
+
 SIZE    : a 64-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit values would be of SIZE 4)
 
 (       : a 64-bit constant 0x0000000000000000 (0)
@@ -43,9 +47,13 @@ empty   : void, defined for grammar syntax, represented by absolutly no bits in 
 
 ### Non-terminal terms (rules)
 
-S (axiom)    -> STRUCTURE CHUNKS
+S (axiom)    -> HEADER STRUCTURE CHUNKS
 
-Separation of structure and chunks
+Separation of header, structure and chunks.
+
+HEADER       -> NEGSIZE FLAGS
+
+NEGSIZE Contains -1 times the address of CHUNKS in the file. It is stored negative so that it is read as an address for recursion reasons but cannot be intepreted as an address, and so designates the first 64-bit value in the file, indicating that the next 64-bit value will be FLAGS, and then the proper octree description.
 
 
 STRUCTURE    -> ADDRESS TREE{,8} )

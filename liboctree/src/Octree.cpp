@@ -185,8 +185,9 @@ void Octree::init(std::istream& in)
 	brw::read(in, file_addr);
 	// debug << tabs << file_addr << std::endl;
 
-	// if file_addr is -1, we are actually at the beginning of the file and we have flags to read !
-	if(file_addr == -1)
+	// if file_addr is negative, we are actually at the beginning of the file
+	// and we have flags to read !
+	if(file_addr < 0)
 	{
 		Flags flags_temp;
 		brw::read(in, flags_temp);
@@ -427,6 +428,7 @@ Octree::~Octree()
 
 void write(std::ostream& stream, Octree& octree)
 {
+	int64_t start(stream.tellp());
 	// write flags if any
 	if(octree.getFlags() != Octree::Flags::NONE)
 	{
@@ -442,18 +444,23 @@ void write(std::ostream& stream, Octree& octree)
 	if(headerSize == 1)
 		headerSize += 2;
 
-	int64_t start(stream.tellp());
+	int64_t headerStart(stream.tellp());
 
 	// write zeros to leave space, don't write first '('
 	int64_t zero(0);
 	for(size_t i(1); i < headerSize; ++i)
 		brw::write(stream, zero);
 
+	int64_t negDataStart(-1*stream.tellp());
 	// write chunks and hold their addresses
 	octree.writeData(stream);
 
-	// write real compact data (with true addresses)
+	// replace the initial -1 by -1*dataStart
 	stream.seekp(start);
+	brw::write(stream, negDataStart);
+
+	// write real compact data (with true addresses)
+	stream.seekp(headerStart);
 	// we don't want to write the vector's size and the first '('
 	// so we write manually from the second element
 	std::vector<int64_t> header(octree.getCompactData());
