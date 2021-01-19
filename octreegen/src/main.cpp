@@ -29,6 +29,7 @@ void man(const char* argv_0)
 {
 	std::cout << "Usage: " << std::endl
 	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT" << std::endl
+	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH:DATASET_R_COLOR_PATH:DATASET_G_COLOR_PATH:DATASET_B_COLOR_PATH FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl
 	          << "\n\t" << "FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported.";
 	std::cout << "\nExamples: " << std::endl
@@ -61,21 +62,22 @@ int main(int argc, char* argv[])
 		man(argv[0]);
 		return EXIT_SUCCESS;
 	}
-	else if(split(argv[1], ':').size() >= 2)
+	auto s(split(argv[1], ':'));
+	if(s.size() >= 2 && s.size() <= 4)
 	{
 		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES);
-		std::string file   = split(argv[1], ':')[0];
-		std::string coords = split(argv[1], ':')[1];
+		std::string file   = s[0];
+		std::string coords = s[1];
 		std::string radius = "";
-		if(split(argv[1], ':').size() >= 3)
+		if(s.size() >= 3)
 		{
-			radius = split(argv[1], ':')[2];
+			radius = s[2];
 			flags |= Octree::Flags::STORE_RADIUS;
 		}
 		std::string luminosity = "";
-		if(split(argv[1], ':').size() >= 4)
+		if(s.size() >= 4)
 		{
-			luminosity = split(argv[1], ':')[3];
+			luminosity = s[3];
 			flags |= Octree::Flags::STORE_LUMINOSITY;
 		}
 		octree.setFlags(flags);
@@ -83,6 +85,30 @@ int main(int argc, char* argv[])
 		try
 		{
 			v = readHDF5(file, coords.c_str(), radius.c_str(), luminosity.c_str());
+		}
+		catch(std::string s)
+		{
+			std::cerr << "Error while reading HDF5 file(s) :" << std::endl;
+			std::cerr << s << std::endl;
+			return EXIT_FAILURE;
+		}
+		std::cout << "Constructing octree :" << std::endl;
+		Octree::showProgress(0.f);
+		octree.init(v);
+	}
+	else if(s.size() == 5)
+	{
+		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES | Octree::Flags::STORE_COLOR);
+		std::string file   = s[0];
+		std::string coords = s[1];
+		std::string r = s[2];
+		std::string g = s[3];
+		std::string b = s[4];
+		octree.setFlags(flags);
+		std::vector<float> v;
+		try
+		{
+			v = readHDF5(file, coords.c_str(), r.c_str(), g.c_str(), b.c_str());
 		}
 		catch(std::string s)
 		{

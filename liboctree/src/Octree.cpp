@@ -246,6 +246,8 @@ void Octree::setFlags(Flags flags)
 		++dimPerVertex_;
 	if((flags & Flags::STORE_LUMINOSITY) != Flags::NONE)
 		++dimPerVertex_;
+	if((flags & Flags::STORE_COLOR) != Flags::NONE)
+		dimPerVertex_ += 3;
 }
 
 bool Octree::isLeaf() const

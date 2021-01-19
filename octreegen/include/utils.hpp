@@ -33,3 +33,4 @@ std::vector<std::string> parseFiles(std::string const& filePath);
 size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths, const char* datasetPath);
 size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std::vector<float>& result, size_t offset = 0, unsigned int stride = 5);
 std::vector<float> readHDF5(std::string const& filePath, const char* pathToCoordinates, const char* pathToRadius = "", const char* pathToLuminosity = "");
+std::vector<float> readHDF5(std::string const& filePath, const char* pathToCoordinates, const char* pathToR, const char* pathToG, const char* pathToB);

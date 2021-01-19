@@ -82,6 +82,9 @@ class Octree
 		/*! \brief Set if the particles luminosities are also stored.
 		 */
 		STORE_LUMINOSITY = 0x0000000200000000ULL,
+		/*! \brief Set if the particles colors are also stored.
+		 */
+		STORE_COLOR = 0x0000000400000000ULL,
 	};
 
 	/*! \brief Constructs an Octree with \p flags as \ref Flags
