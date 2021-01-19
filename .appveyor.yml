@@ -41,7 +41,7 @@ artifacts:
 deploy:
   provider: GitHub
   auth_token:
-    secure: zl4QU+v4bBjyTAJkEVn7y1tBF63bC79DMH9rzcfYGMZnW8d1bDr8LWGHhNCrL44w
+    secure: IMbCn06XphHmGMKdAJGokbAnrW5YVigkWpU0uGlzMyQBo6VHGLnUm/7bHkh1olOc
   artifact: zipfile, installer
   on:
     branch: master                 # release from master branch only
