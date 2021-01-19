@@ -65,7 +65,7 @@ std::vector<std::string> glob(std::string const& filePath)
 	int err = glob(filePath.c_str(), 0, NULL, &globbuf);
 	if(err == 0)
 	{
-		for (size_t i = 0; i < globbuf.gl_pathc; i++)
+		for(size_t i = 0; i < globbuf.gl_pathc; i++)
 		{
 			result.emplace_back(globbuf.gl_pathv[i]);
 		}
@@ -96,7 +96,8 @@ std::vector<std::string> parseFiles(std::string const& filePath)
 	return result;
 }
 
-size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths, const char* datasetPath)
+size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths,
+                             const char* datasetPath)
 {
 	size_t result(0);
 	for(auto filePath : filesPaths)
@@ -105,7 +106,8 @@ size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths, const c
 		hsize_t dims[2];
 		dims[1] = 1;
 
-		hid_t hdf5_file    = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+		hid_t hdf5_file
+		    = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 		if(hdf5_file < 0)
 		{
 			throw(filePath + " isn't a valid HDF5 file.");
@@ -118,7 +120,7 @@ size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths, const c
 			throw(filePath + ":" + datasetPath + " isn't a valid HDF5 Dataset path.");
 		}
 
-		space        = H5Dget_space(hdf5_dataset);
+		space = H5Dget_space(hdf5_dataset);
 		if(space < 0)
 		{
 			H5Dclose(hdf5_dataset);
@@ -140,7 +142,9 @@ size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths, const c
 	return result;
 }
 
-size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std::vector<float>& result, size_t offset, unsigned int stride)
+size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath,
+                       std::vector<float>& result, size_t offset,
+                       unsigned int stride)
 {
 	hid_t hdf5_file;
 	hid_t hdf5_dataset;
@@ -149,7 +153,7 @@ size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std
 
 	hid_t space, memspace;
 
-	hdf5_file    = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+	hdf5_file = H5Fopen(filePath.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 	if(hdf5_file < 0)
 	{
 		throw(filePath + " isn't a valid HDF5 file.");
@@ -159,22 +163,25 @@ size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std
 	if(hdf5_dataset < 0)
 	{
 		H5Fclose(hdf5_file);
-		throw(filePath + ":" + datasetPath + " isn't a valid HDF5 Dataset path.");
+		throw(filePath + ":" + datasetPath
+		      + " isn't a valid HDF5 Dataset path.");
 	}
 
-	space        = H5Dget_space(hdf5_dataset);
+	space = H5Dget_space(hdf5_dataset);
 	if(space < 0)
 	{
 		H5Dclose(hdf5_dataset);
 		H5Fclose(hdf5_file);
-		throw(std::string("Cannot get space of ") + filePath + ":" + datasetPath);
+		throw(std::string("Cannot get space of ") + filePath + ":"
+		      + datasetPath);
 	}
 
 	if(H5Sget_simple_extent_dims(space, dims, NULL) < 0)
 	{
 		H5Dclose(hdf5_dataset);
 		H5Fclose(hdf5_file);
-		throw(std::string("Cannot get simple extent dimensions of ") + filePath + ":" + datasetPath);
+		throw(std::string("Cannot get simple extent dimensions of ") + filePath
+		      + ":" + datasetPath);
 	}
 
 	hsize_t totalSize(dims[0] * stride);
@@ -184,7 +191,7 @@ size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std
 	}
 
 	totalSize = result.size();
-	memspace = H5Screate_simple(1, &totalSize, NULL);
+	memspace  = H5Screate_simple(1, &totalSize, NULL);
 	if(memspace < 0)
 	{
 		H5Dclose(hdf5_dataset);
@@ -195,7 +202,9 @@ size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std
 	}
 
 	hsize_t hoffset(offset), hstride(stride);
-	if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, &hoffset, &hstride, &dims[0], &dims[1]) < 0)
+	if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, &hoffset, &hstride,
+	                       &dims[0], &dims[1])
+	   < 0)
 	{
 		H5Dclose(hdf5_dataset);
 		H5Fclose(hdf5_file);
@@ -211,8 +220,9 @@ size_t readHDF5Dataset(std::string const& filePath, const char* datasetPath, std
 		throw(oss.str());
 	}
 
-	if(H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, memspace, H5S_ALL,
-	                    H5P_DEFAULT, &result[0]) < 0)
+	if(H5Dread(hdf5_dataset, H5T_NATIVE_FLOAT, memspace, H5S_ALL, H5P_DEFAULT,
+	           &result[0])
+	   < 0)
 	{
 		H5Dclose(hdf5_dataset);
 		H5Fclose(hdf5_file);
@@ -240,8 +250,11 @@ std::vector<float> readHDF5(std::string const& filePath,
 	}
 	std::cout << std::endl;
 
-	size_t verticesNumber = totalNumberOfVertices(parseFiles(filePath), pathToCoordinates);
-	std::cout << "Total number of vertices to read : " << verticesNumber << std::endl << std::endl;
+	size_t verticesNumber
+	    = totalNumberOfVertices(parseFiles(filePath), pathToCoordinates);
+	std::cout << "Total number of vertices to read : " << verticesNumber
+	          << std::endl
+	          << std::endl;
 
 	bool radius(pathToRadius[0] != '\0');
 	bool luminosity(pathToLuminosity[0] != '\0');
@@ -262,19 +275,23 @@ std::vector<float> readHDF5(std::string const& filePath,
 		size_t fileOffset_back(fileOffset);
 
 		Octree::showProgress(0.f);
-		fileOffset += stride*readHDF5Dataset(file, pathToCoordinates, result, fileOffset_back + offset, stride);
+		fileOffset += stride
+		              * readHDF5Dataset(file, pathToCoordinates, result,
+		                                fileOffset_back + offset, stride);
 		offset += 3;
 		Octree::showProgress(0.333f);
 		// radius
 		if(radius)
 		{
-			readHDF5Dataset(file, pathToRadius, result, fileOffset_back + offset, stride);
+			readHDF5Dataset(file, pathToRadius, result,
+			                fileOffset_back + offset, stride);
 			offset++;
 		}
 		Octree::showProgress(0.666f);
 		if(luminosity)
 		{
-			readHDF5Dataset(file, pathToLuminosity, result, fileOffset_back + offset, stride);
+			readHDF5Dataset(file, pathToLuminosity, result,
+			                fileOffset_back + offset, stride);
 			offset++;
 		}
 		Octree::showProgress(1.f);

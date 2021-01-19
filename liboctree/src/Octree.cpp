@@ -18,8 +18,8 @@
 
 #include "Octree.hpp"
 
-//std::string Octree::tabs    = "";
-//std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
+// std::string Octree::tabs    = "";
+// std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
 size_t Octree::totalNumberOfVertices = 0;
 
@@ -68,8 +68,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
 	{
 		float localScale(1.f);
-		if((maxX - minX > maxY - minY)
-		   && (maxX - minX > maxZ - minZ))
+		if((maxX - minX > maxY - minY) && (maxX - minX > maxZ - minZ))
 		{
 			localScale = maxX - minX;
 		}
@@ -86,10 +85,10 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		{
 			this->data[i] -= minX;
 			this->data[i] /= localScale;
-			this->data[i+1] -= minY;
-			this->data[i+1] /= localScale;
-			this->data[i+2] -= minZ;
-			this->data[i+2] /= localScale;
+			this->data[i + 1] -= minY;
+			this->data[i + 1] /= localScale;
+			this->data[i + 2] -= minZ;
+			this->data[i + 2] /= localScale;
 		}
 	}
 	if(verticesNumber <= MAX_LEAF_SIZE)
@@ -97,7 +96,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
 		data.resize(dimPerVertex * beg);
-		showProgress(1.f - beg/(float)totalNumberOfVertices);
+		showProgress(1.f - beg / (float) totalNumberOfVertices);
 		// we don't need to create children
 		return;
 	}
@@ -143,16 +142,16 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	if(splits[0] < beg || splits[6] > end)
 	{
 		std::cout << "ERR0" << std::endl;
-		int* foo = (int*)0x10;
-		*foo = 0;
+		int* foo = (int*) 0x10;
+		*foo     = 0;
 	}
 	for(unsigned int i(0); i < 6; ++i)
 	{
-		if(splits[i] > splits[i+1])
+		if(splits[i] > splits[i + 1])
 		{
 			std::cout << "ERR1 " << i << std::endl;
-			int* foo = (int*)0x10;
-			*foo = 0;
+			int* foo = (int*) 0x10;
+			*foo     = 0;
 		}
 	}
 
@@ -202,7 +201,7 @@ void Octree::init(std::istream& in)
 	while(true)
 	{
 		brw::read(in, readVal);
-		//debug << tabs << readVal << std::endl;
+		// debug << tabs << readVal << std::endl;
 		if(readVal == 1) //) <= own end
 			break;
 
@@ -211,7 +210,7 @@ void Octree::init(std::istream& in)
 			// tabs += '\t';
 			children[i] = newOctree(flags);
 			children[i]->init(in);
-			//tabs.pop_back();
+			// tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		else if(readVal != -1) // null node
@@ -219,7 +218,7 @@ void Octree::init(std::istream& in)
 			// tabs += '\t';
 			children[i] = newOctree(flags);
 			children[i]->init(readVal, in);
-			//tabs.pop_back();
+			// tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
 		}
 		++i;
@@ -241,7 +240,7 @@ void Octree::init(int64_t file_addr, std::istream& in)
 
 void Octree::setFlags(Flags flags)
 {
-	this->flags = flags;
+	this->flags   = flags;
 	dimPerVertex_ = 3;
 	if((flags & Flags::STORE_RADIUS) != Flags::NONE)
 		++dimPerVertex_;
@@ -345,8 +344,7 @@ std::vector<float> Octree::getOwnData() const
 	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
 	{
 		float localScale(1.f);
-		if((maxX - minX > maxY - minY)
-		   && (maxX - minX > maxZ - minZ))
+		if((maxX - minX > maxY - minY) && (maxX - minX > maxZ - minZ))
 		{
 			localScale = maxX - minX;
 		}
@@ -363,10 +361,10 @@ std::vector<float> Octree::getOwnData() const
 		{
 			result[i] *= localScale;
 			result[i] += minX;
-			result[i+1] *= localScale;
-			result[i+1] += minY;
-			result[i+2] *= localScale;
-			result[i+2] += minZ;
+			result[i + 1] *= localScale;
+			result[i + 1] += minY;
+			result[i + 2] *= localScale;
+			result[i + 2] += minZ;
 		}
 	}
 	return result;
@@ -399,7 +397,7 @@ std::string Octree::toString(std::string const& tabs) const
 	{
 		for(unsigned int j(0); j < dimPerVertex; ++j)
 		{
-			oss << tabs << data[i+j] << "; ";
+			oss << tabs << data[i + j] << "; ";
 		}
 		oss << std::endl;
 	}
@@ -476,11 +474,11 @@ void write(std::ostream& stream, Octree& octree)
 		std::string tabs = "";
 		for(size_t i(0); i < header.size(); ++i)
 		{
-			if(header[i] == 1)
-				tabs.pop_back();
-			debug << tabs << header[i] << std::endl;
-			if(header[i] == 0)
-				tabs += '\t';
+		    if(header[i] == 1)
+		        tabs.pop_back();
+		    debug << tabs << header[i] << std::endl;
+		    if(header[i] == 0)
+		        tabs += '\t';
 		}*/
 		brw::write(stream, header[1], headerSize - 1);
 	}
@@ -488,7 +486,8 @@ void write(std::ostream& stream, Octree& octree)
 
 Octree::Flags operator|(Octree::Flags a, Octree::Flags b)
 {
-	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b));
+	return static_cast<Octree::Flags>(static_cast<uint64_t>(a)
+	                                  | static_cast<uint64_t>(b));
 }
 
 Octree::Flags& operator|=(Octree::Flags& a, Octree::Flags b)
@@ -499,7 +498,8 @@ Octree::Flags& operator|=(Octree::Flags& a, Octree::Flags b)
 
 Octree::Flags operator&(Octree::Flags a, Octree::Flags b)
 {
-	return static_cast<Octree::Flags>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b));
+	return static_cast<Octree::Flags>(static_cast<uint64_t>(a)
+	                                  & static_cast<uint64_t>(b));
 }
 
 Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b)
@@ -509,13 +509,13 @@ Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b)
 }
 
 inline float Octree::get(std::vector<float> const& data, size_t vertex,
-                  unsigned int dim)
+                         unsigned int dim)
 {
 	return data[dimPerVertex * vertex + dim];
 }
 
 inline void Octree::set(std::vector<float>& data, size_t vertex,
-                 unsigned int dim, float val)
+                        unsigned int dim, float val)
 {
 	data[dimPerVertex * vertex + dim] = val;
 }
@@ -532,8 +532,8 @@ void Octree::swap(std::vector<float>& data, size_t i, size_t j)
 	}
 }
 
-size_t Octree::orderPivot(std::vector<float>& data, size_t beg,
-                                size_t end, unsigned int dim, float pivot)
+size_t Octree::orderPivot(std::vector<float>& data, size_t beg, size_t end,
+                          unsigned int dim, float pivot)
 {
 	// check if -1 has been passed as end (split[i]-1 if split[i] == 0)
 	size_t max(0);
@@ -544,9 +544,10 @@ size_t Octree::orderPivot(std::vector<float>& data, size_t beg,
 	}
 
 	// if end == beg - 1, this is not too bad, so let it go
-	if(beg != 0 && end < (beg-1))
+	if(beg != 0 && end < (beg - 1))
 	{
-		std::cout << "\r\nCONSISTENCY ERROR : " << beg << " " << end << std::endl;
+		std::cout << "\r\nCONSISTENCY ERROR : " << beg << " " << end
+		          << std::endl;
 		exit(1);
 	}
 	if(beg == end)
@@ -578,7 +579,7 @@ void Octree::showProgress(float progress)
 	std::cout << "\r\033[K" << '[';
 	for(unsigned int i(0); i < numberOfXs; ++i)
 		std::cout << "\u25B1";
-	for(unsigned int i(0); i < barSize-numberOfXs; ++i)
+	for(unsigned int i(0); i < barSize - numberOfXs; ++i)
 		std::cout << ' ';
 	std::cout << "] " << static_cast<unsigned int>(100 * progress) << '%';
 	std::fflush(stdout);
