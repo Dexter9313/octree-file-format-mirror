@@ -452,7 +452,8 @@ void write(std::ostream& stream, Octree& octree)
 	// write flags
 	int64_t minusone(-1);
 	// force versioned flag
-	uint64_t flags(static_cast<uint64_t>(octree.getFlags() | Octree::Flags::VERSIONED));
+	uint64_t flags(
+	    static_cast<uint64_t>(octree.getFlags() | Octree::Flags::VERSIONED));
 	brw::write(stream, minusone);
 	brw::write(stream, flags);
 	uint32_t versionMajor(VERSION_MAJOR);
@@ -473,7 +474,7 @@ void write(std::ostream& stream, Octree& octree)
 	for(size_t i(1); i < headerSize; ++i)
 		brw::write(stream, zero);
 
-	int64_t negDataStart(-1*stream.tellp());
+	int64_t negDataStart(-1 * stream.tellp());
 	// write chunks and hold their addresses
 	octree.writeData(stream);
 
