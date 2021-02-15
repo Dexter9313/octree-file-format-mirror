@@ -191,6 +191,25 @@ void Octree::init(std::istream& in)
 		Flags flags_temp;
 		brw::read(in, flags_temp);
 		setFlags(flags_temp);
+		// if versioned
+		if((flags & Flags::VERSIONED) != Flags::NONE)
+		{
+			uint32_t vMajor, vMinor;
+			brw::read(in, vMajor);
+			brw::read(in, vMinor);
+			if(vMajor < VERSION_MAJOR
+			   || (vMajor == VERSION_MAJOR && (int32_t) vMinor < VERSION_MINOR))
+			{
+				std::cerr << "Error: this version of liboctree can read octree "
+				             "files up to format version "
+				          << VERSION_MAJOR << "." << VERSION_MINOR
+				          << " whereas you are trying to load a file encoded "
+				             "with version "
+				          << vMajor << "." << vMinor
+				          << ". Upgrade liboctree to do so." << std::endl;
+				exit(EXIT_FAILURE);
+			}
+		}
 		// read file_addr again with the real value this time
 		brw::read(in, file_addr);
 	}
@@ -429,14 +448,17 @@ Octree::~Octree()
 void write(std::ostream& stream, Octree& octree)
 {
 	int64_t start(stream.tellp());
-	// write flags if any
-	if(octree.getFlags() != Octree::Flags::NONE)
-	{
-		int64_t minusone(-1);
-		uint64_t flags(static_cast<uint64_t>(octree.getFlags()));
-		brw::write(stream, minusone);
-		brw::write(stream, flags);
-	}
+
+	// write flags
+	int64_t minusone(-1);
+	// force versioned flag
+	uint64_t flags(static_cast<uint64_t>(octree.getFlags() | Octree::Flags::VERSIONED));
+	brw::write(stream, minusone);
+	brw::write(stream, flags);
+	uint32_t versionMajor(VERSION_MAJOR);
+	uint32_t versionMinor(VERSION_MINOR);
+	brw::write(stream, versionMajor);
+	brw::write(stream, versionMinor);
 
 	// write the rest of the tree
 	uint64_t headerSize(octree.getCompactData().size());
@@ -484,6 +506,11 @@ void write(std::ostream& stream, Octree& octree)
 		}*/
 		brw::write(stream, header[1], headerSize - 1);
 	}
+}
+
+Octree::Flags operator~(Octree::Flags f)
+{
+	return static_cast<Octree::Flags>(~static_cast<uint64_t>(f));
 }
 
 Octree::Flags operator|(Octree::Flags a, Octree::Flags b)

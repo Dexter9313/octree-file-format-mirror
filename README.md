@@ -27,23 +27,27 @@ If you wish to write your own octree file format reader/writer or edit this proj
 
 ### Terminal terms (vocabulary)
 
-FLOAT   : a 32-bit floating point value
+FLOAT         : a 32-bit floating point value
 
-NEGSIZE : a 64-bit signed integer, used to store -1 times a size.
+NEGSIZE       : a 64-bit signed integer, used to store -1 times a size.
 
-FLAGS   : a 64-bit bitfield storing or-ed flags described in Octree.hpp
+FLAGS         : a 64-bit bitfield storing or-ed flags described in Octree.hpp
 
-SIZE    : a 64-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit values would be of SIZE 4)
+VERSION_MAJOR : a 32-bit unsigned integer, storing the major version of the octree encoding
 
-(       : a 64-bit constant 0x0000000000000000 (0)
+VERSION_MINOR : a 32-bit unsigned integer, storing the minor version of the octree encoding
 
-)       : a 64-bit constant 0x0000000000000001 (1)
+SIZE          : a 64-bit unsigned integer, usually the size of an array stored in a chunk (not counting bytes, but counting individual whole values, an array of four 32-bit values would be of SIZE 4)
 
-null    : a 64-bit constant 0xFFFFFFFFFFFFFFFF (-1)
+(             : a 64-bit constant 0x0000000000000000 (0)
 
-ADDRESS : a 64-bit integer that is not equal to either (, ) or null; usually a pointer to a CHUNK (e.g. if ADDRESS is 0x0000000000000002, this means the chunk starts from the third byte of the file)
+)             : a 64-bit constant 0x0000000000000001 (1)
 
-empty   : void, defined for grammar syntax, represented by absolutly no bits in the file
+null          : a 64-bit constant 0xFFFFFFFFFFFFFFFF (-1)
+
+ADDRESS       : a 64-bit integer that is not equal to either (, ) or null; usually a pointer to a CHUNK (e.g. if ADDRESS is 0x0000000000000002, this means the chunk starts from the third byte of the file)
+
+empty         : void, defined for grammar syntax, represented by absolutly no bits in the file
 
 ### Non-terminal terms (rules)
 
@@ -51,7 +55,7 @@ S (axiom)    -> HEADER STRUCTURE CHUNKS
 
 Separation of header, structure and chunks.
 
-HEADER       -> NEGSIZE FLAGS
+HEADER       -> NEGSIZE FLAGS VERSION_MAJOR VERSION_MINOR
 
 NEGSIZE Contains -1 times the address of CHUNKS in the file. It is stored negative so that it is read as an address for recursion reasons but cannot be intepreted as an address, and so designates the first 64-bit value in the file, indicating that the next 64-bit value will be FLAGS, and then the proper octree description.
 

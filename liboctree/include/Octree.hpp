@@ -33,6 +33,9 @@
 #define MAX_LEAF_SIZE 16000
 #define MAX_THREADS 8
 
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
+
 /*! \mainpage
  *
  * This library is about constructing, reading and writing octrees in a way that
@@ -74,6 +77,12 @@ class Octree
 		 * absolute coordinates for the data.
 		 */
 		NORMALIZED_NODES = 0x0000000000000001ULL,
+		/*! \brief Created with a stored version or not.
+		 *
+		 * It's entirely handled within the octree, so setting or unsetting from
+		 * outside Octree's code has no effect.
+		 */
+		VERSIONED        = 0x0000000000000002ULL,
 
 		// DATA TYPES STORED
 		/*! \brief Set if the particles radii are also stored.
@@ -371,6 +380,10 @@ class Octree
  * \param octree : octree to be written
  */
 void write(std::ostream& stream, Octree& octree);
+
+/*! \brief Returns bitwise NOT value of a flag, considering it is equivalent to uint64_t.
+ */
+Octree::Flags operator~(Octree::Flags f);
 
 /*! \brief Returns bitwise OR value between two Octree#Flags considering they are equivalent to uint64_t.
  */

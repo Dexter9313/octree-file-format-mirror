@@ -230,7 +230,9 @@ int main(int, char* [])
 		f.resetCursor();
 		Octree octree2(Octree::Flags::NONE);
 		octree2.init(f);
-		TEST_EQUAL(static_cast<uint64_t>(octree2.getFlags()), static_cast<uint64_t>(flags), "R/W octree flags");
+		// remove VERSIONED as its meaningless from the user
+		TEST_EQUAL(static_cast<uint64_t>(octree2.getFlags() & ~Octree::Flags::VERSIONED),
+				static_cast<uint64_t>(flags & ~Octree::Flags::VERSIONED), "R/W octree flags");
 		std::cout << success << "R/W octree flags" << std::endl;
 	}
 	// TEST BINARY RW random octree with normalized nodes
