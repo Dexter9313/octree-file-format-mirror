@@ -26,7 +26,8 @@
 /*! \brief Binary read-write.
  *
  * This namespace contains simple functions to read and write binary data from
- * and to a file.
+ * and to a file. The file format is always little-endian, so the functions
+ * provided here will have performance issues on big-endian systems.
  *
  * Reads and writes are supposed to be used together : some data written with
  * one of these "write" functions should be read with its correponding "read"
