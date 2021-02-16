@@ -483,6 +483,8 @@ std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
 	oss << tabs << "D:" << std::endl;
+	oss << tabs << "BBox:" << minX << "->" << maxX << ";" << minY << "->"
+	    << maxY << ";" << minZ << ";" << maxZ << std::endl;
 	for(size_t i(0); i < data.size(); i += dimPerVertex)
 	{
 		for(unsigned int j(0); j < dimPerVertex; ++j)
