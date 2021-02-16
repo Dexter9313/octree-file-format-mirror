@@ -33,7 +33,7 @@
 #define MAX_LEAF_SIZE 16000
 #define MAX_THREADS 8
 
-#define VERSION_MAJOR 1
+#define VERSION_MAJOR 2
 #define VERSION_MINOR 0
 
 /*! \mainpage
@@ -321,6 +321,12 @@ class Octree
 	unsigned int const& dimPerVertex = dimPerVertex_;
 
   private:
+	/*! \brief Converts bounding box to 3 uint_64t.
+	 *
+	 * Used to represent the bounding box in compact data.
+	 */
+	std::array<uint64_t, 3> getBoundingBoxUint64Representation() const;
+
 	// Data indices go from 0 to data.size()-1.
 	// Vertices indices go from 0 to data.size()/3 - 1 (a triplet of values is
 	// ONE vertex).
@@ -360,6 +366,8 @@ class Octree
 	                         unsigned int dim, float pivot);
 
 	Flags flags = Flags::NONE;
+	static uint32_t versionMajor;
+	static uint32_t versionMinor;
 	unsigned int dimPerVertex_ = 3;
 
 	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
@@ -368,6 +376,16 @@ class Octree
 	static std::ofstream debug;
 
 	static size_t totalNumberOfVertices;
+
+	// versioned file reading methods
+	void init1_0(std::istream& in);
+	void init2_0(std::istream& in);
+	void init1_0(int64_t file_addr, std::istream& in);
+	void init2_0(int64_t file_addr, std::istream& in);
+	void readOwnData1_0(std::istream& in);
+	void readOwnData2_0(std::istream& in);
+	void readBBox1_0(std::istream& in);
+	void readBBox2_0(std::istream& in);
 };
 
 /*! \brief Writes an Octree in a stream.

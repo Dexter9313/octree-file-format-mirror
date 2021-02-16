@@ -25,6 +25,8 @@ Please read each tool's README inside its own directory !
 If you wish to write your own octree file format reader/writer or edit this project, here is the complete grammar of the format.
 *The file format uses little-endian convention.*
 
+Current grammar/format version : 2.0
+
 ### Terminal terms (vocabulary)
 
 FLOAT         : a 32-bit floating point value
@@ -59,13 +61,21 @@ HEADER       -> NEGSIZE FLAGS VERSION_MAJOR VERSION_MINOR
 
 NEGSIZE Contains -1 times the address of CHUNKS in the file. It is stored negative so that it is read as an address for recursion reasons but cannot be intepreted as an address, and so designates the first 64-bit value in the file, indicating that the next 64-bit value will be FLAGS, and then the proper octree description.
 
+BOUNDING_BOX -> FLOAT FLOAT FLOAT FLOAT FLOAT FLOAT
 
-STRUCTURE    -> ADDRESS TREE{,8} )
+A bounding box consists of 6 32-bit floating point values. These values represent the bounding box of the data held by the chunk, in this order : minX, maxX, minY, maxY, minZ, maxZ. This small data redundancy helps shortening loading times in practice.
+
+METADATA     -> ADDRESS SIZE BOUNDING_BOX
+
+Metadata describes a particular node or leaf data, without containing it. The size stored in the metadata is the total size the node contains, including its children total size. Metadata is always of size 40 bytes, so it doesn't need delimiters.
+
+
+STRUCTURE    -> METADATA TREE{,8} )
 
 For pure implementation reasons (recursion combined with linear file reading), the root node (which represents the whole structure) doesn't start with a '(' (0 in 64-bit format) because each node should start reading the file once its corresponding '(' has already been read by its parent. See NODE below for more explanations about this rule's components.
 
 
-NODE         -> ( ADDRESS TREE{,8} )
+NODE         -> ( METADATA TREE{,8} )
 
 A node is surrounded by parenthesis (0 and 1 in 64-bit format). The first value it holds is the address of its corresponding chunk. Then it can have none to eight children. The order of defined children is important and is the same accross all trees in the file (hence the existance of the "null" tree to leave spaces if necessary).
 
@@ -75,9 +85,9 @@ TREE         -> NODE | LEAF | null
 A tree can be either a node, a leaf or a "null" tree (absence of tree).
 
 
-LEAF         -> ADDRESS
+LEAF         -> METADATA
 
-A leaf only consists of the address of its corresponding chunk.
+A leaf only consists of its metadata.
 
 
 CHUNKS       -> CHUNK CHUNKS | CHUNK
@@ -85,14 +95,10 @@ CHUNKS       -> CHUNK CHUNKS | CHUNK
 Chunks are specified contiguously and there has to be at least one (for the root node).
 
 
-CHUNK        -> BOUNDING_BOX SIZE DATA
+CHUNK        -> SIZE DATA
 
-A chunk is contiguously described by a bounding box, then the size of its data (counting the 32-bit values, not the bytes), and then the data itself.
+A chunk is contiguously described by the size of its data (counting the 32-bit values, not the bytes), and then the data itself.
 
-
-BOUNDING_BOX -> FLOAT FLOAT FLOAT FLOAT FLOAT FLOAT
-
-A bounding box consists of 6 32-bit floating point values. These values represent the bounding box of the data held by the chunk, in this order : minX, maxX, minY, maxY, minZ, maxZ. This small data redundancy helps shortening loading times in practice.
 
 
 DATA         -> POSITION DATA | empty
@@ -104,6 +110,7 @@ POSITION     -> FLOAT FLOAT FLOAT
 
 A position is a contiguous triplet of 32-bit floating point values representing a point's coordinates (x, y then z).
 
+(Note that POSITION is an example of the size of data. Radii or luminosities of particles can also be stored, which only changes the number of FLOATs stored in POSITION to be gramatically correct. The number of floats actually stored per particle is controlled using the tree's flags.)
 
 ### Example
 

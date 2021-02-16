@@ -21,6 +21,8 @@
 // std::string Octree::tabs    = "";
 // std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
+uint32_t Octree::versionMajor        = VERSION_MAJOR;
+uint32_t Octree::versionMinor        = VERSION_MINOR;
 size_t Octree::totalNumberOfVertices = 0;
 
 Octree::Octree(Flags flags)
@@ -188,30 +190,35 @@ void Octree::init(std::istream& in)
 	// and we have flags to read !
 	if(file_addr < 0)
 	{
+		versionMajor = 0;
+		versionMinor = 0;
 		Flags flags_temp;
 		brw::read(in, flags_temp);
 		setFlags(flags_temp);
 		// if versioned
 		if((flags & Flags::VERSIONED) != Flags::NONE)
 		{
-			uint32_t vMajor, vMinor;
-			brw::read(in, vMajor);
-			brw::read(in, vMinor);
-			if(vMajor < VERSION_MAJOR
-			   || (vMajor == VERSION_MAJOR && (int32_t) vMinor < VERSION_MINOR))
+			brw::read(in, versionMajor);
+			brw::read(in, versionMinor);
+			if(versionMajor < VERSION_MAJOR
+			   || (versionMajor == VERSION_MAJOR
+			       && (int32_t) versionMinor < VERSION_MINOR))
 			{
 				std::cerr << "Error: this version of liboctree can read octree "
 				             "files up to format version "
 				          << VERSION_MAJOR << "." << VERSION_MINOR
 				          << " whereas you are trying to load a file encoded "
 				             "with version "
-				          << vMajor << "." << vMinor
+				          << versionMajor << "." << versionMinor
 				          << ". Upgrade liboctree to do so." << std::endl;
 				exit(EXIT_FAILURE);
 			}
 		}
+		std::cout << "Reading octree file version " << versionMajor << "."
+		          << versionMinor << std::endl;
 		// read file_addr again with the real value this time
 		brw::read(in, file_addr);
+		init(file_addr, in);
 	}
 
 	totalDataSize = 0;
@@ -246,6 +253,18 @@ void Octree::init(std::istream& in)
 
 void Octree::init(int64_t file_addr, std::istream& in)
 {
+	if(versionMajor < 2)
+	{
+		init1_0(file_addr, in);
+	}
+	else
+	{
+		init2_0(file_addr, in);
+	}
+}
+
+void Octree::init1_0(int64_t file_addr, std::istream& in)
+{
 	int64_t cursor(in.tellg());
 
 	this->file_addr = file_addr;
@@ -255,6 +274,20 @@ void Octree::init(int64_t file_addr, std::istream& in)
 	totalDataSize = size;
 
 	in.seekg(cursor);
+}
+
+void Octree::init2_0(int64_t file_addr, std::istream& in)
+{
+	this->file_addr = file_addr;
+	uint64_t totalDataSizeUINT64;
+	brw::read(in, totalDataSizeUINT64);
+	totalDataSize = totalDataSizeUINT64;
+	brw::read(in, minX);
+	brw::read(in, maxX);
+	brw::read(in, minY);
+	brw::read(in, maxY);
+	brw::read(in, minZ);
+	brw::read(in, maxZ);
 }
 
 void Octree::setFlags(Flags flags)
@@ -279,12 +312,22 @@ bool Octree::isLeaf() const
 
 std::vector<int64_t> Octree::getCompactData() const
 {
-	if(isLeaf())
-		return std::vector<int64_t>({file_addr});
-
 	std::vector<int64_t> res;
-	res.push_back(0); // (
+	if(!isLeaf())
+	{
+		res.push_back(0); // (
+	}
 	res.push_back(file_addr);
+	res.push_back(totalDataSize);
+	std::array<uint64_t, 3> bboxUint64(getBoundingBoxUint64Representation());
+	res.push_back(bboxUint64[0]);
+	res.push_back(bboxUint64[1]);
+	res.push_back(bboxUint64[2]);
+	if(isLeaf())
+	{
+		return res;
+	}
+
 	// compute nb of children to write (if last ones are nullptr, no need to
 	// write them)
 	unsigned int nb(8);
@@ -310,12 +353,6 @@ std::vector<int64_t> Octree::getCompactData() const
 void Octree::writeData(std::ostream& out)
 {
 	file_addr = out.tellp();
-	brw::write(out, minX);
-	brw::write(out, maxX);
-	brw::write(out, minY);
-	brw::write(out, maxY);
-	brw::write(out, minZ);
-	brw::write(out, maxZ);
 	brw::write(out, data);
 	for(unsigned int i(0); i < 8; ++i)
 		if(children[i] != nullptr)
@@ -334,7 +371,25 @@ void Octree::readData(std::istream& in)
 
 void Octree::readOwnData(std::istream& in)
 {
+	if(versionMajor < 2)
+	{
+		readOwnData1_0(in);
+	}
+	else
+	{
+		readOwnData2_0(in);
+	}
+}
+
+void Octree::readOwnData1_0(std::istream& in)
+{
 	readBBox(in);
+	brw::read(in, data);
+}
+
+void Octree::readOwnData2_0(std::istream& in)
+{
+	in.seekg(file_addr);
 	brw::read(in, data);
 }
 
@@ -350,6 +405,18 @@ void Octree::readBBoxes(std::istream& in)
 
 void Octree::readBBox(std::istream& in)
 {
+	if(versionMajor < 2)
+	{
+		readBBox1_0(in);
+	}
+	else
+	{
+		readBBox2_0(in);
+	}
+}
+
+void Octree::readBBox1_0(std::istream& in)
+{
 	in.seekg(file_addr);
 	brw::read(in, minX);
 	brw::read(in, maxX);
@@ -358,6 +425,8 @@ void Octree::readBBox(std::istream& in)
 	brw::read(in, minZ);
 	brw::read(in, maxZ);
 }
+
+void Octree::readBBox2_0(std::istream& /*in*/) {}
 
 std::vector<float> Octree::getOwnData() const
 {
@@ -464,7 +533,7 @@ void write(std::ostream& stream, Octree& octree)
 	// write the rest of the tree
 	uint64_t headerSize(octree.getCompactData().size());
 	// if root is a leaf, surround it with parenthesis
-	if(headerSize == 1)
+	if(headerSize == 5)
 		headerSize += 2;
 
 	int64_t headerStart(stream.tellp());
@@ -487,9 +556,14 @@ void write(std::ostream& stream, Octree& octree)
 	// we don't want to write the vector's size and the first '('
 	// so we write manually from the second element
 	std::vector<int64_t> header(octree.getCompactData());
-	if(header.size() == 1)
+	if(header.size() == 5)
 	{
+		// write(stream, header) would write header size
 		brw::write(stream, header[0]);
+		brw::write(stream, header[1]);
+		brw::write(stream, header[2]);
+		brw::write(stream, header[3]);
+		brw::write(stream, header[4]);
 		int64_t closingParenthesis(1);
 		brw::write(stream, closingParenthesis);
 	}
@@ -536,6 +610,14 @@ Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b)
 {
 	a = a & b;
 	return a;
+}
+
+std::array<uint64_t, 3> Octree::getBoundingBoxUint64Representation() const
+{
+	std::array<float, 6> bboxFloat{{minX, maxX, minY, maxY, minZ, maxZ}};
+	uint64_t* data(reinterpret_cast<uint64_t*>(&(bboxFloat[0])));
+	std::array<uint64_t, 3> result{{data[0], data[1], data[2]}};
+	return result;
 }
 
 inline float Octree::get(std::vector<float> const& data, size_t vertex,
