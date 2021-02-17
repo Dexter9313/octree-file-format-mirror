@@ -218,8 +218,8 @@ void Octree::init(std::istream& in)
 		          << versionMinor << std::endl;
 		// read file_addr again with the real value this time
 		brw::read(in, file_addr);
-		init(file_addr, in);
 	}
+	init(file_addr, in);
 
 	totalDataSize = 0;
 	int64_t readVal;
