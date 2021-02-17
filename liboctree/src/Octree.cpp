@@ -688,6 +688,8 @@ size_t Octree::orderPivot(std::vector<float>& data, size_t beg, size_t end,
 
 void Octree::showProgress(float progress)
 {
+	if(progress > 1.f || progress < 0.f)
+		return;
 	const unsigned int barSize(78);
 	unsigned int numberOfXs(progress * barSize);
 	std::cout << "\r\033[K" << '[';
