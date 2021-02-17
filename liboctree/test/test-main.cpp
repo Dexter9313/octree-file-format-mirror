@@ -166,10 +166,11 @@ int main(int, char* [])
 		}
 		std::cout << success << "R/W vector of doubles" << std::endl;
 	}
+	const size_t bigTreeSize(200000);
 	// TEST BINARY RW random octree
 	{
 		Octree octree1;
-		std::vector<float> v(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(bigTreeSize, seed));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
@@ -199,15 +200,15 @@ int main(int, char* [])
 	// TEST OCTREE totalDataSize from data
 	{
 		Octree octree;
-		std::vector<float> v(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(bigTreeSize, seed));
 		octree.init(v);
-		TEST_EQUAL(octree.getTotalDataSize() / 3, (size_t) 100000, "OCTREE totalDataSize (from data)");
+		TEST_EQUAL(octree.getTotalDataSize(), bigTreeSize*3, "OCTREE totalDataSize (from data)");
 		std::cout << success << "OCTREE totalDataSize (from data)" << std::endl;
 	}
 	// TEST OCTREE totalDataSize from file
 	{
 		Octree octree1;
-		std::vector<float> v(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(bigTreeSize, seed));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
@@ -215,7 +216,7 @@ int main(int, char* [])
 		f.resetCursor();
 		Octree octree2;
 		octree2.init(f);
-		TEST_EQUAL(octree2.getTotalDataSize() / 3, (size_t) 100000, "OCTREE totalDataSize (from file)");
+		TEST_EQUAL(octree2.getTotalDataSize(), bigTreeSize*3, "OCTREE totalDataSize (from file)");
 		std::cout << success << "OCTREE totalDataSize (from file)" << std::endl;
 	}
 	// TEST OCTREE flags RW
@@ -238,7 +239,7 @@ int main(int, char* [])
 	// TEST BINARY RW random octree with normalized nodes
 	{
 		Octree octree1(Octree::Flags::NORMALIZED_NODES);
-		std::vector<float> v(generateVertices(100000, seed));
+		std::vector<float> v(generateVertices(bigTreeSize, seed));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
@@ -253,7 +254,7 @@ int main(int, char* [])
 	// TEST BINARY RW random octree with more than three components per vertex
 	{
 		Octree octree1(Octree::Flags::STORE_RADIUS | Octree::Flags::STORE_LUMINOSITY);
-		std::vector<float> v(generateVertices(100000, seed, 5));
+		std::vector<float> v(generateVertices(bigTreeSize, seed, 5));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
@@ -262,7 +263,7 @@ int main(int, char* [])
 		Octree octree2;
 		octree2.init(f);
 		octree2.readData(f);
-		TEST_EQUAL(octree2.getTotalDataSize(), (size_t) 500000, "R/W random octree with more than three components per vertex [size]");
+		TEST_EQUAL(octree2.getTotalDataSize(), bigTreeSize*5, "R/W random octree with more than three components per vertex [size]");
 		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree with more than three components per vertex [content]");
 		std::cout << success << "R/W random octree with more than three components per vertex" << std::endl;
 	}
