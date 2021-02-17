@@ -374,3 +374,13 @@ std::vector<float> readHDF5(std::string const& filePath,
 	          << std::endl;
 	return result;
 }
+
+void initOctree(Octree* octree, std::istream* file)
+{
+	octree->init(*file);
+}
+
+void readData(Octree* octree, std::istream* file)
+{
+	octree->readData(*file);
+}
