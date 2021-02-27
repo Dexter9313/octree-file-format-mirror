@@ -73,7 +73,7 @@ SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Florian Cabot <florian.cabot@epfl.ch>")
 if(TAG)
 	SET(CPACK_PACKAGE_VERSION ${TAG})
 endif()
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-100, liboctree")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libhdf5-103, liboctree")
 
 INCLUDE(CPack)
 
