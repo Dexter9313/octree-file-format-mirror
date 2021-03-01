@@ -203,6 +203,6 @@ void debugread(std::istream& stream, std::ostream& dbgstream)
 	dbgstream << std::endl;
 }
 
-} // ns brw
+} // namespace brw
 
 #endif // BINARYRW_H

@@ -82,7 +82,7 @@ class Octree
 		 * It's entirely handled within the octree, so setting or unsetting from
 		 * outside Octree's code has no effect.
 		 */
-		VERSIONED        = 0x0000000000000002ULL,
+		VERSIONED = 0x0000000000000002ULL,
 
 		// DATA TYPES STORED
 		/*! \brief Set if the particles radii are also stored.
@@ -138,7 +138,7 @@ class Octree
 
 	/*! \brief Sets this octree's \ref Flags
 	 *
-	 * \attention Be careful, changing flags when data is already loaded can 
+	 * \attention Be careful, changing flags when data is already loaded can
 	 * have dramatic consequences.
 	 */
 	void setFlags(Flags flags);
@@ -316,7 +316,8 @@ class Octree
 	std::array<Octree*, 8> children = {{nullptr, nullptr, nullptr, nullptr,
 	                                    nullptr, nullptr, nullptr, nullptr}};
 
-	/*! @brief Number of dimensions per vertex (3 by default with only 3D positions).
+	/*! @brief Number of dimensions per vertex (3 by default with only 3D
+	 * positions).
 	 */
 	unsigned int const& dimPerVertex = dimPerVertex_;
 
@@ -338,11 +339,10 @@ class Octree
 	// Gets a vertex's component from data.
 	// vertex is the vertex's index.
 	// (get(data, 10, 1) will return the y component of the 11th vertex.)
-	float get(std::vector<float> const& data, size_t vertex,
-	                 unsigned int dim);
+	float get(std::vector<float> const& data, size_t vertex, unsigned int dim);
 	// Sets a vertex component in data (see get for indexing).
 	void set(std::vector<float>& data, size_t vertex, unsigned int dim,
-	                float val);
+	         float val);
 	// Swaps two vertices from data, the (i+1)th and the (j+1)th.
 	// This swaps all components of the vertices (x, y, z).
 	void swap(std::vector<float>& data, size_t i, size_t j);
@@ -363,7 +363,7 @@ class Octree
 	// of the vertices and will be moved along with the first component.
 	// Vertices data is always conserved and triplets are always moved together.
 	size_t orderPivot(std::vector<float>& data, size_t beg, size_t end,
-	                         unsigned int dim, float pivot);
+	                  unsigned int dim, float pivot);
 
 	Flags flags = Flags::NONE;
 	static uint32_t versionMajor;
@@ -399,11 +399,13 @@ class Octree
  */
 void write(std::ostream& stream, Octree& octree);
 
-/*! \brief Returns bitwise NOT value of a flag, considering it is equivalent to uint64_t.
+/*! \brief Returns bitwise NOT value of a flag, considering it is equivalent to
+ * uint64_t.
  */
 Octree::Flags operator~(Octree::Flags f);
 
-/*! \brief Returns bitwise OR value between two Octree#Flags considering they are equivalent to uint64_t.
+/*! \brief Returns bitwise OR value between two Octree#Flags considering they
+ * are equivalent to uint64_t.
  */
 Octree::Flags operator|(Octree::Flags a, Octree::Flags b);
 
@@ -411,13 +413,13 @@ Octree::Flags operator|(Octree::Flags a, Octree::Flags b);
  */
 Octree::Flags& operator|=(Octree::Flags& a, Octree::Flags b);
 
-/*! \brief Returns bitwise AND value between two Octree#Flags considering they are equivalent to uint64_t.
+/*! \brief Returns bitwise AND value between two Octree#Flags considering they
+ * are equivalent to uint64_t.
  */
 Octree::Flags operator&(Octree::Flags a, Octree::Flags b);
 
 /*! \brief Stores the result of \p a & \p b in \p a.
  */
 Octree::Flags& operator&=(Octree::Flags& a, Octree::Flags b);
-
 
 #endif // OCTREE_H
