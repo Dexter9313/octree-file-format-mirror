@@ -96,9 +96,34 @@ class Octree
 		STORE_COLOR = 0x0000000400000000ULL,
 	};
 
-	/*! \brief Constructs an Octree with \p flags as \ref Flags
+	struct CommonData
+	{
+		uint32_t versionMajor = VERSION_MAJOR;
+		uint32_t versionMinor = VERSION_MINOR;
+
+		Flags flags = Flags::NONE;
+		/*! @brief Number of dimensions per vertex (3 by default with only 3D
+		 * positions).
+		 */
+		unsigned int dimPerVertex = 3;
+	};
+
+	/*! \brief Constructs an empty root node
+	 *
+	 * Call setFlags if necessary, then init to populate the tree.
 	 */
-	Octree(Flags flags = Flags::NONE);
+	Octree();
+
+	/*! \brief Returns this octree's \ref Flags
+	 */
+	Flags getFlags() const { return commonData.flags; };
+
+	/*! \brief Sets this octree's \ref Flags
+	 *
+	 * \attention Be careful, changing flags when data is already loaded can
+	 * have dramatic consequences.
+	 */
+	void setFlags(Flags flags);
 
 	/*! \brief Initializes the octree from position data.
 	 *
@@ -131,17 +156,6 @@ class Octree
 	 * \param in : File stream from which the node is read.
 	 */
 	virtual void init(int64_t file_addr, std::istream& in);
-
-	/*! \brief Returns this octree's \ref Flags
-	 */
-	Flags getFlags() const { return flags; };
-
-	/*! \brief Sets this octree's \ref Flags
-	 *
-	 * \attention Be careful, changing flags when data is already loaded can
-	 * have dramatic consequences.
-	 */
-	void setFlags(Flags flags);
 
 	/*! \brief Size of the total non-redundant data stored in the tree.
 	 *
@@ -233,8 +247,17 @@ class Octree
 	 */
 	static void showProgress(float progress);
 
+	// Root node allocates or frees common data for the whole tree
+	// and is the only node not to store nullptr in this attribute.
+	CommonData* rootManagedCommonData = nullptr;
+
   protected:
-	/*! \brief Constructs a new octree.
+	CommonData& commonData;
+
+	/*! \brief Constructs a child with common data.
+	 */
+	Octree(CommonData& commonData);
+	/*! \brief Constructs a new child.
 	 *
 	 * Useful for inheritence and polymorphism. You SHOULD reimplement this
 	 * method if you inherit from Octree to return your own instance of it. This
@@ -242,20 +265,23 @@ class Octree
 	 * initializes itself, it will call newOctree to create children to ensure
 	 * the whole tree will be of the right class.
 	 *
+	 * \attention Don't forget to call the child constructor taking a CommonData
+	 * reference.
+	 *
 	 * Example : inheriting from Octree
 	 * @code
 	 * class MyOctree : public Octree
 	 * {
 	 *    // ... some members ...
 	 *    protected:
-	 *      virtual Octree* newOctree(Flags flags) const
+	 *      virtual Octree* newChild() const
 	 *      {
-	 *          return new MyOctree(flags);
+	 *          return new MyOctree(commonData);
 	 *      };
 	 * }
 	 * @endcode
 	 */
-	virtual Octree* newOctree(Flags flags) const;
+	virtual Octree* newChild() const;
 
 	/*! \brief Address within a file where lies or should lie the data.
 	 */
@@ -316,11 +342,6 @@ class Octree
 	std::array<Octree*, 8> children = {{nullptr, nullptr, nullptr, nullptr,
 	                                    nullptr, nullptr, nullptr, nullptr}};
 
-	/*! @brief Number of dimensions per vertex (3 by default with only 3D
-	 * positions).
-	 */
-	unsigned int const& dimPerVertex = dimPerVertex_;
-
   private:
 	/*! \brief Converts bounding box to 3 uint_64t.
 	 *
@@ -364,11 +385,6 @@ class Octree
 	// Vertices data is always conserved and triplets are always moved together.
 	size_t orderPivot(std::vector<float>& data, size_t beg, size_t end,
 	                  unsigned int dim, float pivot);
-
-	Flags flags = Flags::NONE;
-	static uint32_t versionMajor;
-	static uint32_t versionMinor;
-	unsigned int dimPerVertex_ = 3;
 
 	// to write LIBOCTREE.debug which holds the ASCII-translated compact data of
 	// the tree

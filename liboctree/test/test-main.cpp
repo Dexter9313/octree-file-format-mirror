@@ -228,14 +228,16 @@ int main(int, char*[])
 		Octree::Flags flags(Octree::Flags::NORMALIZED_NODES
 		                    | Octree::Flags::STORE_RADIUS
 		                    | Octree::Flags::STORE_LUMINOSITY);
-		Octree octree1(flags);
+		Octree octree1;
+		octree1.setFlags(flags);
 		std::vector<float> v(generateVertices(10, seed, 5));
 		octree1.init(v);
 		TestBinaryFile f;
 		f.resetCursor();
 		write(f, octree1);
 		f.resetCursor();
-		Octree octree2(Octree::Flags::NONE);
+		Octree octree2;
+		octree2.setFlags(Octree::Flags::NONE);
 		octree2.init(f);
 		// remove VERSIONED as its meaningless from the user
 		TEST_EQUAL(static_cast<uint64_t>(octree2.getFlags()
@@ -246,7 +248,8 @@ int main(int, char*[])
 	}
 	// TEST BINARY RW random octree with normalized nodes
 	{
-		Octree octree1(Octree::Flags::NORMALIZED_NODES);
+		Octree octree1;
+		octree1.setFlags(Octree::Flags::NORMALIZED_NODES);
 		std::vector<float> v(generateVertices(bigTreeSize, seed));
 		octree1.init(v);
 		TestBinaryFile f;
@@ -263,8 +266,9 @@ int main(int, char*[])
 	}
 	// TEST BINARY RW random octree with more than three components per vertex
 	{
-		Octree octree1(Octree::Flags::STORE_RADIUS
-		               | Octree::Flags::STORE_LUMINOSITY);
+		Octree octree1;
+		octree1.setFlags(Octree::Flags::STORE_RADIUS
+		                 | Octree::Flags::STORE_LUMINOSITY);
 		std::vector<float> v(generateVertices(bigTreeSize, seed, 5));
 		octree1.init(v);
 		TestBinaryFile f;

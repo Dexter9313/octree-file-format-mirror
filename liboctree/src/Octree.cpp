@@ -21,27 +21,43 @@
 // std::string Octree::tabs    = "";
 // std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
-uint32_t Octree::versionMajor        = VERSION_MAJOR;
-uint32_t Octree::versionMinor        = VERSION_MINOR;
 size_t Octree::totalNumberOfVertices = 0;
 
-Octree::Octree(Flags flags)
+Octree::Octree()
+    : rootManagedCommonData(new CommonData)
+    , commonData(*rootManagedCommonData)
 {
-	setFlags(flags);
+}
+
+Octree::Octree(CommonData& commonData)
+    : commonData(commonData)
+{
+}
+
+void Octree::setFlags(Flags flags)
+{
+	commonData.flags        = flags;
+	commonData.dimPerVertex = 3;
+	if((flags & Flags::STORE_RADIUS) != Flags::NONE)
+		++commonData.dimPerVertex;
+	if((flags & Flags::STORE_LUMINOSITY) != Flags::NONE)
+		++commonData.dimPerVertex;
+	if((flags & Flags::STORE_COLOR) != Flags::NONE)
+		commonData.dimPerVertex += 3;
 }
 
 void Octree::init(std::vector<float>& data)
 {
-	totalNumberOfVertices = (data.size() / dimPerVertex) - 1;
+	totalNumberOfVertices = (data.size() / commonData.dimPerVertex) - 1;
 	std::cout.precision(3);
-	init(data, 0, (data.size() / dimPerVertex) - 1);
+	init(data, 0, (data.size() / commonData.dimPerVertex) - 1);
 	std::cout.precision(6);
 }
 
 void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 {
 	size_t verticesNumber(end - beg + 1);
-	totalDataSize = dimPerVertex * verticesNumber;
+	totalDataSize = commonData.dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
 	{
 		if(get(data, i, 0) < minX)
@@ -61,13 +77,13 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
-			for(unsigned int j(0); j < dimPerVertex; ++j)
+			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
 			{
 				this->data.push_back(get(data, i, j));
 			}
 		}
 	}
-	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
+	if((commonData.flags & Flags::NORMALIZED_NODES) != Flags::NONE)
 	{
 		float localScale(1.f);
 		if((maxX - minX > maxY - minY) && (maxX - minX > maxZ - minZ))
@@ -83,7 +99,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 			localScale = maxZ - minZ;
 		}
 
-		for(size_t i(0); i < this->data.size(); i += dimPerVertex)
+		for(size_t i(0); i < this->data.size(); i += commonData.dimPerVertex)
 		{
 			this->data[i] -= minX;
 			this->data[i] /= localScale;
@@ -97,7 +113,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	{
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
-		data.resize(dimPerVertex * beg);
+		data.resize(commonData.dimPerVertex * beg);
 		showProgress(1.f - beg / (float) totalNumberOfVertices);
 		// we don't need to create children
 		return;
@@ -163,20 +179,20 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 
 	if(end > splits[6])
 	{
-		children[0] = newOctree(flags);
+		children[0] = newChild();
 		children[0]->init(data, splits[6], end);
 	}
 	for(unsigned int i(6); i > 0; --i)
 	{
 		if(splits[i] > splits[i - 1])
 		{
-			children[7 - i] = newOctree(flags);
+			children[7 - i] = newChild();
 			children[7 - i]->init(data, splits[i - 1], splits[i] - 1);
 		}
 	}
 	if(splits[0] > beg)
 	{
-		children[7] = newOctree(flags);
+		children[7] = newChild();
 		children[7]->init(data, beg, splits[0] - 1);
 	}
 }
@@ -190,32 +206,33 @@ void Octree::init(std::istream& in)
 	// and we have flags to read !
 	if(file_addr < 0)
 	{
-		versionMajor = 0;
-		versionMinor = 0;
+		commonData.versionMajor = 0;
+		commonData.versionMinor = 0;
 		Flags flags_temp;
 		brw::read(in, flags_temp);
 		setFlags(flags_temp);
 		// if versioned
-		if((flags & Flags::VERSIONED) != Flags::NONE)
+		if((commonData.flags & Flags::VERSIONED) != Flags::NONE)
 		{
-			brw::read(in, versionMajor);
-			brw::read(in, versionMinor);
-			if(versionMajor < VERSION_MAJOR
-			   || (versionMajor == VERSION_MAJOR
-			       && (int32_t) versionMinor < VERSION_MINOR))
+			brw::read(in, commonData.versionMajor);
+			brw::read(in, commonData.versionMinor);
+			if(commonData.versionMajor < VERSION_MAJOR
+			   || (commonData.versionMajor == VERSION_MAJOR
+			       && (int32_t) commonData.versionMinor < VERSION_MINOR))
 			{
 				std::cerr << "Error: this version of liboctree can read octree "
 				             "files up to format version "
 				          << VERSION_MAJOR << "." << VERSION_MINOR
 				          << " whereas you are trying to load a file encoded "
 				             "with version "
-				          << versionMajor << "." << versionMinor
+				          << commonData.versionMajor << "."
+				          << commonData.versionMinor
 				          << ". Upgrade liboctree to do so." << std::endl;
 				exit(EXIT_FAILURE);
 			}
 		}
-		std::cout << "Reading octree file version " << versionMajor << "."
-		          << versionMinor << std::endl;
+		std::cout << "Reading octree file version " << commonData.versionMajor
+		          << "." << commonData.versionMinor << std::endl;
 		// read file_addr again with the real value this time
 		brw::read(in, file_addr);
 	}
@@ -234,7 +251,7 @@ void Octree::init(std::istream& in)
 		if(readVal == 0) //( <= sub node
 		{
 			// tabs += '\t';
-			children[i] = newOctree(flags);
+			children[i] = newChild();
 			children[i]->init(in);
 			// tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
@@ -242,7 +259,7 @@ void Octree::init(std::istream& in)
 		else if(readVal != -1) // null node
 		{
 			// tabs += '\t';
-			children[i] = newOctree(flags);
+			children[i] = newChild();
 			children[i]->init(readVal, in);
 			// tabs.pop_back();
 			totalDataSize += children[i]->totalDataSize;
@@ -253,7 +270,7 @@ void Octree::init(std::istream& in)
 
 void Octree::init(int64_t file_addr, std::istream& in)
 {
-	if(versionMajor < 2)
+	if(commonData.versionMajor < 2)
 	{
 		init1_0(file_addr, in);
 	}
@@ -288,18 +305,6 @@ void Octree::init2_0(int64_t file_addr, std::istream& in)
 	brw::read(in, maxY);
 	brw::read(in, minZ);
 	brw::read(in, maxZ);
-}
-
-void Octree::setFlags(Flags flags)
-{
-	this->flags   = flags;
-	dimPerVertex_ = 3;
-	if((flags & Flags::STORE_RADIUS) != Flags::NONE)
-		++dimPerVertex_;
-	if((flags & Flags::STORE_LUMINOSITY) != Flags::NONE)
-		++dimPerVertex_;
-	if((flags & Flags::STORE_COLOR) != Flags::NONE)
-		dimPerVertex_ += 3;
 }
 
 bool Octree::isLeaf() const
@@ -371,7 +376,7 @@ void Octree::readData(std::istream& in)
 
 void Octree::readOwnData(std::istream& in)
 {
-	if(versionMajor < 2)
+	if(commonData.versionMajor < 2)
 	{
 		readOwnData1_0(in);
 	}
@@ -405,7 +410,7 @@ void Octree::readBBoxes(std::istream& in)
 
 void Octree::readBBox(std::istream& in)
 {
-	if(versionMajor < 2)
+	if(commonData.versionMajor < 2)
 	{
 		readBBox1_0(in);
 	}
@@ -431,7 +436,7 @@ void Octree::readBBox2_0(std::istream& /*in*/) {}
 std::vector<float> Octree::getOwnData() const
 {
 	std::vector<float> result(data);
-	if((flags & Flags::NORMALIZED_NODES) != Flags::NONE)
+	if((commonData.flags & Flags::NORMALIZED_NODES) != Flags::NONE)
 	{
 		float localScale(1.f);
 		if((maxX - minX > maxY - minY) && (maxX - minX > maxZ - minZ))
@@ -447,7 +452,7 @@ std::vector<float> Octree::getOwnData() const
 			localScale = maxZ - minZ;
 		}
 
-		for(size_t i(0); i < this->data.size(); i += dimPerVertex)
+		for(size_t i(0); i < this->data.size(); i += commonData.dimPerVertex)
 		{
 			result[i] *= localScale;
 			result[i] += minX;
@@ -485,9 +490,9 @@ std::string Octree::toString(std::string const& tabs) const
 	oss << tabs << "D:" << std::endl;
 	oss << tabs << "BBox:" << minX << "->" << maxX << ";" << minY << "->"
 	    << maxY << ";" << minZ << ";" << maxZ << std::endl;
-	for(size_t i(0); i < data.size(); i += dimPerVertex)
+	for(size_t i(0); i < data.size(); i += commonData.dimPerVertex)
 	{
-		for(unsigned int j(0); j < dimPerVertex; ++j)
+		for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
 		{
 			oss << tabs << data[i + j] << "; ";
 		}
@@ -502,9 +507,9 @@ std::string Octree::toString(std::string const& tabs) const
 	return oss.str();
 }
 
-Octree* Octree::newOctree(Flags flags) const
+Octree* Octree::newChild() const
 {
-	return new Octree(flags);
+	return new Octree(commonData);
 }
 
 Octree::~Octree()
@@ -625,20 +630,20 @@ std::array<uint64_t, 3> Octree::getBoundingBoxUint64Representation() const
 inline float Octree::get(std::vector<float> const& data, size_t vertex,
                          unsigned int dim)
 {
-	return data[dimPerVertex * vertex + dim];
+	return data[commonData.dimPerVertex * vertex + dim];
 }
 
 inline void Octree::set(std::vector<float>& data, size_t vertex,
                         unsigned int dim, float val)
 {
-	data[dimPerVertex * vertex + dim] = val;
+	data[commonData.dimPerVertex * vertex + dim] = val;
 }
 
 void Octree::swap(std::vector<float>& data, size_t i, size_t j)
 {
-	std::vector<float> v(dimPerVertex);
+	std::vector<float> v(commonData.dimPerVertex);
 
-	for(unsigned int k(0); k < dimPerVertex; ++k)
+	for(unsigned int k(0); k < commonData.dimPerVertex; ++k)
 	{
 		float tmp = get(data, i, k);
 		set(data, i, k, get(data, j, k));
