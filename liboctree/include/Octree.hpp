@@ -125,6 +125,11 @@ class Octree
 	 */
 	void setFlags(Flags flags);
 
+	/*! \brief Returns number of components (dimensions) per vertex.
+	 * If position stored only, returns 3 for example.
+	 */
+	unsigned int getDimPerVertex() const { return commonData.dimPerVertex; };
+
 	/*! \brief Initializes the octree from position data.
 	 *
 	 * It will also compute all the mins and maxes.
