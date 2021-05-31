@@ -33,8 +33,10 @@ void man(const char* argv_0)
 	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH:DATASET_R_COLOR_PATH:DATASET_G_COLOR_PATH:DATASET_B_COLOR_PATH FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --update OCTREE_FILE_IN FILE_OUT" << std::endl
+	          << "\t" << argv_0 << " --subsample RATE OCTREE_FILE_IN FILE_OUT" << std::endl
 	          << "\n\t" << "FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported."
-	          << "\n\t" << "The --update option will only read then write a previously generated octree file, effectively updating its format to the current octreegen version default format." << std::endl;
+	          << "\n\t" << "The --update option will only read then write a previously generated octree file, effectively updating its format to the current octreegen version default format." << std::endl
+	          << "\n\t" << "The --subsample option will take a ratio RATE of the OCTREE_FILE_IN data to write it in FILE_OUT. (ex: To halve the data, put RATE as 0.5. To take one vertex out of 4, put RATE as 0.25.)" << std::endl;
 	std::cout << "\nExamples: " << std::endl
 	          << "\t"
 	          << "To read gaz data coordinates and luminosity within snapshot.&ast;.hdf5 files (will be expanded as \"snapshot.0.hdf5 snapshot.1.hdf5\" for example) in "
@@ -114,6 +116,89 @@ int main(int argc, char* argv[])
 			}
 		}
 		Octree::showProgress(1.f);
+	}
+	// subsample
+	else if(argc == 5 && argv[1] == std::string("--subsample"))
+	{
+		output = argv[4];
+		std::cout << "Loading octree structure..." << std::endl;
+		std::fflush(stdout);
+		int64_t filesize(0);
+		{
+			std::ifstream in(argv[3], std::ifstream::ate | std::ifstream::binary);
+			filesize = in.tellg();
+		}
+		std::ifstream in;
+		in.open(argv[3], std::fstream::in | std::fstream::binary);
+
+		// Init tree with progress bar
+		int64_t cursor(in.tellg());
+		int64_t size;
+		brw::read(in, size);
+		in.seekg(cursor);
+		size *= -1;
+
+		Octree octree2;
+		auto future = std::async(std::launch::async, &initOctree, &octree2, &in);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / size);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+		std::cout << "Loading octree data..." << std::endl;
+
+		future = std::async(std::launch::async, &readData, &octree2, &in);
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / filesize);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+
+		// subsampling
+		unsigned int step(octree2.getDimPerVertex());
+		float rate(std::stof(argv[2]));
+		std::vector<float> data, subsampledData;
+
+		std::cout << "Extracting data :" << std::endl;
+		Octree::showProgress(0.f);
+		octree2.dumpInVectorAndEmpty(data);
+		Octree::showProgress(1.f);
+
+		std::cout << "Subsampling data :" << std::endl;
+		Octree::showProgress(0.f);
+		for(size_t i(0); i < data.size(); i += step)
+		{
+			if((static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+		          < rate)
+			{
+				for(size_t j(0); j < step; ++j)
+				{
+					subsampledData.push_back(data[i+j]);
+				}
+			}
+			if(i % 10000000 == 0)
+			{
+				Octree::showProgress(static_cast<float>(i) / data.size());
+			}
+		}
+		Octree::showProgress(1.f);
+		octree.setFlags(octree2.getFlags());
+		std::cout << "Constructing octree :" << std::endl;
+		Octree::showProgress(0.f);
+		octree.init(subsampledData);
 	}
 	else
 	{
