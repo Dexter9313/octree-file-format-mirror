@@ -16,6 +16,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -29,6 +30,18 @@ const std::string red("\033[31;31m");
 const std::string green("\033[32;32m");
 const std::string reset("\033[0;0m");
 } // namespace term
+
+std::string vecToStr(std::vector<float> const& v)
+{
+	std::string result;
+	for(float f : v)
+	{
+		auto str(std::to_string(f));
+		str.pop_back(); // remove last digit (rounding errors)
+		result += str + ":";
+	}
+	return result;
+}
 
 class TestBinaryFile : public std::fstream
 {
@@ -288,6 +301,33 @@ int main(int, char*[])
 		    << success
 		    << "R/W random octree with more than three components per vertex"
 		    << std::endl;
+	}
+	// TEST random octree dumping in vector after RW
+	{
+		Octree octree1;
+		octree1.setFlags(Octree::Flags::NORMALIZED_NODES
+		                 | Octree::Flags::STORE_RADIUS
+		                 | Octree::Flags::STORE_LUMINOSITY);
+		std::vector<float> v1(generateVertices(bigTreeSize, seed, 5));
+		std::vector<float> v1Copy(v1);
+		octree1.init(v1);
+		TestBinaryFile f;
+		f.resetCursor();
+		write(f, octree1);
+		f.resetCursor();
+		Octree octree2;
+		octree2.init(f);
+		octree2.readData(f);
+		std::vector<float> v2;
+		octree2.dumpInVectorAndEmpty(v2);
+		TEST_EQUAL(v1Copy.size(), v2.size(),
+		           "random octree dumping in vector after RW [size]");
+		std::sort(v1Copy.begin(), v1Copy.end());
+		std::sort(v2.begin(), v2.end());
+		TEST_EQUAL(vecToStr(v1Copy), vecToStr(v2),
+		           "random octree dumping in vector after RW [content]");
+		std::cout << success << "random octree dumping in vector after RW"
+		          << std::endl;
 	}
 
 	return EXIT_SUCCESS;

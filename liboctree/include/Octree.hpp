@@ -236,6 +236,14 @@ class Octree
 	 */
 	virtual std::vector<float> getData() const;
 
+	/*! \brief Dumps all the data contained within the whole octree in a vector
+	 * while emptying the octree.
+	 *
+	 * It can be used instead of getData to not duplicate memory if the octree
+	 * won't be used anymore.
+	 */
+	virtual void dumpInVectorAndEmpty(std::vector<float>& vector);
+
 	/*! \brief Returns a displayable string to represent the tree.
 	 */
 	virtual std::string toString(std::string const& tabs = "") const;

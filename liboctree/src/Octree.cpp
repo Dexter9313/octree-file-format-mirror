@@ -484,6 +484,25 @@ std::vector<float> Octree::getData() const
 	return result;
 }
 
+void Octree::dumpInVectorAndEmpty(std::vector<float>& vector)
+{
+	if(isLeaf())
+	{
+		auto d(getOwnData());
+		vector.insert(vector.end(), d.begin(), d.end());
+		data.resize(0);
+		data.shrink_to_fit();
+		return;
+	}
+	for(unsigned int i(0); i < 8; ++i)
+	{
+		if(children[i])
+		{
+			children[i]->dumpInVectorAndEmpty(vector);
+		}
+	}
+}
+
 std::string Octree::toString(std::string const& tabs) const
 {
 	std::ostringstream oss;
