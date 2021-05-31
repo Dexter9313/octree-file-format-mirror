@@ -34,6 +34,7 @@ void man(const char* argv_0)
 	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --update OCTREE_FILE_IN FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --subsample RATE OCTREE_FILE_IN FILE_OUT" << std::endl
+	          << "\t" << argv_0 << " --merge OCTREE_FILE_IN1 OCTREE_FILE_IN2 FILE_OUT" << std::endl
 	          << "\n\t" << "FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported."
 	          << "\n\t" << "The --update option will only read then write a previously generated octree file, effectively updating its format to the current octreegen version default format." << std::endl
 	          << "\n\t" << "The --subsample option will take a ratio RATE of the OCTREE_FILE_IN data to write it in FILE_OUT. (ex: To halve the data, put RATE as 0.5. To take one vertex out of 4, put RATE as 0.25.)" << std::endl;
@@ -199,6 +200,115 @@ int main(int argc, char* argv[])
 		std::cout << "Constructing octree :" << std::endl;
 		Octree::showProgress(0.f);
 		octree.init(subsampledData);
+	}
+	// merge
+	else if(argc == 5 && argv[1] == std::string("--merge"))
+	{
+		output = argv[4];
+		std::cout << "Loading octree 1 structure..." << std::endl;
+		std::fflush(stdout);
+		int64_t filesize(0);
+		{
+			std::ifstream in(argv[2], std::ifstream::ate | std::ifstream::binary);
+			filesize = in.tellg();
+		}
+		std::ifstream in;
+		in.open(argv[2], std::fstream::in | std::fstream::binary);
+
+		// Init tree with progress bar
+		int64_t cursor(in.tellg());
+		int64_t size;
+		brw::read(in, size);
+		in.seekg(cursor);
+		size *= -1;
+
+		Octree octree1;
+		auto future = std::async(std::launch::async, &initOctree, &octree1, &in);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / size);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+		std::cout << "Loading octree 1 data..." << std::endl;
+
+		future = std::async(std::launch::async, &readData, &octree1, &in);
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / filesize);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+
+		std::cout << "Loading octree 2 structure..." << std::endl;
+		std::fflush(stdout);
+		filesize = 0;
+		{
+			std::ifstream in(argv[3], std::ifstream::ate | std::ifstream::binary);
+			filesize = in.tellg();
+		}
+		in.close();
+		in.open(argv[3], std::fstream::in | std::fstream::binary);
+
+		// Init tree with progress bar
+		cursor = in.tellg();
+		brw::read(in, size);
+		in.seekg(cursor);
+		size *= -1;
+
+		Octree octree2;
+		future = std::async(std::launch::async, &initOctree, &octree2, &in);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / size);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+		std::cout << "Loading octree 2 data..." << std::endl;
+
+		future = std::async(std::launch::async, &readData, &octree2, &in);
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / filesize);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+
+		// merging
+		std::vector<float> mergedData;
+		std::cout << "Extracting data :" << std::endl;
+		Octree::showProgress(0.f);
+		octree1.dumpInVectorAndEmpty(mergedData);
+		Octree::showProgress(0.5f);
+		octree2.dumpInVectorAndEmpty(mergedData);
+		Octree::showProgress(1.f);
+
+		octree.setFlags(octree1.getFlags());
+		std::cout << "Constructing octree :" << std::endl;
+		Octree::showProgress(0.f);
+		octree.init(mergedData);
 	}
 	else
 	{
