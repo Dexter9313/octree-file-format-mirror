@@ -20,6 +20,13 @@
 #include <future>
 #include <iostream>
 #include <vector>
+#ifdef _WIN32
+#include <Windows.h>
+void sleepOneSec() { Sleep(1000);}
+#else
+#include <unistd.h>
+void sleepOneSec() { usleep(999999);}
+#endif
 
 #include <liboctree/Octree.hpp>
 #include <liboctree/binaryrw.hpp>
@@ -91,7 +98,7 @@ int main(int argc, char* argv[])
 		size *= -1;
 
 		auto future = std::async(std::launch::async, &initOctree, &octree, &in);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		sleepOneSec();
 		Octree::showProgress(0.f);
 		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
 			  != std::future_status::ready)
@@ -141,7 +148,7 @@ int main(int argc, char* argv[])
 
 		Octree octree2;
 		auto future = std::async(std::launch::async, &initOctree, &octree2, &in);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		sleepOneSec();
 		Octree::showProgress(0.f);
 		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
 			  != std::future_status::ready)
@@ -224,7 +231,7 @@ int main(int argc, char* argv[])
 
 		Octree octree1;
 		auto future = std::async(std::launch::async, &initOctree, &octree1, &in);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		sleepOneSec();
 		Octree::showProgress(0.f);
 		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
 			  != std::future_status::ready)
@@ -269,7 +276,7 @@ int main(int argc, char* argv[])
 
 		Octree octree2;
 		future = std::async(std::launch::async, &initOctree, &octree2, &in);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		sleepOneSec();
 		Octree::showProgress(0.f);
 		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
 			  != std::future_status::ready)
