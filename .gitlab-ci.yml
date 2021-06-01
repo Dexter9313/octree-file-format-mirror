@@ -1,7 +1,7 @@
 image: gcc
 
 before_script:
-    - apt-get update && apt-get install -y cmake libhdf5-serial-dev qtbase5-dev doxygen graphviz
+    - apt-get update && apt-get install -y cmake libhdf5-serial-dev qtbase5-dev doxygen graphviz libstdc++-9-dev
 
 stages:
   - buildlib
