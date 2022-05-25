@@ -36,10 +36,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 1)
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/Octree.hpp;${PROJECT_SOURCE_DIR}/include/binaryrw.hpp")
 target_include_directories(${PROJECT_NAME} PRIVATE include)
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 #EXECUTABLE 1 : tests
 add_executable(${PROJECT_TEST_NAME} ${TEST_FILES})
-target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME})
+target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME} Threads::Threads)
 
 enable_testing ()
 add_test (NAME Tests COMMAND ${PROJECT_TEST_NAME})

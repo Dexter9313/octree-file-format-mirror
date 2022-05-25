@@ -21,6 +21,8 @@
 // std::string Octree::tabs    = "";
 // std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
+unsigned int Octree::threadsLaunched = 0;
+
 size_t Octree::totalNumberOfVertices = 0;
 
 Octree::Octree()
@@ -50,7 +52,7 @@ void Octree::init(std::vector<float>& data)
 {
 	totalNumberOfVertices = (data.size() / commonData.dimPerVertex) - 1;
 	std::cout.precision(3);
-	init(data, 0, (data.size() / commonData.dimPerVertex) - 1);
+	initParallel(&data, 0, (data.size() / commonData.dimPerVertex) - 1);
 	std::cout.precision(6);
 }
 
@@ -194,6 +196,186 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	{
 		children[7] = newChild();
 		children[7]->init(data, beg, splits[0] - 1);
+	}
+}
+
+#include <thread>
+
+void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
+{
+	size_t verticesNumber(end - beg + 1);
+	totalDataSize = commonData.dimPerVertex * verticesNumber;
+	for(size_t i(beg); i <= end; ++i)
+	{
+		if(get(*data, i, 0) < minX)
+			minX = get(*data, i, 0);
+		if(get(*data, i, 0) > maxX)
+			maxX = get(*data, i, 0);
+		if(get(*data, i, 1) < minY)
+			minY = get(*data, i, 1);
+		if(get(*data, i, 1) > maxY)
+			maxY = get(*data, i, 1);
+		if(get(*data, i, 2) < minZ)
+			minZ = get(*data, i, 2);
+		if(get(*data, i, 2) > maxZ)
+			maxZ = get(*data, i, 2);
+
+		if(verticesNumber <= MAX_LEAF_SIZE
+		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+		          < MAX_LEAF_SIZE / (float) verticesNumber)
+		{
+			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
+			{
+				this->data.push_back(get(*data, i, j));
+			}
+		}
+	}
+	if((commonData.flags & Flags::NORMALIZED_NODES) != Flags::NONE)
+	{
+		float localScale(1.f);
+		if((maxX - minX > maxY - minY) && (maxX - minX > maxZ - minZ))
+		{
+			localScale = maxX - minX;
+		}
+		else if(maxY - minY > maxZ - minZ)
+		{
+			localScale = maxY - minY;
+		}
+		else if(maxZ != minZ)
+		{
+			localScale = maxZ - minZ;
+		}
+
+		for(size_t i(0); i < this->data.size(); i += commonData.dimPerVertex)
+		{
+			this->data[i] -= minX;
+			this->data[i] /= localScale;
+			this->data[i + 1] -= minY;
+			this->data[i + 1] /= localScale;
+			this->data[i + 2] -= minZ;
+			this->data[i + 2] /= localScale;
+		}
+	}
+	if(verticesNumber <= MAX_LEAF_SIZE)
+	{
+		// delete our part of the vector, we know we are at the end of the
+		// vector per (*) (check after all the orderPivot calls)
+		// data.resize(commonData.dimPerVertex * beg);
+		showProgress(1.f - beg / (float) totalNumberOfVertices);
+		// we don't need to create children
+		return;
+	}
+
+	float midX((minX + maxX) / 2.f), midY((minY + maxY) / 2.f),
+	    midZ((minZ + maxZ) / 2.f);
+
+	// To construct the subtrees we will swap elements within the vector and
+	// split it at 7 places to have 8 parts, each corresponding to a subtree.
+	// The splitting is done with this priority : x, then y, then z. For each
+	// coordinate i, midI will be used as a pivot to put each point whose i
+	// coordinate is below midI before the i split, and each point whose i
+	// coordinate is above midI after the i split. When a split is done, it is
+	// equivalent to having two vectors instead of one, but for memory sake we
+	// keep everything in one single big vector with "splits" barriers.
+	//
+	// After this part of the algorithm, the data should be structure like this
+	// :
+	//
+	// child0 - splits[0] - child1 - splits[1] - child2 - splits[2] - child3 -
+	//             z                    y                    z
+	//
+	// splits[3] - child4 - splits[4] - child5 - splits[5] - child6 - splits[6]
+	//    x                    z                    y                    z
+	//
+	// - child7
+
+	size_t splits[7];
+
+	// split along x in half
+	splits[3] = orderPivot(*data, beg, end, 0, midX);
+
+	// split each half along y in quarters
+	splits[1] = orderPivot(*data, beg, splits[3] - 1, 1, midY);
+	splits[5] = orderPivot(*data, splits[3], end, 1, midY);
+
+	// split each quarter by z in eighths
+	splits[0] = orderPivot(*data, beg, splits[1] - 1, 2, midZ);
+	splits[2] = orderPivot(*data, splits[1], splits[3] - 1, 2, midZ);
+	splits[4] = orderPivot(*data, splits[3], splits[5] - 1, 2, midZ);
+	splits[6] = orderPivot(*data, splits[5], end, 2, midZ);
+
+	if(splits[0] < beg || splits[6] > end)
+	{
+		std::cout << "ERR0" << std::endl;
+		int* foo = (int*) 0x10;
+		*foo     = 0;
+	}
+	for(unsigned int i(0); i < 6; ++i)
+	{
+		if(splits[i] > splits[i + 1])
+		{
+			std::cout << "ERR1 " << i << std::endl;
+			int* foo = (int*) 0x10;
+			*foo     = 0;
+		}
+	}
+
+	// Now we just assign each child its part
+	// (*) we do it from end to begin to let the child use resize to free its
+	// part of the vector (and not erase, which is less efficient)
+
+	if(threadsLaunched + 8 > std::thread::hardware_concurrency())
+	{
+		if(end > splits[6])
+		{
+			children[0] = newChild();
+			children[0]->init(*data, splits[6], end);
+		}
+		for(unsigned int i(6); i > 0; --i)
+		{
+			if(splits[i] > splits[i - 1])
+			{
+				children[7 - i] = newChild();
+				children[7 - i]->init(*data, splits[i - 1], splits[i] - 1);
+			}
+		}
+		if(splits[0] > beg)
+		{
+			children[7] = newChild();
+			children[7]->init(*data, beg, splits[0] - 1);
+		}
+	}
+	else
+	{
+		std::thread* threads[8] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+
+		if(end > splits[6])
+		{
+			children[0] = newChild();
+			threads[0] = new std::thread(&Octree::initParallel, children[0], data, splits[6], end);
+		}
+		for(unsigned int i(6); i > 0; --i)
+		{
+			if(splits[i] > splits[i - 1])
+			{
+				children[7 - i] = newChild();
+				threads[7- i] = new std::thread(&Octree::initParallel, children[7 - i], data, splits[i - 1], splits[i] - 1);
+			}
+		}
+		if(splits[0] > beg)
+		{
+			children[7] = newChild();
+			threads[7] = new std::thread(&Octree::initParallel, children[7], data, beg, splits[0] - 1);
+		}
+
+		for(unsigned int i(0); i < 8; ++i)
+		{
+			if(threads[i] != nullptr)
+			{
+				threads[i]->join();
+				delete threads[i];
+			}
+		}
 	}
 }
 

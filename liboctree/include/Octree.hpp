@@ -369,6 +369,9 @@ class Octree
 	// init helper that only uses data from beg to end (included).
 	// beg and end are vertices indices.
 	void init(std::vector<float>& data, size_t beg, size_t end);
+	// init helper that better uses CPU but doubles RAM usage
+	void initParallel(std::vector<float>* data, size_t beg, size_t end);
+	static unsigned int threadsLaunched;
 
 	// Gets a vertex's component from data.
 	// vertex is the vertex's index.
