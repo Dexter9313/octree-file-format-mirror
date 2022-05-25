@@ -22,6 +22,9 @@
 // std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
 unsigned int Octree::threadsLaunched = 0;
+std::mutex Octree::threadsLaunchedMutex = {};
+size_t Octree::verticesLoaded;
+std::mutex Octree::verticesLoadedMutex = {};
 
 size_t Octree::totalNumberOfVertices = 0;
 
@@ -261,7 +264,9 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
 		// data.resize(commonData.dimPerVertex * beg);
-		showProgress(1.f - beg / (float) totalNumberOfVertices);
+		std::lock_guard<std::mutex> guard(verticesLoadedMutex);
+		verticesLoaded += verticesNumber;
+		showProgress(verticesLoaded / (float) totalNumberOfVertices);
 		// we don't need to create children
 		return;
 	}

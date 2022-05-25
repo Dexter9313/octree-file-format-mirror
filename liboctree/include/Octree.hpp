@@ -27,6 +27,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <mutex>
 
 #include "binaryrw.hpp"
 
@@ -372,6 +373,9 @@ class Octree
 	// init helper that better uses CPU but doubles RAM usage
 	void initParallel(std::vector<float>* data, size_t beg, size_t end);
 	static unsigned int threadsLaunched;
+	static std::mutex threadsLaunchedMutex;
+	static size_t verticesLoaded;
+	static std::mutex verticesLoadedMutex;
 
 	// Gets a vertex's component from data.
 	// vertex is the vertex's index.
