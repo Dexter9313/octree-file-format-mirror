@@ -142,7 +142,7 @@ void MainWindow::generate()
 	if(proc == nullptr)
 	{
 		proc = new QProcess(this);
-		proc->start(cmdLine);
+		proc->start(cmdLine, QStringList());
 		if(!proc->waitForStarted())
 		{
 			QMessageBox::critical(this, tr("Critical Error"),
