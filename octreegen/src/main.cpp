@@ -47,7 +47,7 @@ void man(const char* argv_0)
 	          << "\n\t" << "The --subsample option will take a ratio RATE of the OCTREE_FILE_IN data to write it in FILE_OUT. (ex: To halve the data, put RATE as 0.5. To take one vertex out of 4, put RATE as 0.25.)" << std::endl;
 	std::cout << "\nExamples: " << std::endl
 	          << "\t"
-	          << "To read gaz data coordinates and luminosity within snapshot.&ast;.hdf5 files (will be expanded as \"snapshot.0.hdf5 snapshot.1.hdf5\" for example) in "
+	          << "To read gaz data coordinates and luminosity within snapshot.*.hdf5 files (will be expanded as \"snapshot.0.hdf5 snapshot.1.hdf5\" for example) in "
 	          << std::endl
 	          << "\tgroup /PartType0 and write the corresponding octree in "
 	          << std::endl

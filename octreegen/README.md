@@ -29,7 +29,7 @@ First install the required libraries :
 
 Then simply install the following deb package :
 
-Download (.deb) : [octreegen 1.10.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.10.0/raw/octreegen-1.10.0-linux_amd64.deb?job=pack:octreegen)
+Download (.deb) : [octreegen 1.14.1](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.14.1/raw/octreegen-1.14.1-linux_amd64.deb?job=pack:octreegen)
 
 ### Build from source
 
@@ -37,7 +37,7 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install build-essential cmake libhdf5-serial-dev
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.10.0/raw/liboctree-1.10.0-linux_amd64.deb?job=pack:liboctree
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.14.1/raw/liboctree-1.14.1-linux_amd64.deb?job=pack:liboctree
 	sudo dpkg -i ./*.deb
 
 Then clone this repository. We now suppose the root directory of the repository is stored in the $OCTREE_ROOT_DIR variable.
@@ -60,11 +60,17 @@ Optionally, you can generate a deb package to make installation managing easier 
 
 ## Usage
 
-	octreegen FILES_IN:DATASET_PATH FILE_OUT
-
+	octreegen FILES_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT
+	octreegen FILES_IN:DATASET_COORD_PATH:DATASET_R_COLOR_PATH:DATASET_G_COLOR_PATH:DATASET_B_COLOR_PATH FILE_OUT
 	octreegen PARTICLES_NUMBER FILE_OUT
+	octreegen --update OCTREE_FILE_IN FILE_OUT
+	octreegen --subsample RATE OCTREE_FILE_IN FILE_OUT
+	octreegen --merge OCTREE_FILE_IN1 OCTREE_FILE_IN2 FILE_OUT
 
 	FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported.
+	The --update option will only read then write a previously generated octree file, effectively updating its format to the current octreegen version default format.
+
+	The --subsample option will take a ratio RATE of the OCTREE_FILE_IN data to write it in FILE_OUT. (ex: To halve the data, put RATE as 0.5. To take one vertex out of 4, put RATE as 0.25.)
 
 ### Examples
 
