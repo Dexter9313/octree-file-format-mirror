@@ -31,7 +31,7 @@ First install the required libraries :
 
 Then simply install the following deb package :
 
-Download (.deb) : [octreegen-gui 1.10.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.10.0/raw/octreegen-gui-1.10.0-linux_amd64.deb?job=pack:octreegen-gui)
+Download (.deb) : [octreegen-gui 1.14.1](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.14.1/raw/octreegen-gui-1.14.1-linux_amd64.deb?job=pack:octreegen-gui)
 
 ### Build from source
 
@@ -60,7 +60,7 @@ Optionally, you can generate a deb package to make installation managing easier 
 
 ## Usage
 
-Simply open an HDF5 file with File->Open then select a coordinates dataset within the datasets hierarchy (optionally radius and luminosity too). You can open several files at once if your data is spread out between multiple files. Then click the generate button and you are done when the load bar reaches 100% !
+Simply open an HDF5 file with File->Open then select a coordinates dataset within the datasets hierarchy (optionally radius and luminosity too). You can open several files at once if your data is spread out between multiple files. Then click the generate button and you are done when the loading bar reaches 100% !
 
 ## Uninstall
 
