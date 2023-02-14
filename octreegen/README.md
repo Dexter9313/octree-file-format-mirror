@@ -75,8 +75,11 @@ Optionally, you can generate a deb package to make installation managing easier 
 ### Examples
 
 To read gaz data coordinates and luminosity within snapshot.&ast;.hdf5 files (will be expanded as "snapshot.0.hdf5 snapshot.1.hdf5" for example) in group /PartType0 and write the corresponding octree in the gaz.octree file :
+
 	octreegen snapshot.*.hdf5:/PartType0/Coordinates::/PartType0/Luminosities gaz.octree
+
 which is equivalent to :
+
 	octreegen "snapshot.0.hdf5 snapshot.1.hdf5":/PartType0/Coordinates::/PartType0/Luminosities gaz.octree
 
 To generate 1 million uniformly random particles and 
