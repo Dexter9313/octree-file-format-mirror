@@ -411,7 +411,6 @@ int main(int argc, char* argv[])
 				luminosity = s[3];
 				flags |= Octree::Flags::STORE_LUMINOSITY;
 			}
-			return 0;
 			octree.setFlags(flags);
 			std::vector<float> v;
 			try
