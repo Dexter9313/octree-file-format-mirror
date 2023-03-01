@@ -95,6 +95,12 @@ class Octree
 		/*! \brief Set if the particles colors are also stored.
 		 */
 		STORE_COLOR = 0x0000000400000000ULL,
+		/*! \brief Set if the particles densities are also stored.
+		 */
+		STORE_DENSITY = 0x0000000800000000ULL,
+		/*! \brief Set if the particles temperatures are also stored.
+		 */
+		STORE_TEMPERATURE = 0x0000001000000000ULL,
 	};
 
 	struct CommonData
