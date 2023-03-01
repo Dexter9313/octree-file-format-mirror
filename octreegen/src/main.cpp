@@ -400,17 +400,18 @@ int main(int argc, char* argv[])
 			std::string file   = s[0];
 			std::string coords = s[1];
 			std::string radius = "";
-			if(s.size() >= 3)
+			if(s.size() >= 3 && !s[2].empty())
 			{
 				radius = s[2];
 				flags |= Octree::Flags::STORE_RADIUS;
 			}
 			std::string luminosity = "";
-			if(s.size() >= 4)
+			if(s.size() >= 4 && !s[3].empty())
 			{
 				luminosity = s[3];
 				flags |= Octree::Flags::STORE_LUMINOSITY;
 			}
+			return 0;
 			octree.setFlags(flags);
 			std::vector<float> v;
 			try
