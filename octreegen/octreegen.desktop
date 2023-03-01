@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=octreegen
+Exec=octreegen
+Icon=icon
+Type=Application
+Terminal=true
+Categories=Utility;
