@@ -32,18 +32,14 @@ const std::string green("\033[32;32m");
 const std::string reset("\033[0;0m");
 } // term
 
-template <typename T>
-void TEST_EQUAL(T result, T shouldbe, const char* testname,
+void TEST_EQUAL(std::string const& result, std::string const& shouldbe, const char* testname,
                 std::string const& additional = "")
 {
 	if(result != shouldbe)
 	{
-		std::cerr.precision(2 * sizeof(T));
 		std::cerr << term::red << "[FAILURE] " << term::reset << testname
-		          << "(result is : \"" << result << "|" << std::hex
-		          << *reinterpret_cast<uint64_t*>(&result) << std::dec
-		          << "\", expected : \"" << shouldbe << "|" << std::hex
-		          << *reinterpret_cast<uint64_t*>(&shouldbe) << "\")"
+		          << "(result is : \"" << result
+		          << "\", expected : \"" << shouldbe
 		          << (additional != "" ? " Additional Information : " : "")
 		          << additional << std::endl;
 		exit(EXIT_FAILURE);
