@@ -36,12 +36,14 @@ void sleepOneSec() { usleep(999999);}
 void man(const char* argv_0)
 {
 	std::cout << "Usage: " << std::endl
+	          << "\t" << argv_0 << " OCTREE_FILE" << std::endl
 	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH[:DATASET_RADIUS_PATH[:DATASET_LUM_PATH]] FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " FILES_IN:DATASET_COORD_PATH:DATASET_R_COLOR_PATH:DATASET_G_COLOR_PATH:DATASET_B_COLOR_PATH FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " PARTICLES_NUMBER FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --update OCTREE_FILE_IN FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --subsample RATE OCTREE_FILE_IN FILE_OUT" << std::endl
 	          << "\t" << argv_0 << " --merge OCTREE_FILE_IN1 OCTREE_FILE_IN2 FILE_OUT" << std::endl
+	          << "\n\t" << "When providing only an octree file, octreegen will print some informations about it."
 	          << "\n\t" << "FILES_IN are a set of paths separated by spaces (don't forget the quotes). Wildcards are supported."
 	          << "\n\t" << "The --update option will only read then write a previously generated octree file, effectively updating its format to the current octreegen version default format." << std::endl
 	          << "\n\t" << "The --subsample option will take a ratio RATE of the OCTREE_FILE_IN data to write it in FILE_OUT. (ex: To halve the data, put RATE as 0.5. To take one vertex out of 4, put RATE as 0.25.)" << std::endl;
@@ -71,13 +73,84 @@ int main(int argc, char* argv[])
 {
 	Octree octree;
 	std::string output;
-	if(argc < 3)
+	// info
+	if(argc == 2)
+	{
+		std::ifstream in;
+		in.open(argv[1], std::fstream::in | std::fstream::binary);
+		// Init tree with progress bar
+		int64_t cursor(in.tellg());
+		int64_t size;
+		brw::read(in, size);
+		in.seekg(cursor);
+		size *= -1;
+
+		auto future = std::async(std::launch::async, &initOctree, &octree, &in);
+		sleepOneSec();
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / size);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+
+		std::cout << argv[1] << " :" << std::endl;
+		std::cout << '\t' << "Bounding box :" << std::endl;
+		std::cout << "\t\t" << "x:[" << octree.getMinX() << ',' << octree.getMaxX() << ']' << std::endl;
+		std::cout << "\t\t" << "y:[" << octree.getMinY() << ',' << octree.getMaxY() << ']' << std::endl;
+		std::cout << "\t\t" << "z:[" << octree.getMinZ() << ',' << octree.getMaxZ() << ']' << std::endl;
+		std::cout << '\t' << "Vertex dimension : " << octree.getDimPerVertex() << std::endl;
+		std::cout << '\t' << "Flags :";
+
+		std::string flagsStr("  ");
+
+		auto flags = octree.getFlags();
+		if((flags & Octree::Flags::NORMALIZED_NODES) != Octree::Flags::NONE)
+		{
+			flagsStr += "NORMALIZED_NODES, ";
+		}
+		if((flags & Octree::Flags::VERSIONED) != Octree::Flags::NONE)
+		{
+			flagsStr += "VERSIONED, ";
+		}
+		if((flags & Octree::Flags::STORE_RADIUS) != Octree::Flags::NONE)
+		{
+			flagsStr += "STORE_RADIUS, ";
+		}
+		if((flags & Octree::Flags::STORE_LUMINOSITY) != Octree::Flags::NONE)
+		{
+			flagsStr += "STORE_LUMINOSITY, ";
+		}
+		if((flags & Octree::Flags::STORE_COLOR) != Octree::Flags::NONE)
+		{
+			flagsStr += "STORE_COLOR, ";
+		}
+		if((flags & Octree::Flags::STORE_DENSITY) != Octree::Flags::NONE)
+		{
+			flagsStr += "STORE_DENSITY, ";
+		}
+		if((flags & Octree::Flags::STORE_TEMPERATURE) != Octree::Flags::NONE)
+		{
+			flagsStr += "STORE_TEMPERATURE, ";
+		}
+		// remote last two characters
+		flagsStr.resize(flagsStr.size() - 2);
+		std::cout << flagsStr << std::endl;
+
+		return EXIT_SUCCESS;
+	}
+	else if(argc < 3)
 	{
 		man(argv[0]);
 		return EXIT_SUCCESS;
 	}
 	// update
-	if(argc == 4 && argv[1] == std::string("--update"))
+	else if(argc == 4 && argv[1] == std::string("--update"))
 	{
 		output = argv[3];
 		std::cout << "Loading octree structure..." << std::endl;

@@ -137,6 +137,19 @@ class Octree
 	 */
 	unsigned int getDimPerVertex() const { return commonData.dimPerVertex; };
 
+	/*! \brief Returns the bounding box's minimum x coordinate */
+	float getMinX() const { return minX; };
+	/*! \brief Returns the bounding box's maximum x coordinate */
+	float getMaxX() const { return maxX; };
+	/*! \brief Returns the bounding box's minimum y coordinate */
+	float getMinY() const { return minY; };
+	/*! \brief Returns the bounding box's maximum y coordinate */
+	float getMaxY() const { return maxY; };
+	/*! \brief Returns the bounding box's minimum z coordinate */
+	float getMinZ() const { return minZ; };
+	/*! \brief Returns the bounding box's maximum z coordinate */
+	float getMaxZ() const { return maxZ; };
+
 	/*! \brief Initializes the octree from position data.
 	 *
 	 * It will also compute all the mins and maxes.
