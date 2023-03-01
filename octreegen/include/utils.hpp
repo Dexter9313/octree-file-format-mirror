@@ -17,7 +17,7 @@
 */
 
 #include <cfloat>
-#include <hdf5/serial/hdf5.h>
+#include <hdf5.h>
 #include <iostream>
 #include <liboctree/Octree.hpp>
 #include <string>
