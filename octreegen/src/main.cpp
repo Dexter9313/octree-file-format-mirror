@@ -71,6 +71,7 @@ void man(const char* argv_0)
 
 int main(int argc, char* argv[])
 {
+	std::vector<float> v; // contains octree construction data
 	Octree octree;
 	std::string output;
 	// info
@@ -251,7 +252,7 @@ int main(int argc, char* argv[])
 		// subsampling
 		unsigned int step(octree2.getDimPerVertex());
 		float rate(std::stof(argv[2]));
-		std::vector<float> data, subsampledData;
+		std::vector<float> data;
 
 		std::cout << "Extracting data :" << std::endl;
 		Octree::showProgress(0.f);
@@ -267,7 +268,7 @@ int main(int argc, char* argv[])
 			{
 				for(size_t j(0); j < step; ++j)
 				{
-					subsampledData.push_back(data[i+j]);
+					v.push_back(data[i+j]);
 				}
 			}
 			if(i % 10000000 == 0)
@@ -275,11 +276,14 @@ int main(int argc, char* argv[])
 				Octree::showProgress(static_cast<float>(i) / data.size());
 			}
 		}
+		data.resize(0);
+		data.shrink_to_fit();
+
 		Octree::showProgress(1.f);
 		octree.setFlags(octree2.getFlags());
 		std::cout << "Constructing octree :" << std::endl;
 		Octree::showProgress(0.f);
-		octree.init(subsampledData);
+		octree.init(v);
 	}
 	// merge
 	else if(argc == 5 && argv[1] == std::string("--merge"))
@@ -377,18 +381,17 @@ int main(int argc, char* argv[])
 		Octree::showProgress(1.f);
 
 		// merging
-		std::vector<float> mergedData;
 		std::cout << "Extracting data :" << std::endl;
 		Octree::showProgress(0.f);
-		octree1.dumpInVectorAndEmpty(mergedData);
+		octree1.dumpInVectorAndEmpty(v);
 		Octree::showProgress(0.5f);
-		octree2.dumpInVectorAndEmpty(mergedData);
+		octree2.dumpInVectorAndEmpty(v);
 		Octree::showProgress(1.f);
 
 		octree.setFlags(octree1.getFlags());
 		std::cout << "Constructing octree :" << std::endl;
 		Octree::showProgress(0.f);
-		octree.init(mergedData);
+		octree.init(v);
 	}
 	else
 	{
@@ -412,7 +415,6 @@ int main(int argc, char* argv[])
 				flags |= Octree::Flags::STORE_LUMINOSITY;
 			}
 			octree.setFlags(flags);
-			std::vector<float> v;
 			try
 			{
 				v = readHDF5(file, coords.c_str(), radius.c_str(), luminosity.c_str());
@@ -436,7 +438,6 @@ int main(int argc, char* argv[])
 			std::string g = s[3];
 			std::string b = s[4];
 			octree.setFlags(flags);
-			std::vector<float> v;
 			try
 			{
 				v = readHDF5(file, coords.c_str(), r.c_str(), g.c_str(), b.c_str());
@@ -464,7 +465,7 @@ int main(int argc, char* argv[])
 				man(argv[0]);
 				return EXIT_FAILURE;
 			}
-			std::vector<float> v(generateVertices(numberOfVertices, time(NULL)));
+			v = generateVertices(numberOfVertices, time(NULL));
 			std::cout << "Constructing octree :" << std::endl;
 			Octree::showProgress(0.f);
 			octree.init(v);
