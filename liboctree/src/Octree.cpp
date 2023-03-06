@@ -21,7 +21,7 @@
 // std::string Octree::tabs    = "";
 // std::ofstream Octree::debug = std::ofstream("LIBOCTREE.debug");
 
-unsigned int Octree::threadsLaunched = 0;
+unsigned int Octree::threadsLaunched    = 0;
 std::mutex Octree::threadsLaunchedMutex = {};
 size_t Octree::verticesLoaded;
 std::mutex Octree::verticesLoadedMutex = {};
@@ -64,7 +64,8 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	size_t verticesNumber(end - beg + 1);
 	if(verticesNumber <= MAX_LEAF_SIZE)
 	{
-		this->data.setAsReference(&data, beg * commonData.dimPerVertex, (end + 1) * commonData.dimPerVertex - 1);
+		this->data.setAsReference(&data, beg * commonData.dimPerVertex,
+		                          (end + 1) * commonData.dimPerVertex - 1);
 	}
 	else
 	{
@@ -87,7 +88,8 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		if(get(data, i, 2) > maxZ)
 			maxZ = get(data, i, 2);
 
-		if(verticesNumber > MAX_LEAF_SIZE && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		if(verticesNumber > MAX_LEAF_SIZE
+		   && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
 		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
@@ -215,7 +217,8 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 	size_t verticesNumber(end - beg + 1);
 	if(verticesNumber <= MAX_LEAF_SIZE)
 	{
-		this->data.setAsReference(data, beg * commonData.dimPerVertex, (end + 1) * commonData.dimPerVertex - 1);
+		this->data.setAsReference(data, beg * commonData.dimPerVertex,
+		                          (end + 1) * commonData.dimPerVertex - 1);
 	}
 	else
 	{
@@ -238,7 +241,8 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		if(get(*data, i, 2) > maxZ)
 			maxZ = get(*data, i, 2);
 
-		if(verticesNumber > MAX_LEAF_SIZE && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		if(verticesNumber > MAX_LEAF_SIZE
+		   && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
 		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
@@ -367,25 +371,30 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 	}
 	else
 	{
-		std::thread* threads[8] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		std::thread* threads[8] = {nullptr, nullptr, nullptr, nullptr,
+		                           nullptr, nullptr, nullptr, nullptr};
 
 		if(end > splits[6])
 		{
 			children[0] = newChild();
-			threads[0] = new std::thread(&Octree::initParallel, children[0], data, splits[6], end);
+			threads[0]  = new std::thread(&Octree::initParallel, children[0],
+			                              data, splits[6], end);
 		}
 		for(unsigned int i(6); i > 0; --i)
 		{
 			if(splits[i] > splits[i - 1])
 			{
 				children[7 - i] = newChild();
-				threads[7- i] = new std::thread(&Octree::initParallel, children[7 - i], data, splits[i - 1], splits[i] - 1);
+				threads[7 - i]
+				    = new std::thread(&Octree::initParallel, children[7 - i],
+				                      data, splits[i - 1], splits[i] - 1);
 			}
 		}
 		if(splits[0] > beg)
 		{
 			children[7] = newChild();
-			threads[7] = new std::thread(&Octree::initParallel, children[7], data, beg, splits[0] - 1);
+			threads[7]  = new std::thread(&Octree::initParallel, children[7],
+			                              data, beg, splits[0] - 1);
 		}
 
 		for(unsigned int i(0); i < 8; ++i)
@@ -562,9 +571,9 @@ std::vector<int64_t> Octree::getCompactData() const
 void Octree::writeData(std::ostream& out)
 {
 	file_addr = out.tellp();
-       uint64_t size(data.size());
-       brw::write(out, size);
-       brw::write(out, data[0], data.size());
+	uint64_t size(data.size());
+	brw::write(out, size);
+	brw::write(out, data[0], data.size());
 
 	for(unsigned int i(0); i < 8; ++i)
 		if(children[i] != nullptr)
@@ -596,19 +605,19 @@ void Octree::readOwnData(std::istream& in)
 void Octree::readOwnData1_0(std::istream& in)
 {
 	readBBox(in);
-       uint64_t size;
-       brw::read(in, size);
-	   data.asVector().resize(size);
-       brw::read(in, data[0], data.size());
+	uint64_t size;
+	brw::read(in, size);
+	data.asVector().resize(size);
+	brw::read(in, data[0], data.size());
 }
 
 void Octree::readOwnData2_0(std::istream& in)
 {
 	in.seekg(file_addr);
-       uint64_t size;
-       brw::read(in, size);
-	   data.asVector().resize(size);
-       brw::read(in, data[0], data.size());
+	uint64_t size;
+	brw::read(in, size);
+	data.asVector().resize(size);
+	brw::read(in, data[0], data.size());
 }
 
 void Octree::readBBoxes(std::istream& in)

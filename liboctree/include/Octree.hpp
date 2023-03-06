@@ -25,9 +25,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <vector>
-#include <mutex>
 
 #include "binaryrw.hpp"
 

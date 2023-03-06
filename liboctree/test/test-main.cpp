@@ -208,7 +208,8 @@ int main(int, char*[])
 		Octree octree2;
 		octree2.init(f);
 		octree2.readData(f);
-		TEST_EQUAL(octree2.toString(), octree1.toString(), "R/W random octree");
+		TEST_EQUAL(octree2.toString(), octree1.toString(),
+		           "R/W random octree (only one leaf)");
 		std::cout << success << "R/W random octree (only one leaf)"
 		          << std::endl;
 	}
