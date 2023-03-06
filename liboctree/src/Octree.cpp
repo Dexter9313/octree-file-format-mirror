@@ -62,6 +62,15 @@ void Octree::init(std::vector<float>& data)
 void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 {
 	size_t verticesNumber(end - beg + 1);
+	if(verticesNumber <= MAX_LEAF_SIZE)
+	{
+		this->data.setAsReference(&data, beg * commonData.dimPerVertex, (end + 1) * commonData.dimPerVertex - 1);
+	}
+	else
+	{
+		this->data.setAsVector();
+		this->data.asVector().reserve(MAX_LEAF_SIZE * commonData.dimPerVertex);
+	}
 	totalDataSize = commonData.dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
 	{
@@ -78,8 +87,8 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		if(get(data, i, 2) > maxZ)
 			maxZ = get(data, i, 2);
 
-		if(verticesNumber <= MAX_LEAF_SIZE
-		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+		if(verticesNumber > MAX_LEAF_SIZE && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
 			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
@@ -116,9 +125,6 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	}
 	if(verticesNumber <= MAX_LEAF_SIZE)
 	{
-		// delete our part of the vector, we know we are at the end of the
-		// vector per (*) (check after all the orderPivot calls)
-		data.resize(commonData.dimPerVertex * beg);
 		showProgress(1.f - beg / (float) totalNumberOfVertices);
 		// we don't need to create children
 		return;
@@ -207,6 +213,15 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 {
 	size_t verticesNumber(end - beg + 1);
+	if(verticesNumber <= MAX_LEAF_SIZE)
+	{
+		this->data.setAsReference(data, beg * commonData.dimPerVertex, (end + 1) * commonData.dimPerVertex - 1);
+	}
+	else
+	{
+		this->data.setAsVector();
+		this->data.asVector().reserve(MAX_LEAF_SIZE * commonData.dimPerVertex);
+	}
 	totalDataSize = commonData.dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
 	{
@@ -223,8 +238,8 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		if(get(*data, i, 2) > maxZ)
 			maxZ = get(*data, i, 2);
 
-		if(verticesNumber <= MAX_LEAF_SIZE
-		   || (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+		if(verticesNumber > MAX_LEAF_SIZE && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
 		          < MAX_LEAF_SIZE / (float) verticesNumber)
 		{
 			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
@@ -386,6 +401,7 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 
 void Octree::init(std::istream& in)
 {
+	this->data.setAsVector();
 	brw::read(in, file_addr);
 	// debug << tabs << file_addr << std::endl;
 
@@ -457,6 +473,7 @@ void Octree::init(std::istream& in)
 
 void Octree::init(int64_t file_addr, std::istream& in)
 {
+	this->data.setAsVector();
 	if(commonData.versionMajor < 2)
 	{
 		init1_0(file_addr, in);
@@ -545,7 +562,10 @@ std::vector<int64_t> Octree::getCompactData() const
 void Octree::writeData(std::ostream& out)
 {
 	file_addr = out.tellp();
-	brw::write(out, data);
+       uint64_t size(data.size());
+       brw::write(out, size);
+       brw::write(out, data[0], data.size());
+
 	for(unsigned int i(0); i < 8; ++i)
 		if(children[i] != nullptr)
 			children[i]->writeData(out);
@@ -576,13 +596,19 @@ void Octree::readOwnData(std::istream& in)
 void Octree::readOwnData1_0(std::istream& in)
 {
 	readBBox(in);
-	brw::read(in, data);
+       uint64_t size;
+       brw::read(in, size);
+	   data.asVector().resize(size);
+       brw::read(in, data[0], data.size());
 }
 
 void Octree::readOwnData2_0(std::istream& in)
 {
 	in.seekg(file_addr);
-	brw::read(in, data);
+       uint64_t size;
+       brw::read(in, size);
+	   data.asVector().resize(size);
+       brw::read(in, data[0], data.size());
 }
 
 void Octree::readBBoxes(std::istream& in)
@@ -622,7 +648,7 @@ void Octree::readBBox2_0(std::istream& /*in*/) {}
 
 std::vector<float> Octree::getOwnData() const
 {
-	std::vector<float> result(data);
+	std::vector<float> result(data.asVector());
 	if((commonData.flags & Flags::NORMALIZED_NODES) != Flags::NONE)
 	{
 		float localScale(1.f);
@@ -677,8 +703,8 @@ void Octree::dumpInVectorAndEmpty(std::vector<float>& vector)
 	{
 		auto d(getOwnData());
 		vector.insert(vector.end(), d.begin(), d.end());
-		data.resize(0);
-		data.shrink_to_fit();
+		data.asVector().resize(0);
+		data.asVector().shrink_to_fit();
 		return;
 	}
 	for(unsigned int i(0); i < 8; ++i)

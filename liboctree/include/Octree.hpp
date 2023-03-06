@@ -55,6 +55,98 @@
  * extensively used by the \ref Octree class to read/write octrees.
  */
 
+class Data
+{
+  public:
+	Data() = default;
+	void setAsVector()
+	{
+		if(ref != nullptr && ownsVector)
+		{
+			return;
+		}
+		ownsVector = true;
+		ref        = new std::vector<float>;
+		beg        = 0;
+		end        = 0;
+	}
+	void setAsReference(std::vector<float>* ref, size_t beg, size_t end)
+	{
+		if(this->ref != nullptr && ownsVector)
+		{
+			delete this->ref;
+		}
+		ownsVector = false;
+		this->ref  = ref;
+		this->beg  = beg;
+		this->end  = end;
+	}
+
+	std::vector<float>& asVector() const
+	{
+		if(!ownsVector)
+		{
+			throw("Trying to access vector of non-owned vector.");
+		}
+		return *ref;
+	}
+
+	bool isReference() const { return !ownsVector; };
+
+	size_t size() const
+	{
+		if(ownsVector)
+		{
+			return ref->size();
+		}
+		return end - beg + 1;
+	}
+
+	float operator[](size_t i) const
+	{
+		if(ownsVector)
+		{
+			return (*ref)[i];
+		}
+		return (*ref)[beg + i];
+	}
+	float& operator[](size_t i)
+	{
+		if(ownsVector)
+		{
+			return (*ref)[i];
+		}
+		return (*ref)[beg + i];
+	}
+
+	void push_back(float val)
+	{
+		if(ownsVector)
+		{
+			ref->push_back(val);
+		}
+		else
+		{
+			throw("Tried to push_back in a reference data.");
+		}
+	}
+
+	~Data()
+	{
+		if(ownsVector)
+		{
+			delete ref;
+		}
+	}
+
+  private:
+	bool ownsVector = false;
+
+	std::vector<float>* ref = nullptr;
+	size_t beg              = 0;
+	size_t end              = 0;
+};
+
 /*! \brief Octree main class
  */
 class Octree
@@ -154,8 +246,9 @@ class Octree
 	 *
 	 * It will also compute all the mins and maxes.
 	 *
-	 * \warning The \p data vector will get \e emptied by the octree as it
-	 * copies data from it to prevent excessive memory usage.
+	 * \warning For memory efficiency reasons, the octree will keep \p data
+	 * vector as reference. You should keep it alive as long as the octree is
+	 * alive.
 	 *
 	 * \param data : vector holding positions, structured as follows for N
 	 * points : {x1, y1, z1, ... xN, yN, zN}.
@@ -366,7 +459,7 @@ class Octree
 	 * This vector is structured as follows for N points : {x1, y1, z1, ... xN,
 	 * yN, zN}.
 	 */
-	std::vector<float> data;
+	Data data;
 
 	/*! \brief Children of this node.
 	 *
