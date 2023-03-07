@@ -31,7 +31,7 @@ First install the required libraries :
 
 Then simply install the following deb package :
 
-Download (.deb) : [octreegen-gui 1.14.1](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.14.1/raw/octreegen-gui-1.14.1-linux_amd64.deb?job=pack:octreegen-gui)
+Download (.deb) : [octreegen-gui 1.15.0](https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.15.0/raw/octreegen-gui-1.15.0-linux_amd64.deb?job=pack:octreegen-gui)
 
 ### Build from source
 
