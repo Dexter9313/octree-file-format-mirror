@@ -143,6 +143,30 @@ int main(int argc, char* argv[])
 		flagsStr.resize(flagsStr.size() - 2);
 		std::cout << flagsStr << std::endl;
 
+		octree.readOwnData(in);
+		auto data(octree.getOwnData());
+		if(data.empty())
+		{
+			std::cout << "Empty data..." << std::endl;
+			return EXIT_SUCCESS;
+		}
+		int i(0);
+		std::cout << "\tData Sample :" << std::endl << "\t\t";
+		for(float d : data)
+		{
+			std::cout << d << ", ";
+			++i;
+			if(i / octree.getDimPerVertex() > 15)
+			{
+				std::cout << std::endl;
+				break;
+			}
+			if(i % octree.getDimPerVertex() == 0)
+			{
+				std::cout << std::endl << "\t\t";
+			}
+		}
+
 		return EXIT_SUCCESS;
 	}
 	else if(argc < 3)
