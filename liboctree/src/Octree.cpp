@@ -49,6 +49,10 @@ void Octree::setFlags(Flags flags)
 		++commonData.dimPerVertex;
 	if((flags & Flags::STORE_COLOR) != Flags::NONE)
 		commonData.dimPerVertex += 3;
+	if((flags & Flags::STORE_DENSITY) != Flags::NONE)
+		++commonData.dimPerVertex;
+	if((flags & Flags::STORE_TEMPERATURE) != Flags::NONE)
+		++commonData.dimPerVertex;
 }
 
 void Octree::init(std::vector<float>& data)
