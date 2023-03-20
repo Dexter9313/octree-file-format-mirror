@@ -18,6 +18,14 @@
 
 #include "utils.hpp"
 
+#ifdef _WIN32
+#include <Windows.h>
+void sleepOneSec() { Sleep(1000);}
+#else
+#include <unistd.h>
+void sleepOneSec() { usleep(999999);}
+#endif
+
 std::vector<std::string> split(std::string const& str, char c)
 {
 	// look from the end to use push_back (there is no "push_front")
@@ -41,18 +49,16 @@ std::string join(std::vector<std::string> const& strs, char c)
 	return res;
 }
 
-std::vector<float> generateVertices(size_t number, unsigned int seed)
+std::vector<float> generateVertices(size_t number, unsigned int seed, unsigned int dimPerVertex)
 {
 	std::vector<float> vertices;
-	vertices.reserve(3 * number);
+	vertices.reserve(dimPerVertex * number);
 
 	srand(seed);
 
-	for(size_t i(0); i < 3 * number; ++i)
+	for(size_t i(0); i < dimPerVertex * number; ++i)
 	{
-		vertices.push_back(
-		    2 * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
-		    - 1);
+		vertices.push_back((static_cast<float>(rand()) / static_cast<float>(RAND_MAX)));
 	}
 
 	return vertices;
@@ -94,6 +100,67 @@ std::vector<std::string> parseFiles(std::string const& filePath)
 	std::unordered_set<std::string> s(result.begin(), result.end());
 	result.assign(s.begin(), s.end());
 	return result;
+}
+
+void readOctreeStructureOnly(std::string const& octreeFilePath, Octree& octree)
+{
+		std::cout << "Loading octree structure..." << std::endl;
+		std::fflush(stdout);
+		std::ifstream in;
+		in.open(octreeFilePath, std::fstream::in | std::fstream::binary);
+
+		// Init tree with progress bar
+		int64_t cursor(in.tellg());
+		int64_t size;
+		brw::read(in, size);
+		in.seekg(cursor);
+		size *= -1;
+
+		auto future = std::async(std::launch::async, &initOctree, &octree, &in);
+		sleepOneSec();
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / size);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+}
+
+void readOctreeContentOnly(std::string const& octreeFilePath, Octree& octree)
+{
+		std::cout << "Loading octree data..." << std::endl;
+		std::fflush(stdout);
+		int64_t filesize(0);
+		{
+			std::ifstream in(octreeFilePath, std::ifstream::ate | std::ifstream::binary);
+			filesize = in.tellg();
+		}
+		std::ifstream in;
+		in.open(octreeFilePath, std::fstream::in | std::fstream::binary);
+
+		auto future = std::async(std::launch::async, &readData, &octree, &in);
+		Octree::showProgress(0.f);
+		while(future.wait_for(std::chrono::duration<int, std::milli>(100))
+			  != std::future_status::ready)
+		{
+			float p(((float)in.tellg()) / filesize);
+			if(0.f < p && p < 1.f)
+			{
+				Octree::showProgress(p);
+			}
+		}
+		Octree::showProgress(1.f);
+}
+
+void readOctreeContent(std::string const& octreeFilePath, Octree& octree)
+{
+	readOctreeStructureOnly(octreeFilePath, octree);
+	readOctreeContentOnly(octreeFilePath, octree);
 }
 
 size_t totalNumberOfVertices(std::vector<std::string> const& filesPaths,
