@@ -482,6 +482,17 @@ void Octree::init(std::istream& in)
 		}
 		++i;
 	}
+	// update totalDataSize if no child
+	for(auto child : children)
+	{
+		if(child == nullptr)
+			continue;
+		return;
+	}
+	in.seekg(file_addr);
+	uint64_t size;
+	brw::read(in, size);
+	totalDataSize = size;
 }
 
 void Octree::init(int64_t file_addr, std::istream& in)
