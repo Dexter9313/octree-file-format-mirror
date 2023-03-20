@@ -31,7 +31,6 @@
 
 #include "binaryrw.hpp"
 
-#define MAX_LEAF_SIZE 16000
 #define MAX_THREADS 8
 
 #define VERSION_MAJOR 2
@@ -253,7 +252,7 @@ class Octree
 	 * \param data : vector holding positions, structured as follows for N
 	 * points : {x1, y1, z1, ... xN, yN, zN}.
 	 */
-	virtual void init(std::vector<float>& data);
+	virtual void init(std::vector<float>& data, unsigned int maxLeafSize = 16000);
 
 	/*! \brief Initializes the octree from a stream.
 	 *
@@ -481,9 +480,9 @@ class Octree
 
 	// init helper that only uses data from beg to end (included).
 	// beg and end are vertices indices.
-	void init(std::vector<float>& data, size_t beg, size_t end);
+	void init(std::vector<float>& data, size_t beg, size_t end, unsigned int maxLeafSize);
 	// init helper that better uses CPU but doubles RAM usage
-	void initParallel(std::vector<float>* data, size_t beg, size_t end);
+	void initParallel(std::vector<float>* data, size_t beg, size_t end, unsigned int maxLeafSize);
 	static unsigned int threadsLaunched;
 	static std::mutex threadsLaunchedMutex;
 	static size_t verticesLoaded;

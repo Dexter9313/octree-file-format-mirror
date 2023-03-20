@@ -55,18 +55,18 @@ void Octree::setFlags(Flags flags)
 		++commonData.dimPerVertex;
 }
 
-void Octree::init(std::vector<float>& data)
+void Octree::init(std::vector<float>& data, unsigned int maxLeafSize)
 {
-	totalNumberOfVertices = (data.size() / commonData.dimPerVertex) - 1;
+	totalNumberOfVertices = data.size() / commonData.dimPerVertex;
 	std::cout.precision(3);
-	initParallel(&data, 0, (data.size() / commonData.dimPerVertex) - 1);
+	initParallel(&data, 0, (data.size() / commonData.dimPerVertex) - 1, maxLeafSize);
 	std::cout.precision(6);
 }
 
-void Octree::init(std::vector<float>& data, size_t beg, size_t end)
+void Octree::init(std::vector<float>& data, size_t beg, size_t end, unsigned int maxLeafSize)
 {
 	size_t verticesNumber(end - beg + 1);
-	if(verticesNumber <= MAX_LEAF_SIZE)
+	if(verticesNumber <= maxLeafSize)
 	{
 		this->data.setAsReference(&data, beg * commonData.dimPerVertex,
 		                          (end + 1) * commonData.dimPerVertex - 1);
@@ -74,7 +74,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	else
 	{
 		this->data.setAsVector();
-		this->data.asVector().reserve(MAX_LEAF_SIZE * commonData.dimPerVertex);
+		this->data.asVector().reserve(maxLeafSize * commonData.dimPerVertex);
 	}
 	totalDataSize = commonData.dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
@@ -92,10 +92,10 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 		if(get(data, i, 2) > maxZ)
 			maxZ = get(data, i, 2);
 
-		if(verticesNumber > MAX_LEAF_SIZE
-		   && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		if(verticesNumber > maxLeafSize
+		   && this->data.size() < maxLeafSize * commonData.dimPerVertex
 		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
-		          < MAX_LEAF_SIZE / (float) verticesNumber)
+		          < maxLeafSize / (float) verticesNumber)
 		{
 			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
 			{
@@ -129,7 +129,7 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 			this->data[i + 2] /= localScale;
 		}
 	}
-	if(verticesNumber <= MAX_LEAF_SIZE)
+	if(verticesNumber <= maxLeafSize)
 	{
 		showProgress(1.f - beg / (float) totalNumberOfVertices);
 		// we don't need to create children
@@ -197,29 +197,29 @@ void Octree::init(std::vector<float>& data, size_t beg, size_t end)
 	if(end > splits[6])
 	{
 		children[0] = newChild();
-		children[0]->init(data, splits[6], end);
+		children[0]->init(data, splits[6], end, maxLeafSize);
 	}
 	for(unsigned int i(6); i > 0; --i)
 	{
 		if(splits[i] > splits[i - 1])
 		{
 			children[7 - i] = newChild();
-			children[7 - i]->init(data, splits[i - 1], splits[i] - 1);
+			children[7 - i]->init(data, splits[i - 1], splits[i] - 1, maxLeafSize);
 		}
 	}
 	if(splits[0] > beg)
 	{
 		children[7] = newChild();
-		children[7]->init(data, beg, splits[0] - 1);
+		children[7]->init(data, beg, splits[0] - 1, maxLeafSize);
 	}
 }
 
 #include <thread>
 
-void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
+void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end, unsigned int maxLeafSize)
 {
 	size_t verticesNumber(end - beg + 1);
-	if(verticesNumber <= MAX_LEAF_SIZE)
+	if(verticesNumber <= maxLeafSize)
 	{
 		this->data.setAsReference(data, beg * commonData.dimPerVertex,
 		                          (end + 1) * commonData.dimPerVertex - 1);
@@ -227,7 +227,7 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 	else
 	{
 		this->data.setAsVector();
-		this->data.asVector().reserve(MAX_LEAF_SIZE * commonData.dimPerVertex);
+		this->data.asVector().reserve(maxLeafSize * commonData.dimPerVertex);
 	}
 	totalDataSize = commonData.dimPerVertex * verticesNumber;
 	for(size_t i(beg); i <= end; ++i)
@@ -245,10 +245,10 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		if(get(*data, i, 2) > maxZ)
 			maxZ = get(*data, i, 2);
 
-		if(verticesNumber > MAX_LEAF_SIZE
-		   && this->data.size() < MAX_LEAF_SIZE * commonData.dimPerVertex
+		if(verticesNumber > maxLeafSize
+		   && this->data.size() < maxLeafSize * commonData.dimPerVertex
 		   && (static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
-		          < MAX_LEAF_SIZE / (float) verticesNumber)
+		          < maxLeafSize / (float) verticesNumber)
 		{
 			for(unsigned int j(0); j < commonData.dimPerVertex; ++j)
 			{
@@ -282,7 +282,7 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 			this->data[i + 2] /= localScale;
 		}
 	}
-	if(verticesNumber <= MAX_LEAF_SIZE)
+	if(verticesNumber <= maxLeafSize)
 	{
 		// delete our part of the vector, we know we are at the end of the
 		// vector per (*) (check after all the orderPivot calls)
@@ -357,20 +357,20 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		if(end > splits[6])
 		{
 			children[0] = newChild();
-			children[0]->init(*data, splits[6], end);
+			children[0]->init(*data, splits[6], end, maxLeafSize);
 		}
 		for(unsigned int i(6); i > 0; --i)
 		{
 			if(splits[i] > splits[i - 1])
 			{
 				children[7 - i] = newChild();
-				children[7 - i]->init(*data, splits[i - 1], splits[i] - 1);
+				children[7 - i]->init(*data, splits[i - 1], splits[i] - 1, maxLeafSize);
 			}
 		}
 		if(splits[0] > beg)
 		{
 			children[7] = newChild();
-			children[7]->init(*data, beg, splits[0] - 1);
+			children[7]->init(*data, beg, splits[0] - 1, maxLeafSize);
 		}
 	}
 	else
@@ -382,7 +382,7 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 		{
 			children[0] = newChild();
 			threads[0]  = new std::thread(&Octree::initParallel, children[0],
-			                              data, splits[6], end);
+			                              data, splits[6], end, maxLeafSize);
 		}
 		for(unsigned int i(6); i > 0; --i)
 		{
@@ -391,14 +391,14 @@ void Octree::initParallel(std::vector<float>* data, size_t beg, size_t end)
 				children[7 - i] = newChild();
 				threads[7 - i]
 				    = new std::thread(&Octree::initParallel, children[7 - i],
-				                      data, splits[i - 1], splits[i] - 1);
+				                      data, splits[i - 1], splits[i] - 1, maxLeafSize);
 			}
 		}
 		if(splits[0] > beg)
 		{
 			children[7] = newChild();
 			threads[7]  = new std::thread(&Octree::initParallel, children[7],
-			                              data, beg, splits[0] - 1);
+			                              data, beg, splits[0] - 1, maxLeafSize);
 		}
 
 		for(unsigned int i(0); i < 8; ++i)
