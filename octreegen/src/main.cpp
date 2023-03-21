@@ -167,7 +167,7 @@ void executeGenerateHelp(std::string const& argv_0)
 		<< "\t\t\t--add-density" << std::endl
 		<< "\t\t\t--add-temperature" << std::endl
 	<< "\t\t--input-octree <OCTREE-FILES> : specifies octree file(s) as input (globbing works). If several files are specified, they must share the same flags (check flags using octreegen info)." << std::endl
-    << "\t\t--input-hdf5 <HDF5-FILES> --coord-path=<COORD-DATASET-PATH> [ADDITIONAL-DATASET-PATHS] : specifies hdf5 file(s) as input (glob works). If several files are specified, they must share the same dataset path structure. COORD-DATASET-PATH is the 3D dataset path of particles coordinates. Additional variables dataset path can be specified as ADDITIONAL-DATASET-PATHS :" << std::endl
+    << "\t\t--input-hdf5 <HDF5-FILES> --coord-path=<COORD-DATASET-PATH> [ADDITIONAL-DATASET-PATHS] : specifies hdf5 file(s) as input (globbing works). If several files are specified, they must share the same dataset path structure. COORD-DATASET-PATH is the 3D dataset path of particles coordinates. Additional variables dataset path can be specified as ADDITIONAL-DATASET-PATHS :" << std::endl
         << "\t\t\t--radius-path=<RADIUS-DATASET-PATH> : 1D dataset" << std::endl
         << "\t\t\t--lum-path=<LUM-DATASET-PATH> : total luminosity (1D dataset)" << std::endl
         << "\t\t\t--rgb-lum-path=<RGB-LUM-PATH> : luminosity per band (3D dataset)" << std::endl
@@ -193,7 +193,7 @@ void executeGenerateHelp(std::string const& argv_0)
 	          << "\twrite the corresponding octree in the random.octree file "
 	             ":"
 	          << std::endl
-	          << "\t" << argv_0 << " --input-random 1000000 --output random.octree" << std::endl;
+	          << "\t" << argv_0 << " generate --input-random 1000000 --output random.octree" << std::endl;
 }
 
 void executeGenerate(arg::GenerateArguments const& args, std::string const& argv_0)
