@@ -24,7 +24,7 @@ First install the required libraries :
 
 	sudo apt-get update
 	sudo apt-get install libhdf5-100
-	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.10.0/raw/liboctree-1.10.0-linux_amd64.deb?job=pack:liboctree
+	wget --content-disposition https://gitlab.com/Dexter9313/octree-file-format/-/jobs/artifacts/1.16.0/raw/liboctree-1.10.0-linux_amd64.deb?job=pack:liboctree
 	sudo dpkg -i ./*.deb
 
 Then simply install the following deb package :
