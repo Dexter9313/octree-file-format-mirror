@@ -111,9 +111,9 @@ Optionally, you can generate a deb package to make installation managing easier 
 
 ### Examples
 
-To read gaz data coordinates and luminosity within snapshot.\*.hdf5 files (will be expanded as "snapshot.0.hdf5 snapshot.1.hdf5" for example) in group /PartType0 and write the corresponding octree in the gaz.octree file :
+To read gaz data coordinates and luminosity within snapshot.*.hdf5 files (will be expanded as "snapshot.0.hdf5 snapshot.1.hdf5" for example) in group /PartType0 and write the corresponding octree in the gaz.octree file :
 
-	octreegen generate --input-hdf5 snapshot.\*.hdf5 --coord-path=/PartType0/Coordinates --lum-path=/PartType0/Luminosities --output gaz.octree
+	octreegen generate --input-hdf5 snapshot.*.hdf5 --coord-path=/PartType0/Coordinates --lum-path=/PartType0/Luminosities --output gaz.octree
 
 which is equivalent to :
 
